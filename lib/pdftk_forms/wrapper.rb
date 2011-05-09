@@ -3,13 +3,13 @@ module PdftkForms
   # Wraps calls to PdfTk
   class Wrapper
     
-    attr_reader :pdftk, :options
+    attr_reader :path, :options
     
     # PdftkWrapper.new('/usr/bin/pdftk', :encrypt => true, :encrypt_options => 'allow Printing')
     # Or
     # PdftkWrapper.new  #assumes 'pdftk' is in the users path
     def initialize(pdftk_path = nil, options = {})
-      @pdftk = pdftk_path || "pdftk"
+      @path = pdftk_path || "pdftk"
       @options = options
     end
     
@@ -54,7 +54,7 @@ module PdftkForms
     end
     
     def call_pdftk(*args)
-      %x{#{pdftk} #{args.flatten.compact.join ' '}}
+      %x{#{path} #{args.flatten.compact.join ' '}}
     end
     
   end
