@@ -1,0 +1,13 @@
+= Changelog
+
+== v 0.1.0 - 05/09/11
+
+* Initial Release of the new gem
+* Combined the 2 projects here:
+  1. https://github.com/devfu/pdftk
+  2. https://github.com/jkraemer/pdf-forms
+* Added xfdf support for generating the combined pdf
+* Added a bunch of field helper methods that make creating forms much easier
+  1. #field_type (returns a string of 'text_field', 'text_area', 'check_box', 'radio_button', 'select' or 'push button')
+  2. #required?
+  3. #multiline? (for text_areas)

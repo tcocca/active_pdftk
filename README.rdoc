@@ -1,0 +1,92 @@
+= PdftkForms
+
+This gem is intended to be a wrapper for the PDFTK command line utility for working with pdfs, mainly editable pdfs.
+
+You must have PDFTK (http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/) installed.
+
+Currently this gem is intended to make the following much easier with pdftk:
+  1. Get all the form fields on the pdf along with the important information for those fields such as 'type', 'required?', options (for selects), etc..
+  2. Pass 'answers' for those form fields to be inserted into a new compressed pdf and returned
+
+
+== Props
+
+Props to this gem go out to jkraemer (Jens Krämer) for creating https://github.com/jkraemer/pdf-forms and devfu (Dev Fu!) for creating https://github.com/devfu/pdftk.
+
+This gem is based on the work of those two projects and expands upon their functionality.
+
+
+== Installation
+
+  gem install pdftk_forms
+
+In a rails 2.3.x app
+
+  config.gem 'pdftk_forms'
+
+
+== Usage
+
+=== PdftkForms::Wrapper
+
+This is the class you will interact with.  You can optionally pass a full path to your 'pdftk' library or the gem assumes pdftk is in your path by default:
+
+  @pdftk = PdftkForms::Wrapper.new
+  @pdftk.path # => 'pdftk'
+  
+  @pdftk = PdftkForms::Wrapper.new('/usr/local/bin/pdftk')
+  @pdftk.path # => '/usr/local/bin/pdftk'
+
+==== To get the fields from a form:
+
+  @pdftk.fields('/path/to/form.pdf')
+
+This will return an array of PdftkForms::Field objects. Each field responds to the following methods
+
+  #field_type => returns one of 'text_field', 'text_area', 'check_box', 'radio_button', 'select' or 'push button'.  All pdf Choice fields (combo box or list box) come back as 'select'.
+  #required? => returns true if the field is a required field
+  #options => returns an array of options if the field is a 'select', 'check_box' or 'radio_button'
+
+There are also some useful fields used internally but that are exposed for determing the field_type
+  #multiline? => returns true if the field is a Text field and is specified as multiline (used to determine text_field vs. text_area)
+  #push_button?, #radio_button, #check_box? => Used to determine the different types of field based on the field flags when the original field type is 'Button'
+
+Finally there are methods to get the original PDF field data:
+  #name => returns the FieldName from the pdf field
+  #type => returns the original FieldType (one of 'Text', 'Button', 'Choice')
+  #value => returns the original FieldValue for pre-filled text or options
+  #flags => returns the original FieldFlags a number that is used to determine information on the form such as required, radio vs. check box, multiline, etc ...
+  #alt_name => returns the FieldNameAlt data
+
+==== To fill out a form with answers
+
+The method for filling out the form take 3 required parameters, the path to the form, the destination for the new flattened pdf, the answer data.
+
+Also, there is a 4th optional param, whether or not to use an xfdf template to fill out the form, it defaults to true. PDFTK added support for xfdf in version 1.40 released on September 19, 2006.
+
+You can pass false in as a 4th param if your pdftk version does not support xfdf to use the standard fdf format.
+
+  @pdftk.fill_form('/path/to/form.pdf', '/path/to/destination_file.pdf', {'field_one' => 'value1', 'field_two' => 'value2'})
+
+or
+
+  @pdftk.fill_form('/path/to/form.pdf', '/path/to/destination_file.pdf', {'field_one' => 'value1', 'field_two' => 'value2'}, false)
+
+The data (3rd param) is a hash where the keys are the #name of the field and the value is the answer you are submitting for that field.
+This method submits the data and created a flattened uneditable version of the completed pdf and puts it in your destination path.
+
+
+== Note on Patches/Pull Requests
+ 
+* Fork the project.
+* Make your feature addition or bug fix.
+* Add tests for it. This is important so I don't break it in a
+  future version unintentionally.
+* Commit, do not mess with rakefile, version, or history.
+  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
+* Send me a pull request. Bonus points for topic branches.
+
+
+== Copyright
+
+Copyright (c) 2010-2011 Tom Cocca. See LICENSE for details.
