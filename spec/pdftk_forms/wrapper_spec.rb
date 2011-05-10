@@ -107,10 +107,5 @@ describe PdftkForms::Wrapper do
       @fields[7].field_type.should == "text_area"
     end
   end
-
-  def path_to_pdf(filename)
-    File.join File.dirname(__FILE__), '../', 'test_pdfs', "#{filename}.pdf"
-  end
-
 end
 
