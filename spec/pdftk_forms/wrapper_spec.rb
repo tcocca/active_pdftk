@@ -103,9 +103,4 @@ describe PdftkForms::Wrapper do
     end
   end
 
-  def path_to_pdf(filename)
-    File.join File.dirname(__FILE__), '../', 'test_pdfs', "#{filename}.pdf"
-  end
-
 end
-

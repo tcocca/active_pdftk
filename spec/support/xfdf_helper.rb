@@ -13,3 +13,7 @@ def valid_xfdf
   end
   xfdf.target!
 end
+
+def path_to_pdf(filename)
+  File.join File.dirname(__FILE__), '../', 'test_pdfs', "#{filename}.pdf"
+end

@@ -1,5 +1,7 @@
 require 'tempfile'
 module PdftkForms
+  class MissingLibrary < StandardError; end
+
   # Wraps calls to PdfTk
   class Wrapper
 
@@ -8,16 +10,19 @@ module PdftkForms
     # PdftkForms::Wrapper.new(:path => '/usr/bin/pdftk', :encrypt => true, :encrypt_options => 'allow Printing')
     # Or
     # PdftkForms::Wrapper.new  #try to locate the library in the system, fallback on 'pdftk' in the users path
+    # Raise a PdftkForms::MissingLibrary exception if pdftk is not found.
     def initialize(options = {})
       @path = options.delete(:path) || Wrapper.path
       @options = options
+      raise(MissingLibrary, "Pdftk library not found on your system, please check the binary path or fetch it at http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/") if pdftk_version.to_f == 0
     end
 
     # pdftk.fill_form('/path/to/form.pdf', '/path/to/destination.pdf', :field1 => 'value 1')
     # if your version of pdftk does not support xfdf then call
     # pdftk.fill_form('/path/to/form.pdf', '/path/to/destination.pdf', {:field1 => 'value 1'}, false)
     def fill_form(template, destination, data = {}, xfdf_input = true)
-      input = xfdf_input ? Xfdf.new(data) : Fdf.new(data)
+      warn "[DEPRECATION] xfdf_input option is deprecated, and will be set with the pdftk version number."
+      input = (xfdf_support? && xfdf_input) ? Xfdf.new(data) : Fdf.new(data)
       tmp = Tempfile.new('pdf_forms_input')
       tmp.close
       input.save_to tmp.path
@@ -64,6 +69,14 @@ module PdftkForms
 
     protected
 
+    def xfdf_support?
+      pdftk_version.to_f >= 1.40
+    end
+
+    def pdftk_version
+      call_pdftk("--version", "2>&1").scan(/pdftk (\S*) a Handy Tool/).to_s
+    end
+
     def encrypt_options(pwd)
       if options[:encrypt]
         ['encrypt_128bit', 'owner_pw', pwd, options[:encrypt_options]]
@@ -76,4 +89,3 @@ module PdftkForms
 
   end
 end
-
