@@ -2,17 +2,17 @@ require 'tempfile'
 module PdftkForms
   # Wraps calls to PdfTk
   class Wrapper
-    
+
     attr_reader :path, :options
-    
-    # PdftkWrapper.new('/usr/bin/pdftk', :encrypt => true, :encrypt_options => 'allow Printing')
+
+    # PdftkForms::Wrapper.new(:path => '/usr/bin/pdftk', :encrypt => true, :encrypt_options => 'allow Printing')
     # Or
-    # PdftkWrapper.new  #assumes 'pdftk' is in the users path
-    def initialize(pdftk_path = nil, options = {})
-      @path = pdftk_path || "pdftk"
+    # PdftkForms::Wrapper.new  #try to locate the library in the system, fallback on 'pdftk' in the users path
+    def initialize(options = {})
+      @path = options.delete(:path) || Wrapper.path
       @options = options
     end
-    
+
     # pdftk.fill_form('/path/to/form.pdf', '/path/to/destination.pdf', :field1 => 'value 1')
     # if your version of pdftk does not support xfdf then call
     # pdftk.fill_form('/path/to/form.pdf', '/path/to/destination.pdf', {:field1 => 'value 1'}, false)
@@ -24,7 +24,7 @@ module PdftkForms
       call_pdftk template, 'fill_form', tmp.path, 'output', destination, 'flatten', encrypt_options(tmp.path)
       tmp.unlink
     end
-    
+
     def fields(template_path)
       unless @all_fields
         field_output = call_pdftk(template_path, 'dump_data_fields')
@@ -44,18 +44,38 @@ module PdftkForms
       end
       @all_fields
     end
-    
+
+    class << self
+
+      def path
+        @@path ||= locate_pdftk || 'pdftk'
+      end
+
+      def path=(value)
+        @@path = value || @@path
+      end
+
+      def locate_pdftk # Try to locate the library
+        auto_path = %x{locate pdftk | grep "/bin/pdftk"}.strip # should work on all *nix system
+  #      TODO find a valid Win32 procedure (not in my top priorities)
+  #      pdftk_path ||= %x{cd \ && dir pdftk.exe \S \B}.strip
+
+        auto_path.empty? ? nil : auto_path
+      end
+    end
+
     protected
-    
+
     def encrypt_options(pwd)
       if options[:encrypt]
         ['encrypt_128bit', 'owner_pw', pwd, options[:encrypt_options]]
       end
     end
-    
+
     def call_pdftk(*args)
-      %x{#{path} #{args.flatten.compact.join ' '}}
+      %x{#{@path} #{args.flatten.compact.join ' '}}
     end
-    
+
   end
 end
+
