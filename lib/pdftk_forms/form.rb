@@ -11,12 +11,11 @@ module PdftkForms
     attr_reader :template
 
     # Open a pdf file as a PdftkForms::Form object.
-    # @bic = PdftkForms::Form.new(pdf_file, 'pdfxt_path', options)
+    # @bic = PdftkForms::Form.new(pdf_file, {:path => 'pdfxt_path'})
     # @bic = PdftkForms::Form.new('bic.pdf')
     #
-    def initialize(template, *args)
-      options = args.last.is_a?(::Hash) ? args.pop : {}
-      @pdftk = Wrapper.new(options)
+    def initialize(template, wrapper_options = {})
+      @pdftk = Wrapper.new(wrapper_options)
       @template = template
     end
 
