@@ -18,7 +18,7 @@ module PdftkForms
     end
 
     # generate FDF content
-    def to_fdf
+    def to_s
       fdf = header
       
       @data.each do |key, value|
@@ -37,7 +37,7 @@ module PdftkForms
     
     # write fdf content to path
     def save_to(path)
-      (File.open(path, 'w') << to_fdf).close
+      (File.open(path, 'w') << to_s).close
     end
     
     protected

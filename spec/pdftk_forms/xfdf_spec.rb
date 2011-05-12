@@ -7,7 +7,7 @@ describe PdftkForms::Xfdf do
       @xfdf = PdftkForms::Xfdf.new(:test => "one", :user => "tom")
     end
     
-    it { @xfdf.to_xfdf.should == valid_xfdf }
+    it { @xfdf.to_s.should == valid_xfdf }
   end
   
 end

@@ -11,5 +11,5 @@ def valid_xfdf
       end
     end
   end
-  xfdf
+  xfdf.target!
 end
