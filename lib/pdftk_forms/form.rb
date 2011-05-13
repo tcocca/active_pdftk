@@ -42,10 +42,11 @@ module PdftkForms
     # @bic = PdftkForms::Form.new('bic.pdf')
     # @bic.set('filled_field', 'SomeString') #=> 'SomeString'
     # @bic.set('not_a_field', 'SomeString') #=> false
+    # calling #set on a read_only? field will result in false as well
     #
     def set(field_name, value)
       f = get(field_name)
-      f.nil? ? false : f.value = value
+      (f.nil? || f.read_only?) ? false : f.value = value
     end
 
     # Save the PdftkForms::Form form to a new pdf file.

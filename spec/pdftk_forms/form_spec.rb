@@ -54,6 +54,11 @@ describe PdftkForms::Form do
       it "should return false for a not valid field_name" do
         @form.set('not_a_field', 'whatever').should be_false
       end
+
+      it "should return false when calling set on a read_only? field" do
+        @form.fields[0].stub!(:read_only?).and_return(true)
+        @form.set(@form.fields[0].name, 'test').should be_false
+      end
     end
 
     context "method_missing" do
