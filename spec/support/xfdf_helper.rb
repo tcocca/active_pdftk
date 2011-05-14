@@ -11,7 +11,7 @@ def valid_xfdf
       end
     end
   end
-  xfdf
+  xfdf.target!
 end
 
 def path_to_pdf(filename)

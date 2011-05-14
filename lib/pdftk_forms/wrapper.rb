@@ -7,12 +7,11 @@ module PdftkForms
 
     attr_reader :path, :options
 
-    # PdftkWrapper.new('/usr/bin/pdftk', :encrypt => true, :encrypt_options => 'allow Printing')
+    # PdftkForms::Wrapper.new(:path => '/usr/bin/pdftk', :encrypt => true, :encrypt_options => 'allow Printing')
     # Or
-    # PdftkWrapper.new  #assumes 'pdftk' is in the users path
-    # Raise a PdftkForms::MissingLibrary exception if pdftk is not found.
-    def initialize(pdftk_path = nil, options = {})
-      @path = pdftk_path || "pdftk"
+    # PdftkForms::Wrapper.new  #try to locate the library in the system, fallback on 'pdftk' in the users path
+    def initialize(options = {})
+      @path = options.delete(:path) || Wrapper.path
       @options = options
       raise(MissingLibrary, "Pdftk library not found on your system, please check the binary path or fetch it at http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/") if pdftk_version.to_f == 0
     end
@@ -50,15 +49,24 @@ module PdftkForms
       @all_fields
     end
 
+    class << self
+
+      def path
+        @@path ||= locate_pdftk || 'pdftk'
+      end
+
+      def path=(value)
+        @@path = value || @@path
+      end
+
+      def locate_pdftk # Try to locate the library
+        auto_path = %x{locate pdftk | grep "/bin/pdftk"}.strip.split("\n").first # should work on all *nix system
+        #TODO find a valid Win32 procedure (not in my top priorities)
+        auto_path.empty? ? nil : auto_path
+      end
+    end
+
     protected
-
-    def xfdf_support?
-      pdftk_version.to_f >= 1.40
-    end
-
-    def pdftk_version
-      call_pdftk("--version", "2>&1").scan(/pdftk (\S*) a Handy Tool/).to_s
-    end
 
     def encrypt_options(pwd)
       if options[:encrypt]
@@ -67,7 +75,7 @@ module PdftkForms
     end
 
     def call_pdftk(*args)
-      %x{#{path} #{args.flatten.compact.join ' '}}
+      %x{#{@path} #{args.flatten.compact.join ' '}}
     end
 
   end

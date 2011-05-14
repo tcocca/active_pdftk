@@ -89,4 +89,4 @@ This method submits the data and created a flattened uneditable version of the c
 
 == Copyright
 
-Copyright (c) 2010-2011 Tom Cocca. See LICENSE for details.
+Copyright (c) 2011 Tom Cocca. See LICENSE for details.

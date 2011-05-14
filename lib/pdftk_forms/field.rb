@@ -8,6 +8,10 @@ module PdftkForms
       @attributes = attributes
     end
     
+    def read_only?
+      check_bit_true(1, 1)
+    end
+    
     def required?
       check_bit_true(2, 2)
     end
