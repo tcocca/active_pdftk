@@ -5,7 +5,7 @@ module PdftkForms
       @data = data
     end
     
-    def to_xfdf
+    def to_s
       xfdf = Builder::XmlMarkup.new
       xfdf.instruct!
       xfdf.xfdf(:xmlns => "http://ns.adobe.com/xfdf/", :"xml:space" => "preserve") do
@@ -25,12 +25,11 @@ module PdftkForms
           end
         end
       end
-      xfdf
+      xfdf.target!
     end
     
     def save_to(path)
-      xml = to_xfdf.target!
-      (File.open(path, 'w') << xml).close
+      (File.open(path, 'w') << to_s).close
     end
     
   end

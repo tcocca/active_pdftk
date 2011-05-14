@@ -4,7 +4,7 @@ describe PdftkForms::Fdf do
   context "multiple fields" do
     before do
       @fdf = PdftkForms::Fdf.new :field1 => 'fieldvalue1', :other_field => 'some other value'
-      @fdf_text = @fdf.to_fdf
+      @fdf_text = @fdf.to_s
     end
     
     it { @fdf_text.should_not be_nil }
@@ -15,7 +15,7 @@ describe PdftkForms::Fdf do
   context "quoting fields" do
     before do
       @fdf = PdftkForms::Fdf.new :field1 => 'field(va)lue1'
-      @fdf_text = @fdf.to_fdf
+      @fdf_text = @fdf.to_s
     end
     
     it { @fdf_text.should_not be_nil }
@@ -25,7 +25,7 @@ describe PdftkForms::Fdf do
   context "multi-value fields" do
     before do
       @fdf = PdftkForms::Fdf.new :field1 => %w(one two)
-      @fdf_text = @fdf.to_fdf
+      @fdf_text = @fdf.to_s
     end
     
     it { @fdf_text.should_not be_nil }

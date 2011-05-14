@@ -2,14 +2,20 @@ require 'spec_helper'
 
 describe PdftkForms::Wrapper do
 
+  context "pdftk_locate" do
+    it "should find the path of pdftk (unstable)" do
+      PdftkForms::Wrapper.path.should == ENV['path']
+    end if ENV['path'] # Give an argument to rake (rake path=/usr/bin/pdftk)
+  end
+
   context "new" do
-    it "should set the default path" do
+    it "should set the path from Wrapper.path" do
       @pdftk = PdftkForms::Wrapper.new
-      @pdftk.path.should == "pdftk"
+      @pdftk.path.should == PdftkForms::Wrapper.path
     end
 
     it "should allow for custom paths" do
-      @pdftk = PdftkForms::Wrapper.new('/usr/local/bin/pdftk')
+      @pdftk = PdftkForms::Wrapper.new(:path => '/usr/local/bin/pdftk')
       @pdftk.path.should == "/usr/local/bin/pdftk"
     end
   end
@@ -17,7 +23,7 @@ describe PdftkForms::Wrapper do
   context "fields" do
     before do
       @pdftk = PdftkForms::Wrapper.new
-      @fields = @pdftk.fields(path_to_pdf('fields.pdf'))
+      @fields = @pdftk.fields(path_to_pdf('fields'))
     end
 
     it "should get the total number of fields" do
@@ -97,5 +103,8 @@ describe PdftkForms::Wrapper do
     end
   end
 
-end
+  def path_to_pdf(filename)
+    File.join File.dirname(__FILE__), '../', 'test_pdfs', "#{filename}.pdf"
+  end
 
+end

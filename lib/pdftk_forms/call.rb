@@ -1,6 +1,11 @@
 require "open3"
 
 module PdftkForms
+  class MissingLibrary < StandardError
+    def initialize
+      super("Pdftk library not found on your system, please check the binary path or fetch it at http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/")
+    end
+  end
   class CommandError < StandardError
     def initialize(args = {})
       super("#{args[:stderr]} #!# While executing #=> `#{args[:cmd]}`")
@@ -19,14 +24,15 @@ module PdftkForms
 
   # Build pdftk command
   class Call
-    attr_reader :path, :default_statements
+    attr_reader :default_statements
     
     # PdftkFoms::Call.new  # assumes 'pdftk' is in the users path, no default statement
     # Or
     # PdftkFoms::Call.new(:path => '/usr/bin/pdftk', :operation => {:fill_form => 'a.fdf'}, :options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'})
     def initialize(options = {})
-      @path = options.delete(:path) || "pdftk"
       @default_statements = options
+      @default_statements[:path] ||= locate_pdftk || "pdftk"
+      raise MissingLibrary if pdftk_version.to_f == 0
     end
 
     # Here is a representation of a pdftk command
@@ -37,7 +43,8 @@ module PdftkForms
     # :options => {:flatten => true, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'}
     # }
     def pdftk(options = {})
-      cmd = "#{path} #{set_cmd(options)}"
+      options = @default_statements.merge(options)
+      cmd = "#{@default_statements[:path]} #{set_cmd(options)}"
       Open3.popen3(cmd) do |stdin, stdout, stderr|
         stdin.puts @input.read if @input
         stdin.close
@@ -101,8 +108,26 @@ module PdftkForms
         end
       end.flatten.compact.join(' ').squeeze(' ').strip
     end
+    
+    def xfdf_support?
+      pdftk_version.to_f >= 1.40
+    end
+
+    def utf8_support?
+      pdftk_version.to_f >= 1.44
+    end
+
+    def pdftk_version
+      %x{#{@default_statements[:path]} --version 2>&1}.scan(/pdftk (\S*) a Handy Tool/).to_s
+    end
 
     protected
+    
+    def locate_pdftk # Try to locate the library
+      auto_path = %x{locate pdftk | grep "/bin/pdftk"}.strip.split("\n").first # should work on all *nix system
+      #TODO find a valid Win32 procedure (not in my top priorities)
+      auto_path.empty? ? nil : auto_path
+    end
 
     # {'a.pdf' => 'foo', 'b.pdf' => 'bar', 'c.pdf' => nil} #=> "B=c.pdf C=a.pdf D=b.pdf input_pw C=foo D=bar"
     def build_input(args)

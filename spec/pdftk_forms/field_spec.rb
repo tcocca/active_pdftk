@@ -31,6 +31,31 @@ describe PdftkForms::Field do
     end
   end
   
+  context 'read_only?' do
+    before do
+      @attributes = {
+        'FieldName' => 'test',
+        'FieldType' => 'Text',
+        'FieldValue' => '',
+        'FieldFlags' => 0
+      }
+    end
+    
+    it "should be false" do
+      @field1 = PdftkForms::Field.new(@attributes)
+      @field1.read_only?.should be_false
+      @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 2))
+      @field2.read_only?.should be_false
+    end
+    
+    it "should be true" do
+      @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 1))
+      @field1.read_only?.should be_true
+      @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 3))
+      @field2.read_only?.should be_true
+    end
+  end
+  
   context 'required?' do
     before do
       @attributes = {

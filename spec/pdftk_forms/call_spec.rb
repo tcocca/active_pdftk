@@ -3,19 +3,38 @@ require 'tempfile'
 
 describe PdftkForms::Call do
   context "#new" do
-    it "should set the default path" do
+    before do
       @pdftk = PdftkForms::Call.new
-      @pdftk.path.should == "pdftk"
+    end
+    it "should set the path (not nil)" do
+      @pdftk.default_statements[:path].should_not be_nil
     end
 
-    it "should allow for custom paths" do
-      @pdftk = PdftkForms::Call.new(:path => '/usr/local/bin/pdftk')
-      @pdftk.path.should == "/usr/local/bin/pdftk"
+    if ENV['path']
+      it "should find the path of pdftk (unstable)" do
+        @pdftk.default_statements[:path].should == ENV['path']
+      end
+
+      it "should allow a custom path" do # not very testing ~!?
+        @pdftk = PdftkForms::Call.new(:path => @pdftk.default_statements[:path])
+        @pdftk.default_statements[:path].should == @pdftk.default_statements[:path]
+      end
+    end
+
+    if ENV['version']
+      it "should find the version of pdftk (unstable)" do
+        @pdftk.pdftk_version.should == ENV['version']
+      end
+    end
+
+    it "WARNING\nUnable to test path detection and custom setting.\nProvide rake argument to test them.\n`$ rake spec path=/usr/bin/pdftk version=1.44`" do
+      ENV['path'].should_not be_nil
+      ENV['version'].should_not be_nil
     end
 
     it "should store default options" do
       @pdftk = PdftkForms::Call.new(:input => 'test.pdf', :options => {:flatten => true})
-      @pdftk.default_statements.should == {:input => 'test.pdf', :options => {:flatten => true}}
+      @pdftk.default_statements.should == {:input => 'test.pdf', :options => {:flatten => true}, :path=>"/usr/bin/pdftk"}
     end
   end
 
