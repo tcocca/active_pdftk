@@ -77,9 +77,9 @@ describe PdftkForms::Form do
 
     context "save/export :" do
       # TODO set exeception and write test for pdftk writting error.
-      it "save should create the pdf with '.filled' extension" do
+      it "save should create the pdf with '_filled' file_name" do
         # TODO check presence of the file
-        @form.save.should == path_to_pdf('fields') + '.filled'
+        @form.save.should == path_to_pdf('fields_filled')
       end
 
       it "save should create pdf with specific path" do

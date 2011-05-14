@@ -53,12 +53,16 @@ module PdftkForms
     # Return the path to the created file or false
     # @bic = PdftkForms::Form.new('bic.pdf')
     # @bic.set(..., ...) #=> ...
-    # @bic.save #=> 'bic.pdf.filled'
+    # @bic.save #=> 'bic_filled.pdf'
     # @bic.save('bic.custom.pdf') #=> 'bic.custom.pdf'
     #
     def save(path = nil, options = {})
       #TODO Flatten should be an option
-      @pdftk.fill_form(@template, path ||= @template + '.filled', to_h)
+      if path.nil?
+        file_name = @template.split('.pdf').first
+        path = file_name + '_filled.pdf'
+      end
+      @pdftk.fill_form(@template, path, to_h)
       path
     end
 
