@@ -27,7 +27,7 @@ describe PdftkForms::Form do
 
     context "to_h" do
       it "should return the reduced hash" do
-        @form.dummy_filling!.to_h.should == {"list_box"=>"sam", "text_not_required"=>"text_not_required", "text_area"=>"text_area", "text_required"=>"text_required"}
+        @form.field_mapping_fill!.to_h.should == {"list_box"=>"sam", "text_not_required"=>"text_not_required", "text_area"=>"text_area", "text_required"=>"text_required"}
       end
 
       it "(true) should return the full hash" do
@@ -104,9 +104,9 @@ describe PdftkForms::Form do
     end
 
     # Cannot test while flatten is forced.
-    context "dummy_filling!" do
-      it "should save correctly the dummy filled form" do
-        @form.dummy_filling!
+    context "field_mapping_fill!" do
+      it "should save the form with the fields filled in with their FieldName" do
+        @form.field_mapping_fill!
         @form_dummy = PdftkForms::Form.new(@form.save(@form.template + '.dummy'))
 #        @form.fields.each do |f|
 #          next unless f.type == 'Text'

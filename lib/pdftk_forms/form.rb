@@ -102,7 +102,7 @@ module PdftkForms
     # return self, so the methods could be chained.
     # @bic.dummy_filling! #=> #<PdftkForms::Field:0x... >
     #
-    def dummy_filling!
+    def field_mapping_fill!
       fields.each { |f| f.value = f.name.to_s if f.type == 'Text'}
       self
     end
