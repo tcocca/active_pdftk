@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe PdftkForms::Field do
-  
+
   context "aliased attributes" do
     before do
       @field = PdftkForms::Field.new(
@@ -11,16 +11,15 @@ describe PdftkForms::Field do
         'FieldFlags' => 4096
       )
     end
-    
+
     it "should respond to" do
       @field.should respond_to(:name)
       @field.should respond_to(:type)
-      @field.should respond_to(:value)
       @field.should respond_to(:flags)
       @field.should respond_to(:alt_name)
       @field.should respond_to(:options)
     end
-    
+
     it "should return the attribute values for the aliased methods" do
       @field.name.should == 'test'
       @field.type.should == 'Text'
@@ -30,7 +29,7 @@ describe PdftkForms::Field do
       @field.options.should be_nil
     end
   end
-  
+
   context 'read_only?' do
     before do
       @attributes = {
@@ -40,14 +39,14 @@ describe PdftkForms::Field do
         'FieldFlags' => 0
       }
     end
-    
+
     it "should be false" do
       @field1 = PdftkForms::Field.new(@attributes)
       @field1.read_only?.should be_false
       @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 2))
       @field2.read_only?.should be_false
     end
-    
+
     it "should be true" do
       @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 1))
       @field1.read_only?.should be_true
@@ -55,7 +54,7 @@ describe PdftkForms::Field do
       @field2.read_only?.should be_true
     end
   end
-  
+
   context 'required?' do
     before do
       @attributes = {
@@ -65,7 +64,7 @@ describe PdftkForms::Field do
         'FieldFlags' => 0
       }
     end
-    
+
     it "should be false" do
       @field1 = PdftkForms::Field.new(@attributes)
       @field1.required?.should be_false
@@ -74,7 +73,7 @@ describe PdftkForms::Field do
       @field3 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 4))
       @field3.required?.should be_false
     end
-    
+
     it "should be true" do
       @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 2))
       @field1.required?.should be_true
@@ -82,7 +81,7 @@ describe PdftkForms::Field do
       @field2.required?.should be_true
     end
   end
-  
+
   context 'multiline? text fields' do
     before do
       @attributes = {
@@ -92,7 +91,7 @@ describe PdftkForms::Field do
         'FieldFlags' => 0
       }
     end
-    
+
     it "should be false" do
       @field1 = PdftkForms::Field.new(@attributes)
       @field1.multiline?.should be_false
@@ -103,7 +102,7 @@ describe PdftkForms::Field do
       @field3 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 8192))
       @field3.multiline?.should be_false
     end
-    
+
     it "should be true" do
       @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 4096))
       @field1.multiline?.should be_true
@@ -111,7 +110,7 @@ describe PdftkForms::Field do
       @field2.multiline?.should be_true
     end
   end
-  
+
   context 'push_button?' do
     before do
       @attributes = {
@@ -121,7 +120,7 @@ describe PdftkForms::Field do
         'FieldFlags' => 0
       }
     end
-    
+
     it "should be false" do
       @field1 = PdftkForms::Field.new(@attributes)
       @field1.push_button?.should be_false
@@ -130,7 +129,7 @@ describe PdftkForms::Field do
       @field3 = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 131072))
       @field3.push_button?.should be_false
     end
-    
+
     it "should be true" do
       @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 65536))
       @field1.push_button?.should be_true
@@ -138,7 +137,7 @@ describe PdftkForms::Field do
       @field2.push_button?.should be_true
     end
   end
-  
+
   context 'radio_button?' do
     before do
       @attributes = {
@@ -148,7 +147,7 @@ describe PdftkForms::Field do
         'FieldFlags' => 0
       }
     end
-    
+
     it "should be false" do
       @field1 = PdftkForms::Field.new(@attributes)
       @field1.radio_button?.should be_false
@@ -159,7 +158,7 @@ describe PdftkForms::Field do
       @field4 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 98304))
       @field4.radio_button?.should be_false
     end
-    
+
     it "should be true" do
       @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 32768))
       @field1.radio_button?.should be_true
@@ -167,7 +166,7 @@ describe PdftkForms::Field do
       @field2.radio_button?.should be_true
     end
   end
-  
+
   context 'check_box?' do
     before do
       @attributes = {
@@ -177,14 +176,14 @@ describe PdftkForms::Field do
         'FieldFlags' => 0
       }
     end
-    
+
     it "should be false" do
       @field2 = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 65536))
       @field2.check_box?.should be_false
       @field3 = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 32768))
       @field3.check_box?.should be_false
     end
-    
+
     it "should be true" do
       @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 0))
       @field1.check_box?.should be_true
@@ -192,7 +191,7 @@ describe PdftkForms::Field do
       @field2.check_box?.should be_true
     end
   end
-  
+
   context 'field_type' do
     before do
       @attributes = {
@@ -201,41 +200,137 @@ describe PdftkForms::Field do
         'FieldFlags' => 0
       }
     end
-    
+
     it "should reutrn check_box" do
       @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button'))
       @field.field_type.should == "check_box"
     end
-    
+
     it "should return radio_button" do
       @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 32768))
       @field.field_type.should == "radio_button"
     end
-    
+
     it "should return push_button" do
       @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 65536))
       @field.field_type.should == "push_button"
     end
-    
+
     it "should return text_field" do
       @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Text'))
       @field.field_type.should == "text_field"
     end
-    
+
     it "should return text_area" do
       @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Text', 'FieldFlags' => 4096))
       @field.field_type.should == "text_area"
     end
-    
+
     it "should return select" do
       @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Choice'))
       @field.field_type.should == "select"
     end
-    
+
     it "should return lowercased FieldType" do
       @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Something'))
       @field.field_type.should == "something"
     end
   end
-  
+
+  context "value" do
+    before do
+      @field = PdftkForms::Field.new(
+        'FieldName' => 'test',
+        'FieldType' => 'Text',
+        'FieldValue' => '',
+        'FieldFlags' => 4096
+      )
+    end
+    
+    context "setting value" do
+      it { @field.value.should == '' }
+
+      it "should return the new value" do
+        @field.value = 'test'
+        @field.value.should == 'test'
+      end
+
+      it "should set #value_was" do
+        @field.value_was.should == ''
+        @field.value = 'test'
+        @field.value_was.should == ''
+      end
+    end
+
+    context "dirty" do
+      it "should determine #changed?" do
+        @field.changed?.should be_false
+        @field.value = 'test'
+        @field.changed?.should be_true
+      end
+
+      it "should give the user the changes" do
+        @field.changes.should == {}
+        @field.value = 'test'
+        @field.changes.should == {'value' => ['', 'test']}
+      end
+    end
+  end
+
+  context "setting value on readonly" do
+    before do
+      @field = PdftkForms::Field.new(
+        'FieldName' => 'test',
+        'FieldType' => 'Text',
+        'FieldValue' => '',
+        'FieldFlags' => 1
+      )
+    end
+
+    it "should not change the value" do
+      @field.changed?.should be_false
+      @field.value = 'test'
+      @field.value.should == ''
+      @field.changed?.should be_false
+      @field.changes.should == {}
+    end
+  end
+
+  context 'nil initial value' do
+    context 'no FieldValue data' do
+      before do
+        @field = PdftkForms::Field.new(
+          'FieldName' => 'test',
+          'FieldType' => 'Text',
+          'FieldFlags' => 2
+        )
+      end
+
+      it { @field.value_was.should == nil}
+
+      it "should return nil in the changes" do
+        @field.value = 'test'
+        @field.changes.should == {'value' => [nil, 'test']}
+      end
+    end
+
+    context 'explicity nil FieldValue data' do
+      before do
+        @field = PdftkForms::Field.new(
+          'FieldName' => 'test',
+          'FieldType' => 'Text',
+          'FieldValue' => nil,
+          'FieldFlags' => 2
+        )
+      end
+
+      it { @field.value_was.should == nil}
+
+      it "should return nil in the changes" do
+        @field.value = 'test'
+        @field.changes.should == {'value' => [nil, 'test']}
+      end
+    end
+  end
+
 end
