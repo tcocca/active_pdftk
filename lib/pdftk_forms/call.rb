@@ -121,13 +121,13 @@ module PdftkForms
       %x{#{@default_statements[:path]} --version 2>&1}.scan(/pdftk (\S*) a Handy Tool/).to_s
     end
 
-    protected
-    
     def locate_pdftk # Try to locate the library
       auto_path = %x{locate pdftk | grep "/bin/pdftk"}.strip.split("\n").first # should work on all *nix system
       #TODO find a valid Win32 procedure (not in my top priorities)
       auto_path.empty? ? nil : auto_path
     end
+
+    protected
 
     # {'a.pdf' => 'foo', 'b.pdf' => 'bar', 'c.pdf' => nil} #=> "B=c.pdf C=a.pdf D=b.pdf input_pw C=foo D=bar"
     def build_input(args)

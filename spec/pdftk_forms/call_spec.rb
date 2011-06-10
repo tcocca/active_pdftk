@@ -34,7 +34,7 @@ describe PdftkForms::Call do
 
     it "should store default options" do
       @pdftk = PdftkForms::Call.new(:input => 'test.pdf', :options => {:flatten => true})
-      @pdftk.default_statements.should == {:input => 'test.pdf', :options => {:flatten => true}, :path=>"/usr/bin/pdftk"}
+      @pdftk.default_statements.should == {:input => 'test.pdf', :options => {:flatten => true}, :path => PdftkForms::Call.new.locate_pdftk}
     end
   end
 
@@ -160,4 +160,3 @@ describe PdftkForms::Call do
     end
   end
 end
-
