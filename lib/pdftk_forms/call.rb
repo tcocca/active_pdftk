@@ -107,8 +107,9 @@ module PdftkForms
           when :options then build_options(PDFTK_MAPPING[part], options[part])
         end
       end.flatten.compact.join(' ').squeeze(' ').strip
+      #TODO if Array#shelljoin will do a better job
     end
-    
+
     def xfdf_support?
       pdftk_version.to_f >= 1.40
     end
@@ -118,10 +119,9 @@ module PdftkForms
     end
 
     def pdftk_version
-      %x{#{@default_statements[:path]} --version 2>&1}.scan(/pdftk (\S*) a Handy Tool/).to_s
+      %x{#{@default_statements[:path]} --version 2>&1}.scan(/pdftk (\S*) a Handy Tool/).join
     end
 
-    protected
     
     def locate_pdftk # Try to locate the library
       auto_path = %x{locate pdftk | grep "/bin/pdftk"}.strip.split("\n").first # should work on all *nix system
@@ -129,6 +129,7 @@ module PdftkForms
       auto_path.empty? ? nil : auto_path
     end
 
+    protected
     # {'a.pdf' => 'foo', 'b.pdf' => 'bar', 'c.pdf' => nil} #=> "B=c.pdf C=a.pdf D=b.pdf input_pw C=foo D=bar"
     def build_input(args)
       out, i = [[], "input_pw",[]], "A"

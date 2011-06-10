@@ -8,8 +8,9 @@ describe PdftkForms::Wrapper do
     end
 
     it "should pass the defaults statements to the call instance." do
-      @pdftk = PdftkForms::Wrapper.new(:path => '/usr/bin/pdftk', :operation => {:fill_form => 'a.fdf'}, :options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'})
-      @pdftk.default_statements.should == {:path => '/usr/bin/pdftk', :operation => {:fill_form => 'a.fdf'}, :options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'}}
+      path = PdftkForms::Call.new.locate_pdftk
+      @pdftk = PdftkForms::Wrapper.new(:path => path, :operation => {:fill_form => 'a.fdf'}, :options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'})
+      @pdftk.default_statements.should == {:path => path, :operation => {:fill_form => 'a.fdf'}, :options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'}}
     end
   end
 
