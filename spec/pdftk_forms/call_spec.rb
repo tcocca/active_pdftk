@@ -4,7 +4,9 @@ require 'tempfile'
 describe PdftkForms::Call do
   context "#new" do
     before do
-      @pdftk = PdftkForms::Call.new
+      options = {}
+      options[:path] = ENV['path'] unless ENV['path'].nil?
+      @pdftk = PdftkForms::Call.new(options)
     end
     it "should set the path (not nil)" do
       @pdftk.default_statements[:path].should_not be_nil
@@ -33,8 +35,9 @@ describe PdftkForms::Call do
     end
 
     it "should store default options" do
+      path =  PdftkForms::Call.new.locate_pdftk
       @pdftk = PdftkForms::Call.new(:input => 'test.pdf', :options => {:flatten => true})
-      @pdftk.default_statements.should == {:input => 'test.pdf', :options => {:flatten => true}, :path => PdftkForms::Call.new.locate_pdftk}
+      @pdftk.default_statements.should == {:input => 'test.pdf', :options => {:flatten => true}, :path => path}
     end
   end
 
