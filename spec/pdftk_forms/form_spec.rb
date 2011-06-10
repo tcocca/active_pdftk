@@ -3,16 +3,17 @@ require 'spec_helper'
 describe PdftkForms::Form do
   context "new" do
     it "should create a PdftkForms::Form object" do
-      @form = PdftkForms::Form.new(path_to_pdf('fields'))
+      @form = PdftkForms::Form.new(path_to_pdf('fields.pdf'))
       @form.should be_kind_of(PdftkForms::Form)
-      @form.template.should == path_to_pdf('fields')
+      @form.template.should == path_to_pdf('fields.pdf')
     end
   end
 
   context "Instantiate a Form, " do
     before do
-      @form = PdftkForms::Form.new(path_to_pdf('fields'))
+      @form = PdftkForms::Form.new(path_to_pdf('fields.pdf'))
     end
+
     context "fields" do
       it "should get the total number of fields" do
         @form.fields.size.should == 8
@@ -79,7 +80,7 @@ describe PdftkForms::Form do
       # TODO set exeception and write test for pdftk writting error.
       it "save should create the pdf with '_filled' file_name" do
         # TODO check presence of the file
-        @form.save.should == path_to_pdf('fields_filled')
+        @form.save.should == path_to_pdf('fields_filled.pdf')
       end
 
       it "save should create pdf with specific path" do
@@ -103,16 +104,15 @@ describe PdftkForms::Form do
       end
     end
 
-    # Cannot test while flatten is forced.
     context "field_mapping_fill!" do
       it "should save the form with the fields filled in with their FieldName" do
-        @form.field_mapping_fill!
-        @form_dummy = PdftkForms::Form.new(@form.save(@form.template + '.dummy'))
-#        @form.fields.each do |f|
-#          next unless f.type == 'Text'
-#          puts f.name
-#          @form_dummy.get(f.name).value.should == f.name
-#        end
+        @form.field_mapping_fill!.save(@output = StringIO.new)
+        @output.rewind
+        @form_dummy = PdftkForms::Form.new(@output)
+        @form.fields.each do |f|
+          next unless f.type == 'Text'
+          @form_dummy.get(f.name).value.should == f.name
+        end
       end
     end
   end

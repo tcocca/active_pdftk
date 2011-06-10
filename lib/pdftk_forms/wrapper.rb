@@ -1,91 +1,80 @@
 require 'tempfile'
 module PdftkForms
-  class MissingLibrary < StandardError; end
-
   # Wraps calls to PdfTk
   class Wrapper
-
-    attr_reader :path, :options
 
     # PdftkForms::Wrapper.new(:path => '/usr/bin/pdftk', :encrypt => true, :encrypt_options => 'allow Printing')
     # Or
     # PdftkForms::Wrapper.new  #try to locate the library in the system, fallback on 'pdftk' in the users path
-    # Raise a PdftkForms::MissingLibrary exception if pdftk is not found.
     def initialize(options = {})
-      @path = options.delete(:path) || Wrapper.path
-      @options = options
-      raise(MissingLibrary, "Pdftk library not found on your system, please check the binary path or fetch it at http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/") if pdftk_version.to_f == 0
+      @call = Call.new options
     end
 
-    # pdftk.fill_form('/path/to/form.pdf', '/path/to/destination.pdf', :field1 => 'value 1')
-    # if your version of pdftk does not support xfdf then call
-    # pdftk.fill_form('/path/to/form.pdf', '/path/to/destination.pdf', {:field1 => 'value 1'}, false)
-    def fill_form(template, destination, data = {}, xfdf_input = true)
-      warn "[DEPRECATION] xfdf_input option is deprecated, and will be set with the pdftk version number."
-      input = (xfdf_support? && xfdf_input) ? Xfdf.new(data) : Fdf.new(data)
-      tmp = Tempfile.new('pdf_forms_input')
-      tmp.close
-      input.save_to tmp.path
-      call_pdftk template, 'fill_form', tmp.path, 'output', destination, 'flatten', encrypt_options(tmp.path)
-      tmp.unlink
+    def default_statements
+      @call.default_statements
     end
 
-    def fields(template_path)
-      unless @all_fields
-        field_output = call_pdftk(template_path, 'dump_data_fields')
-        raw_fields = field_output.split(/^---\n/).reject {|text| text.empty? }
-        @all_fields = raw_fields.map do |field_text|
-          attributes = {}
-          field_text.scan(/^(\w+): (.*)$/) do |key, value|
-            if key == "FieldStateOption"
-              attributes[key] ||= []
-              attributes[key] << value
-            else
-              attributes[key] = value
-            end
+    # Allowed by pdftk in order to apply some output options (flatten, compress), without changing the content of the file
+    def nop(template, options)
+      @call.pdftk(options.merge(:input => template, :operation => nil))
+    end
+
+#    def cat
+#    end
+#
+#    def shuffle
+#    end
+
+    def burst
+    end
+
+    # should allow multiple
+    def background
+    end
+
+    # should allow multiple
+    def stamp
+    end
+
+    def dump_data_fields(template)
+      cmd = @call.utf8_support? ? :dump_data_fields_utf8 : :dump_data_fields
+      field_output = @call.pdftk(:input => template, :operation => cmd)
+      raw_fields = field_output.string.split(/^---\n/).reject {|text| text.empty? }
+      raw_fields.map do |field_text|
+        attributes = {}
+        field_text.scan(/^(\w+): (.*)$/) do |key, value|
+          if key == "FieldStateOption"
+            attributes[key] ||= []
+            attributes[key] << value
+          else
+            attributes[key] = value
           end
-          Field.new(attributes)
         end
-      end
-      @all_fields
-    end
-
-    class << self
-
-      def path
-        @@path ||= locate_pdftk || 'pdftk'
-      end
-
-      def path=(value)
-        @@path = value || @@path
-      end
-
-      def locate_pdftk # Try to locate the library
-        auto_path = %x{locate pdftk | grep "/bin/pdftk"}.strip.split("\n").first # should work on all *nix system
-        #TODO find a valid Win32 procedure (not in my top priorities)
-        auto_path.empty? ? nil : auto_path
+        Field.new(attributes)
       end
     end
-
-    protected
-
-    def xfdf_support?
-      pdftk_version.to_f >= 1.40
+    
+    def fill_form(template, data = {}, options ={})
+      input = @call.xfdf_support? ? Xfdf.new(data) : Fdf.new(data)
+      @call.pdftk(options.merge(:input => template, :operation => {:fill_form => StringIO.new(input.to_s)}))
     end
 
-    def pdftk_version
-      call_pdftk("--version", "2>&1").scan(/pdftk (\S*) a Handy Tool/).to_s
+    def dump_data(template)
+      cmd = @call.utf8_support? ? :dump_data_utf8 : :dump_data
+      @call.pdftk(:input => template, :operation => cmd)
     end
 
-    def encrypt_options(pwd)
-      if options[:encrypt]
-        ['encrypt_128bit', 'owner_pw', pwd, options[:encrypt_options]]
-      end
+    def update_info(template, infos, options = {})
+      cmd = @call.utf8_support? ? :update_info_utf8 : :update_info
+      @call.pdftk(options.merge(:input => template, :operation => {cmd => infos}))
     end
 
-    def call_pdftk(*args)
-      %x{#{@path} #{args.flatten.compact.join ' '}}
+    def attach_files(template, files, options = {})
+      @call.pdftk(options.merge(:input => template, :operation => {:attach_files => files}))
     end
 
+    def unpack_files(template, directory)
+      @call.pdftk(:input => template, :operation => :unpack_files, :output => directory)
+    end
   end
 end

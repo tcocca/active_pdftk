@@ -10,25 +10,44 @@ module PdftkForms
 
     attr_reader :template
 
-    # Open a pdf file as a PdftkForms::Form object.
-    # @bic = PdftkForms::Form.new(pdf_file, {:path => 'pdfxt_path'})
+    # Create a new Form object based on the given template pdf file.
+    #
+    # @param [String, File, Tempfile, StringIO] template is the file which we will perform all operation.
+    # if it is String it represent the path to access the file
+    # other case are ruby object [File, Tempfile, StringIO] which contain a PDF file.
+    # @param [Hash] wrapper_statements is a hash containing default statements for the wrapper (path of the library, output options, ...)
+    #
+    # @return [Form]
+    #
+    # @example
+    # @bic = PdftkForms::Form.new(template, {:path => 'pdfxt_path'})
     # @bic = PdftkForms::Form.new('bic.pdf')
     #
-    def initialize(template, wrapper_options = {})
-      @pdftk = Wrapper.new(wrapper_options)
+    def initialize(template, wrapper_statements = {})
+      @pdftk = Wrapper.new(wrapper_statements)
       @template = template
     end
 
-    # Access all PdftkForms::Field objects associated to a given PdftkForms::Form.
-    # @bic = PdftkForms::Form.new('bic.pdf')
-    # @bic.fields #=> array of PdftkForms::Field
-    #
+    # Access all Field objects associated to +self+.
     # fields are lazily loaded from the pdf file.
+    #
+    # @return [Array]
+    #
+    # @example
+    # @bic = PdftkForms::Form.new('bic.pdf')
+    # @bic.fields #=> [#<PdftkForms::Field:0x... >, #<PdftkForms::Field:0x... >, ...]
+    #
     def fields
-      @fields ||= @pdftk.fields(@template)
+      @fields ||= @pdftk.dump_data_fields(@template)
     end
 
-    # Get a PdftkForms::Field by his 'field_name'.
+    # Get a Field by his 'field_name'.
+    #
+    # @param [String] field_name of the field to retrieve.
+    #
+    # @return [nil, Field]
+    #
+    # @example
     # @bic = PdftkForms::Form.new('bic.pdf')
     # @bic.get('filled_field') #=> #<PdftkForms::Field:0x... >
     # @bic.get('not_a_field') #=> nil
@@ -38,36 +57,51 @@ module PdftkForms
       fields.detect {|f| f.name == field_name.to_s}
     end
 
-    # Set a PdftkForms::Field value by his 'field_name'.
+    # Set a Field value by his 'field_name'.
+    #
+    # @param [String] field_name of the field to retrieve.
+    # @param [String] value of set the field.
+    #
+    # @return [false, String]
+    #
+    # @example
     # @bic = PdftkForms::Form.new('bic.pdf')
     # @bic.set('filled_field', 'SomeString') #=> 'SomeString'
     # @bic.set('not_a_field', 'SomeString') #=> false
-    # calling #set on a read_only? field will result in false as well
+    # calling #set on a ReadOnly field will result in false as well
     #
     def set(field_name, value)
       f = get(field_name)
       (f.nil? || f.read_only?) ? false : f.value = value
     end
 
-    # Save the PdftkForms::Form form to a new pdf file.
-    # Return the path to the created file or false
+    # Save self to a new pdf file.
+    #
+    # @param [String, File, Tempfile, StringIO, nil] output where the PDF should be saved.
+    # if no output is given (or nil), the pdf will be saved in the same directory of the template but extension will be changed from '.pdf' to '_filled.pdf'.
+    # @param [Hash] options to apply to the output.
+
+    # @return [String, File, Tempfile, StringIO, nil] Corresponding to the output argument, or false if the command fails but no error is raised.
+    #
+    # @example
     # @bic = PdftkForms::Form.new('bic.pdf')
     # @bic.set(..., ...) #=> ...
     # @bic.save #=> 'bic_filled.pdf'
     # @bic.save('bic.custom.pdf') #=> 'bic.custom.pdf'
     #
-    def save(path = nil, options = {})
-      #TODO Flatten should be an option
-      if path.nil?
-        file_name = @template.split('.pdf').first
-        path = file_name + '_filled.pdf'
-      end
-      @pdftk.fill_form(@template, path, to_h)
-      path
+    def save(output = nil, options = {})
+      output = @template.split('.pdf').first + '_filled.pdf' if output.nil?
+      @pdftk.fill_form(@template, to_h, options.merge(:output => output))
+      output
     end
 
-    # Save the PdftkForms::Form form to the current pdf file and overwrite it.
-    # Return the path to the overwritten file or false
+    # Save self to the current PDF file
+    #
+    # @param [Hash] options to apply to the output.
+
+    # @return [String, File, Tempfile, StringIO, nil] Corresponding to the current template
+    #
+    # @example
     # @bic = PdftkForms::Form.new('bic.pdf')
     # @bic.save! #=> 'bic.pdf'
     #
@@ -75,9 +109,13 @@ module PdftkForms
       save(@template, options)
     end
 
-    # Create the fdf file corresponding to the PdftkForms::Form state.
-    # Return a PdftkForms::Fdf object
-    # Empty fields are discarded unless you pass +true+ as only argument.
+    # Create the fdf file corresponding to the state of +self+.
+    #
+    # @param [Boolean] full represent all fields (true) or only non empty one (false or default).
+    #
+    # @return [Fdf]
+    #
+    # @example
     # @bic = PdftkForms::Form.new('bic.pdf')
     # @bic.to_fdf #=> #<PdftkForms::Fdf:0x... >
     # @bic.to_fdf(true) #=> #<PdftkForms::Fdf:0x... >
@@ -86,9 +124,13 @@ module PdftkForms
       Fdf.new(to_h(full))
     end
 
-    # Create the xfdf file corresponding to the PdftkForms::Form state (empty fields are discarded).
-    # Return a PdftkForms::Xfdf object
-    # Empty fields are discarded unless you pass +true+ as only argument.
+    # Create the xfdf file corresponding to the state of +self+.
+    #
+    # @param [Boolean] full represent all fields (true) or only non empty one (false or default).
+    #
+    # @return [Xfdf]
+    #
+    # @example
     # @bic = PdftkForms::Form.new('bic.pdf')
     # @bic.to_xfdf #=> #<PdftkForms::Xfdf:0x... >
     # @bic.to_xfdf(true) #=> #<PdftkForms::Xfdf:0x... >
@@ -100,6 +142,9 @@ module PdftkForms
     # Fill the form values with fields name
     # Helpfull for autogenerated forms which are not mnemonic compliant.
     # return self, so the methods could be chained.
+    # @return self
+    #
+    # @example
     # @bic.dummy_filling! #=> #<PdftkForms::Field:0x... >
     #
     def field_mapping_fill!
@@ -107,6 +152,16 @@ module PdftkForms
       self
     end
 
+    # Return a hash representing the fields embedded in the file.
+    #
+    # @param [Boolean] full if the hash represent all fields (true) or only non empty one (false or default).
+    #
+    # @return [Hash]
+    #
+    # @example
+    # @bic.to_h #=> {'field1' => 'one', 'field2' => 'two'}
+    # @bic.to_h(true) #=> {'field1' => 'one', 'field2' => 'two', 'field3' => ''}
+    #
     def to_h(full = false)
       hash = {}
       fields.each do |f|
@@ -115,10 +170,9 @@ module PdftkForms
       hash
     end
 
-    def to_s
-      to_h(true).to_s
-    end
 
+    # Fields can be accessed directly by their name.
+    #
     def respond_to?(method_name, include_private = false)
       field_name = method_name.to_s.delete('=')
       fields.any? {|f| f.name == field_name} ? true : super

@@ -1,0 +1,51 @@
+---
+FieldType: Text
+FieldName: text_not_required
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Choice
+FieldName: combo_box
+FieldFlags: 131072
+FieldJustification: Left
+FieldStateOption: Jason
+FieldStateOption: Tom
+---
+FieldType: Text
+FieldName: text_required
+FieldFlags: 2
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: check_box
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Button
+FieldName: radio_button
+FieldFlags: 49152
+FieldJustification: Left
+FieldStateOption: No
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Choice
+FieldName: list_box
+FieldFlags: 0
+FieldValue: sam
+FieldValueDefault: sam
+FieldJustification: Left
+FieldStateOption: dave
+FieldStateOption: sam
+---
+FieldType: Button
+FieldName: button
+FieldFlags: 65536
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: text_area
+FieldFlags: 4096
+FieldJustification: Left
