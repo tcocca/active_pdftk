@@ -135,5 +135,19 @@ describe PdftkForms::Wrapper do
         File.unlink path_to_pdf('fields.pdf.attached')
       end
     end
+
+    context "not yet implemented commands" do
+      before do
+        @pdftk = PdftkForms::Wrapper.new
+      end
+
+      it "should raise a PdftkForms::NotImplemented error" do
+        expect{ @pdftk.cat }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: cat")
+        expect{ @pdftk.shuffle }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: shuffle")
+        expect{ @pdftk.burst }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: burst")
+        expect{ @pdftk.background }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: background")
+        expect{ @pdftk.stamp }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: stamp")
+      end
+    end
   end
 end

@@ -1,5 +1,12 @@
 require 'tempfile'
+
 module PdftkForms
+  class NotImplemented < StandardError
+    def initialize(method)
+      super("Command Not Yet Implemented: #{method}")
+    end
+  end
+
   # Wraps calls to PdfTk
   class Wrapper
 
@@ -19,21 +26,26 @@ module PdftkForms
       @call.pdftk(options.merge(:input => template, :operation => nil))
     end
 
-#    def cat
-#    end
-#
-#    def shuffle
-#    end
+    def cat
+      raise(NotImplemented, 'cat')
+    end
+
+    def shuffle
+      raise(NotImplemented, 'shuffle')
+    end
 
     def burst
+      raise(NotImplemented, 'burst')
     end
 
     # should allow multiple
     def background
+      raise(NotImplemented, 'background')
     end
 
     # should allow multiple
     def stamp
+      raise(NotImplemented, 'stamp')
     end
 
     def dump_data_fields(template)
