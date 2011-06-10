@@ -108,10 +108,10 @@ describe PdftkForms::Form do
       it "should save the form with the fields filled in with their FieldName" do
         @form.field_mapping_fill!.save(@output = StringIO.new)
         @output.rewind
-        @form_dummy = PdftkForms::Form.new(@output)
+        @form_field_mapping = PdftkForms::Form.new(@output)
         @form.fields.each do |f|
           next unless f.type == 'Text'
-          @form_dummy.get(f.name).value.should == f.name
+          @form_field_mapping.get(f.name).value.should == f.name
         end
       end
     end

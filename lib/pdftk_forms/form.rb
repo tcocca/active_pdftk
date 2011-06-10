@@ -3,7 +3,7 @@ module PdftkForms
   # it is your prefered abstraction layer, all actions on a PDF could be triggered from here.
   # Use a PdftkForms::Form object as an electronic document, read, edit & save it!
   # @bic = PdftkForms::Form.new('bic.pdf')
-  # @bic.dummy_filling!
+  # @bic.field_mapping_fill!
   # @bic.save
   #
   class Form
@@ -145,7 +145,7 @@ module PdftkForms
     # @return self
     #
     # @example
-    # @bic.dummy_filling! #=> #<PdftkForms::Field:0x... >
+    # @bic.field_mapping_fill! #=> #<PdftkForms::Field:0x... >
     #
     def field_mapping_fill!
       fields.each { |f| f.value = f.name.to_s if f.type == 'Text'}
