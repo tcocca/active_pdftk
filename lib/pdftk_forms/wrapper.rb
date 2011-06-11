@@ -26,6 +26,10 @@ module PdftkForms
       @call.pdftk(options.merge(:input => template, :operation => nil))
     end
 
+    def generate_fdf
+      raise(NotImplemented, 'generate_fdf')
+    end
+
     def cat
       raise(NotImplemented, 'cat')
     end
@@ -38,12 +42,12 @@ module PdftkForms
       raise(NotImplemented, 'burst')
     end
 
-    # should allow multiple
+    # should allow multibackground
     def background
       raise(NotImplemented, 'background')
     end
 
-    # should allow multiple
+    # should allow multistamp
     def stamp
       raise(NotImplemented, 'stamp')
     end
@@ -65,7 +69,7 @@ module PdftkForms
         Field.new(attributes)
       end
     end
-    
+
     def fill_form(template, data = {}, options ={})
       input = @call.xfdf_support? ? Xfdf.new(data) : Fdf.new(data)
       @call.pdftk(options.merge(:input => template, :operation => {:fill_form => StringIO.new(input.to_s)}))

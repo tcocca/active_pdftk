@@ -142,6 +142,7 @@ describe PdftkForms::Wrapper do
       end
 
       it "should raise a PdftkForms::NotImplemented error" do
+        expect{ @pdftk.generate_fdf }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: generate_fdf")
         expect{ @pdftk.cat }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: cat")
         expect{ @pdftk.shuffle }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: shuffle")
         expect{ @pdftk.burst }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: burst")
