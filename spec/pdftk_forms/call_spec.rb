@@ -87,6 +87,59 @@ describe PdftkForms::Call do
       end
     end
 
+    context "build_range_option" do
+      before do
+        @pdftk = PdftkForms::Call.new
+      end
+
+      it "should set the operation with arguments" do
+        cat_options = {
+          :input => {'a.pdf' => nil, 'b.pdf' => nil, 'c.pdf' => nil},
+          :operation => {
+            :cat => [
+              {
+                :start => 1,
+                :end => 'end',
+                :pdf => 'a.pdf'
+              },
+              {
+                :pdf => 'b.pdf',
+                :start => 12,
+                :end => 16,
+                :orientation => 'E',
+                :pages => 'even'
+              }
+            ]
+          }
+        }
+        cmd = @pdftk.set_cmd(cat_options)
+        input_pdfs = cmd.split(' cat ').first
+        inputs = input_pdfs.split(' ')
+        input_map = {}
+        inputs.each do |input|
+          parts = input.split('=')
+          input_map[parts[1]] = parts[0]
+        end
+        cmd.should == "#{input_pdfs} cat #{input_map['a.pdf']}1-end #{input_map['b.pdf']}12-16evenE"
+        @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf', :start => 1, :end => 'end'}]}).should == "B=a.pdf cat B1-end"
+        @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf', :start => 1, :end => 'end'}]}).should == "a.pdf cat 1-end"
+        @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf', :end => 'end'}]}).should == "a.pdf cat 1-end"
+        @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf', :start => '4', :orientation => 'N'}]}).should == "a.pdf cat 4N"
+      end
+
+      it "should raise missing input errors" do
+        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}) }.to raise_error(PdftkForms::MissingInput)
+        expect { @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}) }.to raise_error(PdftkForms::MissingInput)
+        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil, 'c.pdf' => 'foo'}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}) }.to raise_error(PdftkForms::MissingInput, "Missing Input file, `b.pdf`")
+      end
+      
+      it "should raise an invalid options error" do
+        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => nil}) }.to raise_error(PdftkForms::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
+        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => []}) }.to raise_error(PdftkForms::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
+        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => "test"}) }.to raise_error(PdftkForms::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
+      end
+    end
+
     context "build command" do
       before do
         @pdftk = PdftkForms::Call.new(:input => 'test.pdf', :options => {:flatten => true})
@@ -120,7 +173,6 @@ describe PdftkForms::Call do
       @file = File.new path_to_pdf('fields.pdf')
       @tempfile = Tempfile.new 'specs'
       @stringio = StringIO.new
-
       @file_as_string = @file.read
       @file.rewind
     end

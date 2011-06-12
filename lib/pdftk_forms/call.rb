@@ -21,6 +21,20 @@ module PdftkForms
       super("`#{args[:statement].inspect}` is not a valid statement.\nShould be one of #{args[:options].inspect}.")
     end
   end
+  class InvalidOptions < StandardError
+    def initialize(args = {})
+      super("Invalid options passed to the command, `#{args[:cmd]}`, please see `$: pdftk --help`")
+    end
+  end
+  class MissingInput < StandardError
+    def initialize(args = {})
+      unless args[:input].nil?
+        super("Missing Input file, `#{args[:input]}`")
+      else
+        super("Missing Input files")
+      end
+    end
+  end
 
   # Build pdftk command
   class Call
@@ -61,8 +75,8 @@ module PdftkForms
     PDFTK_MAPPING = {
       :operation => {
         nil => nil,                              # no operation.
-#        :cat => Array of Range,                 # Array of ranges [ < page ranges > ]
-#        :shuffle => Array of Range,             # Array of ranges [<page ranges>]
+        :cat => [],                              # Array of ranges [ < page ranges > ]
+        :shuffle => [],                          # Array of ranges [<page ranges>]
         :burst => nil,                           # for 'burst' operation output could be something line 'page_%02d.pdf'
         :generate_fdf => nil,
         :fill_form => '',                        #< FDF data filename | XFDF data filename | - | PROMPT >
@@ -76,7 +90,7 @@ module PdftkForms
         :dump_data_fields_utf8 => nil,
         :update_info => '',                      #< info data filename | - | PROMPT >
         :update_info_utf8 => '',                 #< info data filename | - | PROMPT>
-        :attach_files => [],                      #< attachment filenames | PROMPT > [ to_page < page number | PROMPT > ] !to_page is not supported for now
+        :attach_files => [],                     #< attachment filenames | PROMPT > [ to_page < page number | PROMPT > ] !to_page is not supported for now
         :unpack_files => nil
       },
       :options => {
@@ -97,7 +111,7 @@ module PdftkForms
     # #=> ["B=c.pdf C=a.pdf D=b.pdf input_pw C=foo D=bar", ["fill_form a.fdf"], ["output", "out.pdf", ["flatten", "encrypt_40bit", "owner_pw bar", "user_pw baz"]]]
     #
     def set_cmd(options = {})
-      @input, @output, @error = nil, nil, nil
+      @input, @output, @error, @input_file_map = nil, nil, nil, nil
       options = @default_statements.merge(options)
       PDFTK_ORDER.collect do |part|
         case part
@@ -135,9 +149,11 @@ module PdftkForms
       out, i = [[], "input_pw",[]], "A"
       case args
       when Hash
+        @input_file_map = {}
         args.each do |file, pass|
           out.first << "#{i.next!}=#{file}"
           out.last << "#{i}=#{pass}" if pass
+          @input_file_map[file] = "#{i}"
         end
       when String
         out.first << args
@@ -154,16 +170,27 @@ module PdftkForms
       operation = {operation.to_sym => nil} if (operation.is_a?(String) || operation.is_a?(Symbol))
       operation = operation.to_a.flatten(1)
       check_statement(abilities, operation.first)
-      case operation.last
-      when NilClass
+      if [:cat, :shuffle].include?(operation.first)
+        if operation.last.nil? || operation.last.empty? || !operation.last.is_a?(Array)
+          raise(InvalidOptions, {:cmd => operation.first})
+        elsif operation.last.collect{|h| h[:pdf]}.uniq.size > 1 && (@input_file_map.nil? || @input_file_map.empty?)
+          raise MissingInput
+        else
+          ops = operation.last.collect {|range| build_range_option(range)}.join(' ')
+          "#{operation.first} #{ops}"
+        end
+      else
+        case operation.last
+        when NilClass
           "#{operation.first}"
-      when String, Symbol
+        when String, Symbol
           "#{operation.first} #{operation.last}"
-      when File, Tempfile, StringIO
+        when File, Tempfile, StringIO
           @input ? raise(MultipleInputStream) : (@input = operation.last)
           "#{operation.first} -"
-      when Array
+        when Array
           "#{operation.first} #{operation.last.join(' ')}"
+        end
       end
     end
 
@@ -195,6 +222,23 @@ module PdftkForms
           "#{option} #{current.collect{|i| i.to_s.downcase} && value.collect{|i| i.to_s.downcase}.join(' ')}"
         end
       end
+    end
+
+    # {:pdf => 'a.pdf', :start => 1, :end => 'end', :pages => 'odd', :orientation => 'E'} # => 'A1-endoddE
+    def build_range_option(range_args)
+      range = ""
+      if range_args[:pdf] && !@input_file_map.nil?
+        raise(MissingInput, {:input => range_args[:pdf]}) unless @input_file_map.has_key?(range_args[:pdf])
+        range += @input_file_map[range_args[:pdf]]
+      end
+      range += range_args[:start].to_s if range_args[:start]
+      if range_args[:end]
+        range += "1" unless range_args[:start]
+        range += "-#{range_args[:end]}"
+      end
+      range += range_args[:pages] if range_args[:pages]
+      range += range_args[:orientation] if range_args[:orientation]
+      range
     end
 
     def check_statement(abilities, statement)
