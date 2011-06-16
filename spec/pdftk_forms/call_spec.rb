@@ -97,31 +97,25 @@ describe PdftkForms::Call do
           :input => {'a.pdf' => nil, 'b.pdf' => nil, 'c.pdf' => nil},
           :operation => {
             :cat => [
-              {
-                :start => 1,
-                :end => 'end',
-                :pdf => 'a.pdf'
-              },
-              {
-                :pdf => 'b.pdf',
-                :start => 12,
-                :end => 16,
-                :orientation => 'E',
-                :pages => 'even'
-              }
+              {:start => 1, :end => 'end', :pdf => 'a.pdf'},
+              {:pdf => 'b.pdf', :start => 12, :end => 16, :orientation => 'E', :pages => 'even'}
             ]
           }
         }
         cmd = @pdftk.set_cmd(cat_options)
         input_pdfs = cmd.split(' cat ').first
-        inputs = input_pdfs.split(' ')
-        input_map = {}
-        inputs.each do |input|
-          parts = input.split('=')
-          input_map[parts[1]] = parts[0]
-        end
+        input_map = map_inputs(input_pdfs)
         cmd.should == "#{input_pdfs} cat #{input_map['a.pdf']}1-end #{input_map['b.pdf']}12-16evenE"
+        
         @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf', :start => 1, :end => 'end'}]}).should == "B=a.pdf cat B1-end"
+        @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}]}).should == "B=a.pdf cat B"
+        
+        cat_options = {:input => {'a.pdf' => nil, 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}}
+        cmd = @pdftk.set_cmd(cat_options)
+        input_pdfs = cmd.split(' cat ').first
+        input_map = map_inputs(input_pdfs)
+        cmd.should == "#{input_pdfs} cat #{input_map['a.pdf']} #{input_map['b.pdf']}"
+        
         @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf', :start => 1, :end => 'end'}]}).should == "a.pdf cat 1-end"
         @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf', :end => 'end'}]}).should == "a.pdf cat 1-end"
         @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf', :start => '4', :orientation => 'N'}]}).should == "a.pdf cat 4N"

@@ -21,3 +21,13 @@ def reconstruct_inputs(chain)
   end
   Hash[tested_inputs.values]
 end
+
+def map_inputs(input_pdfs)
+  inputs = input_pdfs.split(' ')
+  input_map = {}
+  inputs.each do |input|
+    parts = input.split('=')
+    input_map[parts[1]] = parts[0]
+  end
+  input_map
+end
