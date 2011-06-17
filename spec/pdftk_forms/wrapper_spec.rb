@@ -127,27 +127,130 @@ describe PdftkForms::Wrapper do
     context "attach_files/unpack_files" do
       it "should bind the file ine the pdf" do
         @pdftk.attach_files(path_to_pdf('fields.pdf'), path_to_pdf('attached_file.txt'), :output => path_to_pdf('fields.pdf.attached'))
-        File.unlink path_to_pdf('attached_file.txt')
+        File.unlink(path_to_pdf('attached_file.txt')).should == 1
       end
 
       it "should retrieve the file" do
         @pdftk.unpack_files(path_to_pdf('fields.pdf.attached'), path_to_pdf(''))
-        File.unlink path_to_pdf('fields.pdf.attached')
+        File.unlink(path_to_pdf('fields.pdf.attached')).should == 1
       end
     end
 
-    context "not yet implemented commands" do
-      before do
+    context "generate_fdf" do
+      it "should call #pdftk on @call" do
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :generate_fdf})
+        @pdftk.generate_fdf(path_to_pdf('fields.pdf'))
         @pdftk = PdftkForms::Wrapper.new
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :generate_fdf, :options => {:encrypt  => :'40bit'}})
+        @pdftk.generate_fdf(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'})
       end
 
-      it "should raise a PdftkForms::NotImplemented error" do
-        expect{ @pdftk.generate_fdf }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: generate_fdf")
-        expect{ @pdftk.cat }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: cat")
-        expect{ @pdftk.shuffle }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: shuffle")
-        expect{ @pdftk.burst }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: burst")
-        expect{ @pdftk.background }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: background")
-        expect{ @pdftk.stamp }.to raise_error(PdftkForms::NotImplemented, "Command Not Yet Implemented: stamp")
+      it "should output the fdf as a string" do
+        @pdftk.generate_fdf(path_to_pdf('fields.pdf')).should be_kind_of(StringIO)
+      end
+
+      it "should output to a file" do
+        @pdftk.generate_fdf(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'}, :output => path_to_pdf('fields.fdf'))
+        File.unlink(path_to_pdf('fields.fdf')).should == 1
+      end
+    end
+
+    context "burst" do
+      it "should call #pdtk on @call" do
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst})
+        @pdftk.burst(path_to_pdf('fields.pdf'))
+        @pdftk = PdftkForms::Wrapper.new
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst, :options => {:encrypt  => :'40bit'}})
+        @pdftk.burst(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'})
+      end
+      
+      it "should put a file in the system tmpdir when no output location given" do
+        @pdftk.burst(path_to_pdf('fields.pdf'))
+        File.unlink(File.join(Dir.tmpdir, 'pg_0001.pdf')).should == 1
+      end
+
+      it "should put a file in the system tmpdir when no output location given but a page name format given" do
+        @pdftk.burst(path_to_pdf('fields.pdf'), :output => 'page_%02d.pdf')
+        File.unlink(File.join(Dir.tmpdir, 'page_01.pdf')).should == 1
+      end
+
+      it "should put a file in the specified path" do
+        @pdftk.burst(path_to_pdf('fields.pdf'), :output => path_to_pdf('page_%02d.pdf').to_s)
+        File.unlink(path_to_pdf('page_01.pdf')).should == 1
+      end
+    end
+
+    context "background" do
+      it "should call #pdtk on @call" do
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:background => path_to_pdf('b.pdf')}})
+        @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'))
+        @pdftk = PdftkForms::Wrapper.new
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:background => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
+        @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :options => {:encrypt  => :'40bit'})
+      end
+      
+      it "should output the generated pdf" do
+        @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :output => path_to_pdf('background.pdf'))
+        File.unlink(path_to_pdf('background.pdf')).should == 1
+      end
+    end
+
+    context "multibackground" do
+      it "should call #pdtk on @call" do
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multibackground => path_to_pdf('b.pdf')}})
+        @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :multi => true)
+        @pdftk = PdftkForms::Wrapper.new
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multibackground => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
+        @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :multi => true, :options => {:encrypt  => :'40bit'})
+      end
+    end
+
+    context "stamp" do
+      it "should call #pdtk on @call" do
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:stamp => path_to_pdf('b.pdf')}})
+        @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'))
+        @pdftk = PdftkForms::Wrapper.new
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:stamp => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
+        @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :options => {:encrypt  => :'40bit'})
+      end
+      
+      it "should output the generated pdf" do
+        @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :output => path_to_pdf('stamp.pdf'))
+        File.unlink(path_to_pdf('stamp.pdf')).should == 1
+      end
+    end
+
+    context "multistamp" do
+      it "should call #pdtk on @call" do
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multistamp => path_to_pdf('b.pdf')}})
+        @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :multi => true)
+        @pdftk = PdftkForms::Wrapper.new
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multistamp => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
+        @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :multi => true, :options => {:encrypt  => :'40bit'})
+      end
+    end
+
+    context "cat" do
+      it "should call #pdftk on @call" do
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
+        @pdftk.cat([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
+      end
+      
+      it "should output the generated pdf" do
+        @pdftk.cat([{:pdf => path_to_pdf('a.pdf'), :pass => 'foo'}, {:pdf => path_to_pdf('b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => path_to_pdf('cat.pdf'))
+        File.unlink(path_to_pdf('cat.pdf')).should == 1
+      end
+    end
+
+    context "shuffle" do
+      it "should call #pdftk on @call" do
+        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:shuffle => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
+        @pdftk.shuffle([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
+      end
+      
+      it "should output the generated pdf" do
+        @pdftk.shuffle([{:pdf => path_to_pdf('a.pdf'), :pass => 'foo'}, {:pdf => path_to_pdf('b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => path_to_pdf('shuffle.pdf'))
+        File.unlink(path_to_pdf('shuffle.pdf')).should == 1
       end
     end
   end

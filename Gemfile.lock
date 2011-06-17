@@ -9,18 +9,18 @@ GEM
   specs:
     builder (3.0.0)
     diff-lcs (1.1.2)
-    rspec (2.5.0)
-      rspec-core (~> 2.5.0)
-      rspec-expectations (~> 2.5.0)
-      rspec-mocks (~> 2.5.0)
-    rspec-core (2.5.1)
-    rspec-expectations (2.5.0)
+    rspec (2.6.0)
+      rspec-core (~> 2.6.0)
+      rspec-expectations (~> 2.6.0)
+      rspec-mocks (~> 2.6.0)
+    rspec-core (2.6.4)
+    rspec-expectations (2.6.0)
       diff-lcs (~> 1.1.2)
-    rspec-mocks (2.5.0)
+    rspec-mocks (2.6.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   pdftk_forms!
-  rspec (~> 2.5.0)
+  rspec (~> 2.6.0)

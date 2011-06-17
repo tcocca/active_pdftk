@@ -1,4 +1,5 @@
 require "open3"
+require "tmpdir"
 
 module PdftkForms
   class MissingLibrary < StandardError
@@ -59,6 +60,9 @@ module PdftkForms
     def pdftk(options = {})
       options = @default_statements.merge(options)
       cmd = "#{@default_statements[:path]} #{set_cmd(options)}"
+      if options[:operation].to_s.match(/burst/)
+        cmd.insert(0, "cd #{Dir.tmpdir} && ")
+      end
       Open3.popen3(cmd) do |stdin, stdout, stderr|
         stdin.puts @input.read if @input
         stdin.close
