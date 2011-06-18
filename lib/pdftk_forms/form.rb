@@ -38,7 +38,22 @@ module PdftkForms
     # @bic.fields #=> [#<PdftkForms::Field:0x... >, #<PdftkForms::Field:0x... >, ...]
     #
     def fields
-      @fields ||= @pdftk.dump_data_fields(@template)
+      @fields ||= begin
+        field_output = @pdftk.dump_data_fields(@template)
+        raw_fields = field_output.string.split(/^---\n/).reject {|text| text.empty? }
+        raw_fields.map do |field_text|
+          attributes = {}
+          field_text.scan(/^(\w+): (.*)$/) do |key, value|
+            if key == "FieldStateOption"
+              attributes[key] ||= []
+              attributes[key] << value
+            else
+              attributes[key] = value
+            end
+          end
+          Field.new(attributes)
+        end
+      end
     end
 
     # Get a Field by his 'field_name'.

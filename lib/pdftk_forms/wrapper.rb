@@ -62,22 +62,9 @@ module PdftkForms
        @call.pdftk(options.merge(command_options))
     end
 
-    def dump_data_fields(template)
+    def dump_data_fields(template, options = {})
       cmd = @call.utf8_support? ? :dump_data_fields_utf8 : :dump_data_fields
-      field_output = @call.pdftk(:input => template, :operation => cmd)
-      raw_fields = field_output.string.split(/^---\n/).reject {|text| text.empty? }
-      raw_fields.map do |field_text|
-        attributes = {}
-        field_text.scan(/^(\w+): (.*)$/) do |key, value|
-          if key == "FieldStateOption"
-            attributes[key] ||= []
-            attributes[key] << value
-          else
-            attributes[key] = value
-          end
-        end
-        Field.new(attributes)
-      end
+      @call.pdftk(options.merge(:input => template, :operation => cmd))
     end
 
     def fill_form(template, data = {}, options ={})
