@@ -28,11 +28,13 @@ module PdftkForms
     end
 
     def cat(ranges = [], options = {})
-      call_range_operation(:cat, ranges, options)
+      command_options = call_range_operation(:cat, ranges)
+      @call.pdftk(options.merge(command_options))
     end
 
     def shuffle(ranges = [], options = {})
-      call_range_operation(:shuffle, ranges, options)
+      command_options = call_range_operation(:shuffle, ranges)
+      @call.pdftk(options.merge(command_options))
     end
 
     # burst('in1.pdf') to split the input into pages with the default filename format of 'pg_%04d.pdf' ( 'pg_0001.pdf', 'pg_0002.pdf' )
@@ -47,7 +49,8 @@ module PdftkForms
     # For multibackground pass :multi => true in the options, ex:
     # background('in1.pdf', 'bg.pdf', :muli => true)
     def background(template, background, options = {})
-      call_multi_operation("background", template, background, options)
+       command_options = call_multi_operation("background", template, background, options.delete(:multi))
+       @call.pdftk(options.merge(command_options))
     end
 
     # stamp('in1.pdf', 'stamp.pdf') for StringIO output
@@ -55,7 +58,8 @@ module PdftkForms
     # For multistamp pass :multi => true in the options, ex:
     # stamp('in1.pdf', 'stamp.pdf', :muli => true)
     def stamp(template, stamp, options = {})
-      call_multi_operation("stamp", template, stamp, options)
+       command_options = call_multi_operation("stamp", template, stamp, options.delete(:multi))
+       @call.pdftk(options.merge(command_options))
     end
 
     def dump_data_fields(template)
@@ -101,7 +105,7 @@ module PdftkForms
 
     private
 
-    def call_range_operation(operation, ranges, options)
+    def call_range_operation(operation, ranges)
       inputs = {}
       ranges.each do |range|
         if range[:pdf]
@@ -111,14 +115,12 @@ module PdftkForms
           end
         end
       end
-      command_options = {:input => inputs, :operation => {operation => ranges}}
-      @call.pdftk(options.merge(command_options))
+      {:input => inputs, :operation => {operation => ranges}}
     end
 
-    def call_multi_operation(command, template, overlay, options)
-      multi = options.delete(:multi)
-      cmd = multi == true ? "multi#{command}".to_sym : command.to_sym
-      @call.pdftk(options.merge(:input => template, :operation => {cmd => overlay}))
+    def call_multi_operation(command, template, overlay, multi)
+      cmd = (multi == true ? "multi#{command}".to_sym : command.to_sym)
+      {:input => template, :operation => {cmd => overlay}}
     end
 
   end
