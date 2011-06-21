@@ -159,6 +159,8 @@ module PdftkForms
     # return self, so the methods could be chained.
     # @return self
     #
+    # Note: only fills Text type fields (will respect the default value for Choice or Button fields)
+    #
     # @example
     # @bic.field_mapping_fill! #=> #<PdftkForms::Field:0x... >
     #
@@ -180,6 +182,7 @@ module PdftkForms
     def to_h(full = false)
       hash = {}
       fields.each do |f|
+        next if f.no_export?
         hash[f.name.to_s] = f.value.to_s if (full || f.value)
       end
       hash
