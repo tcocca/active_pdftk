@@ -143,7 +143,7 @@ module PdftkForms
     def locate_pdftk # Try to locate the library
       auto_path = %x{locate pdftk | grep "/bin/pdftk"}.strip.split("\n").first # should work on all *nix system
       #TODO find a valid Win32 procedure (not in my top priorities)
-      auto_path.empty? ? nil : auto_path
+      (auto_path.nil? || auto_path.empty?) ? nil : auto_path
     end
 
     protected
