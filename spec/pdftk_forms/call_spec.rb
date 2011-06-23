@@ -8,8 +8,18 @@ describe PdftkForms::Call do
       options[:path] = ENV['path'] unless ENV['path'].nil?
       @pdftk = PdftkForms::Call.new(options)
     end
+
     it "should set the path (not nil)" do
       @pdftk.default_statements[:path].should_not be_nil
+    end
+
+    it "should check the ENV vars" do
+      unless ENV['path'].nil? || ENV['version'].nil?
+        ENV['path'].should_not be_nil
+        ENV['version'].should_not be_nil
+      else
+        warn "\nWARNING\nUnable to test path detection and custom setting.\nProvide rake argument to test them.\n`$ rake spec path=/usr/bin/pdftk version=1.44`\n"
+      end
     end
 
     if ENV['path']
@@ -27,11 +37,6 @@ describe PdftkForms::Call do
       it "should find the version of pdftk (unstable)" do
         @pdftk.pdftk_version.should == ENV['version']
       end
-    end
-
-    it "WARNING\nUnable to test path detection and custom setting.\nProvide rake argument to test them.\n`$ rake spec path=/usr/bin/pdftk version=1.44`" do
-      ENV['path'].should_not be_nil
-      ENV['version'].should_not be_nil
     end
 
     it "should store default options" do

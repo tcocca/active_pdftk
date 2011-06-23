@@ -9,6 +9,7 @@ GEM
   specs:
     builder (3.0.0)
     diff-lcs (1.1.2)
+    rake (0.8.7)
     rspec (2.6.0)
       rspec-core (~> 2.6.0)
       rspec-expectations (~> 2.6.0)
@@ -23,4 +24,5 @@ PLATFORMS
 
 DEPENDENCIES
   pdftk_forms!
+  rake (>= 0.8.7)
   rspec (~> 2.6.0)
