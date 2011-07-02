@@ -13,10 +13,11 @@ Gem::Specification.new do |s|
   s.description = "Fill out editable PDF forms with pdftk (http://www.accesspdf.com/pdftk/)."
 
   s.rubyforge_project = "pdftk_forms"
-  
+
   s.add_dependency "builder", '>= 2.1.2'
   s.add_development_dependency "rspec", "~> 2.6.0"
   s.add_development_dependency "rake", ">= 0.8.7"
+  s.add_development_dependency "yard"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

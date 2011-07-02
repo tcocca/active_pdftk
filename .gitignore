@@ -4,20 +4,28 @@
 ## TEXTMATE
 *.tmproj
 tmtags
+
 ## EMACS
 *~
 \#*
 .\#*
+
 ## VIM
 *.swp
+
+## RubyMine
+/.idea/
+
 ## PROJECT::GENERAL
 coverage
 rdoc
 pkg
+
 ## PROJECT::SPECIFIC
-Gemfile.lock
 *.gem
 pkg/*
 .bundle
-## RubyMine
-/.idea/
+
+## YARD
+/.yardoc/
+/doc/
