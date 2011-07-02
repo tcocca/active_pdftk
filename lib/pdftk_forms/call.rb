@@ -60,7 +60,7 @@ module PdftkForms
     def pdftk(options = {})
       options = @default_statements.merge(options)
       cmd = "#{@default_statements[:path]} #{set_cmd(options)}"
-      if options[:operation].to_s.match(/burst/)
+      if options[:operation].to_s.match(/burst|unpack_files/)
         cmd.insert(0, "cd #{Dir.tmpdir} && ")
       end
       Open3.popen3(cmd) do |stdin, stdout, stderr|
@@ -69,7 +69,19 @@ module PdftkForms
         @output.puts stdout.read if @output
         raise(CommandError, {:stderr => @error, :cmd => cmd}) unless (@error = stderr.read).empty?
       end
-      @output ? @output : true
+      if options[:operation].to_s.match(/burst|unpack_files/)
+        if options[:output].nil?
+          Dir.tmpdir
+        else
+          if options[:output].to_s.match(/(.*)(\/.*\%.*d.*\.pdf)/) #burst can specify a printf format for filenames
+            $1
+          else
+            options[:output]
+          end
+        end
+      else
+        @output ? @output : true
+      end
     end
 
     # See http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/ for a full manual.

@@ -111,16 +111,16 @@ describe PdftkForms::Call do
         input_pdfs = cmd.split(' cat ').first
         input_map = map_inputs(input_pdfs)
         cmd.should == "#{input_pdfs} cat #{input_map['a.pdf']}1-end #{input_map['b.pdf']}12-16evenE"
-        
+
         @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf', :start => 1, :end => 'end'}]}).should == "B=a.pdf cat B1-end"
         @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}]}).should == "B=a.pdf cat B"
-        
+
         cat_options = {:input => {'a.pdf' => nil, 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}}
         cmd = @pdftk.set_cmd(cat_options)
         input_pdfs = cmd.split(' cat ').first
         input_map = map_inputs(input_pdfs)
         cmd.should == "#{input_pdfs} cat #{input_map['a.pdf']} #{input_map['b.pdf']}"
-        
+
         @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf', :start => 1, :end => 'end'}]}).should == "a.pdf cat 1-end"
         @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf', :end => 'end'}]}).should == "a.pdf cat 1-end"
         @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf', :start => '4', :orientation => 'N'}]}).should == "a.pdf cat 4N"
@@ -131,7 +131,7 @@ describe PdftkForms::Call do
         expect { @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}) }.to raise_error(PdftkForms::MissingInput)
         expect { @pdftk.set_cmd(:input => {'a.pdf' => nil, 'c.pdf' => 'foo'}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}) }.to raise_error(PdftkForms::MissingInput, "Missing Input file, `b.pdf`")
       end
-      
+
       it "should raise an invalid options error" do
         expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => nil}) }.to raise_error(PdftkForms::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
         expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => []}) }.to raise_error(PdftkForms::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
@@ -210,6 +210,41 @@ describe PdftkForms::Call do
 
     it "should raise a PdftkForms::CommandError exception" do
       expect{ @pdftk.pdftk(:input => {'a.pdf' => 'foo', 'b.pdf' => 'bar', 'c.pdf' => nil}, :operation => {}, :output => 'out.pdf',:options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'}) }.to raise_error(PdftkForms::CommandError)
+    end
+
+    context "#burst" do
+      it "should return Dir.tmpdir when there is no output" do
+        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :burst).should == Dir.tmpdir
+      end
+
+      it "should return the specified output directory" do
+        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :burst, :output => path_to_pdf('pg_%02d.pdf')).should == path_to_pdf(nil)
+      end
+    end
+
+    context "#burst" do
+      it "should return Dir.tmpdir when there is no output specified" do
+        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :burst).should == Dir.tmpdir
+      end
+
+      it "should return the specified output directory" do
+        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :burst, :output => path_to_pdf('pg_%02d.pdf')).should == path_to_pdf(nil)
+        File.unlink(path_to_pdf('pg_01.pdf')).should == 1
+      end
+    end
+
+    context "#unpack_files" do
+      it "should return Dir.tmpdir when there is no output specified" do
+        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => {:attach_files => path_to_pdf('attached_file.txt')}, :output => path_to_pdf('attached.pdf'))
+        @pdftk.pdftk(:input => path_to_pdf('attached.pdf'), :operation => :unpack_files).should == Dir.tmpdir
+        File.unlink(path_to_pdf('attached.pdf'))
+      end
+
+      it "should return the specified output directory" do
+        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => {:attach_files => path_to_pdf('attached_file.txt')}, :output => path_to_pdf('attached.pdf'))
+        @pdftk.pdftk(:input => path_to_pdf('attached.pdf'), :operation => :unpack_files, :output => path_to_pdf(nil)).should == path_to_pdf(nil)
+        File.unlink(path_to_pdf('attached.pdf'))
+      end
     end
   end
 end

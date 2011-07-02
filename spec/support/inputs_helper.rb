@@ -1,5 +1,7 @@
 def path_to_pdf(filename)
-  File.join File.dirname(__FILE__), '../', 'test_pdfs', "#{filename}"
+  file = File.join(File.dirname(__FILE__), '../', 'test_pdfs')
+  file = File.join(file, "#{filename}") unless filename.nil?
+  file
 end
 
 # Because with Ruby 1.8 Hashes are unordered, and options in cli are unordered too,
