@@ -152,7 +152,7 @@ module PdftkForms
     # @option dsl_statements [String, File, StringIO, Tempfile, nil] :output the output part of the Hash
     # @option dsl_statements [Hash] :options the input part of the Hash
     #
-    # @return [File, Tempfile, StringIO, nil] return the output stream or nil
+    # @return resource specified in :output, if :ouput is not provided (or nil), return content of stdout in a StringIO, except for operation burst & unpack where Dir.temp is returned
     #
     # @example
     #   @call.pdftk(
