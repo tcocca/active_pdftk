@@ -213,22 +213,12 @@ describe PdftkForms::Call do
     end
 
     context "#burst" do
-      it "should return Dir.tmpdir when there is no output" do
-        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :burst).should == Dir.tmpdir
-      end
-
-      it "should return the specified output directory" do
-        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :burst, :output => path_to_pdf('pg_%02d.pdf')).should == path_to_pdf(nil)
-      end
-    end
-
-    context "#burst" do
       it "should return Dir.tmpdir when there is no output specified" do
         @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :burst).should == Dir.tmpdir
       end
 
       it "should return the specified output directory" do
-        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :burst, :output => path_to_pdf('pg_%02d.pdf')).should == path_to_pdf(nil)
+        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :burst, :output => path_to_pdf('pg_%02d.pdf')).should == path_to_pdf('pg_%02d.pdf')
         File.unlink(path_to_pdf('pg_01.pdf')).should == 1
       end
     end

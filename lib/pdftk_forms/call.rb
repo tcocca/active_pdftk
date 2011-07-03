@@ -175,17 +175,8 @@ module PdftkForms
         @output.puts stdout.read if @output && !@output.is_a?(String)
         raise(CommandError, {:stderr => @error, :cmd => cmd}) unless (@error = stderr.read).empty?
       end
-      if dsl_statements[:operation].to_s.match(/burst|unpack_files/)
-        if dsl_statements[:output].nil?
-          Dir.tmpdir
-        else
-          # burst can specify a printf format for filenames so only return the path the the containing directory
-          if dsl_statements[:output].to_s.match(/(.*)(\/.*\%.*d.*\.pdf)/)
-            $1
-          else
-            dsl_statements[:output]
-          end
-        end
+      if dsl_statements[:operation].to_s.match(/burst|unpack_files/) && dsl_statements[:output].nil?
+        Dir.tmpdir
       else
         @output
       end
