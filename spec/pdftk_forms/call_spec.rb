@@ -170,7 +170,7 @@ describe PdftkForms::Call do
     before do
       @pdftk = PdftkForms::Call.new
       @file = File.new path_to_pdf('fields.pdf')
-      @tempfile = Tempfile.new 'specs'
+      @tempfile = Tempfile.new('specs')
       @stringio = StringIO.new
       @file_as_string = @file.read
       @file.rewind
@@ -202,7 +202,7 @@ describe PdftkForms::Call do
       @return_stringio.string.should == @data_string
     end
 
-    it "should input a File, output a StrinIO without exception and give the appropriate result" do
+    it "should input a File, output a StringIO without exception and give the appropriate result" do
       @data_fields_string = File.new(path_to_pdf('fields.data_fields')).read
       expect{ @pdftk.pdftk(:input => @file, :operation => :dump_data_fields, :output => @stringio) }.to_not raise_error(PdftkForms::CommandError)
       @stringio.string.should == @data_fields_string
@@ -244,6 +244,30 @@ describe PdftkForms::Call do
         @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => {:attach_files => path_to_pdf('attached_file.txt')}, :output => path_to_pdf('attached.pdf'))
         @pdftk.pdftk(:input => path_to_pdf('attached.pdf'), :operation => :unpack_files, :output => path_to_pdf(nil)).should == path_to_pdf(nil)
         File.unlink(path_to_pdf('attached.pdf'))
+      end
+    end
+
+    context "respect output formats" do
+      it "should return a file as output" do
+        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data, :output => File.new(path_to_pdf('field_data.txt'), "w")).should be_a(File)
+        File.unlink(path_to_pdf('field_data.txt')).should == 1
+      end
+
+      it "should return a tempfile as output" do
+        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data, :output => Tempfile.new('field_data.txt')).should be_a(Tempfile)
+      end
+
+      it "should return stringio as output" do
+        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data, :output => StringIO.new).should be_a(StringIO)
+      end
+
+      it "should return a string as output" do
+        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data, :output => path_to_pdf('field_data.txt')).should be_a(String)
+        File.unlink(path_to_pdf('field_data.txt')).should == 1
+      end
+
+      it "should return stringio if no output is specified" do
+        @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data).should be_a(StringIO)
       end
     end
   end

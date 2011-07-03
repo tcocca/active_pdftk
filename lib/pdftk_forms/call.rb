@@ -172,21 +172,22 @@ module PdftkForms
       Open3.popen3(cmd) do |stdin, stdout, stderr|
         stdin.puts @input.read if @input
         stdin.close
-        @output.puts stdout.read if @output
+        @output.puts stdout.read if @output && !@output.is_a?(String)
         raise(CommandError, {:stderr => @error, :cmd => cmd}) unless (@error = stderr.read).empty?
       end
       if dsl_statements[:operation].to_s.match(/burst|unpack_files/)
         if dsl_statements[:output].nil?
           Dir.tmpdir
         else
-          if dsl_statements[:output].to_s.match(/(.*)(\/.*\%.*d.*\.pdf)/) #burst can specify a printf format for filenames
+          # burst can specify a printf format for filenames so only return the path the the containing directory
+          if dsl_statements[:output].to_s.match(/(.*)(\/.*\%.*d.*\.pdf)/)
             $1
           else
             dsl_statements[:output]
           end
         end
       else
-        @output ? @output : true
+        @output
       end
     end
 
@@ -388,6 +389,7 @@ module PdftkForms
           @output = StringIO.new
           ""
         when String
+          @output = value
           "output #{value}"
         when File, Tempfile, StringIO
           @output = value
