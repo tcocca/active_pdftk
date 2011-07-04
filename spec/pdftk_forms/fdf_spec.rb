@@ -10,6 +10,12 @@ describe PdftkForms::Fdf do
     it { @fdf_text.should_not be_nil }
     it { @fdf_text.should match(%r{<</T\(field1\)/V\(fieldvalue1\)>>}) }
     it { @fdf_text.should match(%r{<</T\(other_field\)/V\(some other value\)>>}) }
+    it "should return nil when saving the file" do
+      res = @fdf.save_to(path_to_pdf('fdf.txt'))
+      res.should == path_to_pdf('fdf.txt')
+      res.should be_a(String)
+      File.unlink(path_to_pdf('fdf.txt')).should == 1
+    end
   end
   
   context "quoting fields" do
