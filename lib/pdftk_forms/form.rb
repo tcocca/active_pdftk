@@ -177,6 +177,10 @@ module PdftkForms
       hash
     end
 
+    # Check to see if the form has a field of the given name, 
+    # added to support the method_missing for accessing fields directly without having to access the fields array
+    #
+    # @return [Boolean]
     def respond_to?(method_name, include_private = false)
       field_name = method_name.to_s.delete('=')
       fields.any? {|f| f.name == field_name} ? true : super
@@ -184,6 +188,9 @@ module PdftkForms
 
     private
 
+    # Allow direct access to fields for a form by calling the field name as the method name, this will use method_missing to find the field
+    #
+    # @return [PdftkForms::Field]
     def method_missing(method_name, *args)
       field_name = method_name.to_s.delete('=')
       if fields.any? {|f| f.name == field_name}
