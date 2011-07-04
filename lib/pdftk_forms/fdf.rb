@@ -16,7 +16,7 @@ module PdftkForms
     # Creates a new instance given the field names and values provided as a hash
     #
     # @param[Hash] A hash of fields where the key is the field name and the value is the value for the field.  The value can also be a nested hash of fields.
-    # @param[Hash] optional header options for the FDF
+    # @param[Hash] options optional header options for the FDF
     # @option options [String] :file (optional) The source file or target file: the PDF document file that this FDF file was exported from or is intended to be imported into. This option corresponds to the /F attribute in FDF content.
     # @option options [String] :ufile (optional) The corresponding PDF filename of the form. This method corresponds to the /UF attribute in FDF content.
     # @option options [String] :id (optional) An array of two strings constituting a file identifier. This method corresponds to the ID attribute in FDF content.

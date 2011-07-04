@@ -118,7 +118,7 @@ module PdftkForms
 
     # @return [Hash] the default DSL statements.
     attr_reader :default_statements
-    
+
     # Create an instance based upon the default provided DSL statements.
     #
     # @param [Hash] dsl_statements default statements as defined in DSL.
@@ -288,7 +288,7 @@ module PdftkForms
     end
 
     private
-    
+
     # Prepare the input part of the command line string
     #
     # @param [Hash, String, File, Tempfile, StringIO] as defined in DSL, input statements only.
@@ -438,7 +438,7 @@ module PdftkForms
       range += range_args[:orientation] if range_args[:orientation]
       range
     end
-    
+
     # Check for illegal statements in the hash
     #
     # @param [Hash, String, Symbol] statement operation or options provided in the dsl_hash.
@@ -452,4 +452,3 @@ module PdftkForms
 
   end
 end
-
