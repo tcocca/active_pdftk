@@ -13,6 +13,7 @@ module PdftkForms
     end
 
     # Generates a string of XFDF format using the +@data+ hash to construct the field and value pairs
+    #
     # Uses Builder to construct the XML
     #
     # @return [String]

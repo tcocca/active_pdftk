@@ -3,7 +3,9 @@ module PdftkForms
   # Map keys and values to Adobe's FDF format.
   #
   # Straight port of Perl's PDF::FDF::Simple by Steffen Schwigon.
+  #
   # FDF can be returned as a string with #to_s or written to a file with #save_to('file_path')
+  #
   # Parsing FDF files is not supported (yet).
   #
   class Fdf
