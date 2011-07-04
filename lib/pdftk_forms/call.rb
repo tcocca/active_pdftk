@@ -2,32 +2,49 @@ require "open3"
 require "tmpdir"
 
 module PdftkForms
+  # Error that is raised when +pdftk+ could not be located on the system and the path to the library is not passed in
   class MissingLibrary < StandardError
+    # Calls super with the message and a link to pdftk
     def initialize
       super("Pdftk library not found on your system, please check the binary path or fetch it at http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/")
     end
   end
+
+  # Error than is raised when pdftk CLI returns an error
   class CommandError < StandardError
+    # Return the text of +stderr+ and the command that was attempted
     def initialize(args = {})
       super("#{args[:stderr]} #!# While executing #=> `#{args[:cmd]}`")
     end
   end
+
+  # Error that is raised when you attempt to pass streaming input for more than 1 file
   class MultipleInputStream < ArgumentError
+    # Call super with the error message
     def initialize
       super("Only one input stream is allowed (other one should be a real path to a file.)")
     end
   end
+
+  # Error that is raised when an illegal option was passed in
   class IllegalStatement < ArgumentError
+    # Display the bad option and the list of valid options
     def initialize(args = {})
       super("`#{args[:statement].inspect}` is not a valid statement.\nShould be one of #{args[:options].inspect}.")
     end
   end
+
+  # Error that is raise when you are trying to run commands with invalid options
   class InvalidOptions < StandardError
+    # Raise the error and display the command that was attempted
     def initialize(args = {})
       super("Invalid options passed to the command, `#{args[:cmd]}`, please see `$: pdftk --help`")
     end
   end
+
+  # Error that is raised when you specify a filename on a range option (cat|shuffle) and the file is not in the input list
   class MissingInput < StandardError
+    # Raise an error with the missing file name if known, otherwise raise a standard error
     def initialize(args = {})
       unless args[:input].nil?
         super("Missing Input file, `#{args[:input]}`")
@@ -397,7 +414,6 @@ module PdftkForms
     # @example
     #   build_options(:flatten => true, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit') #=> ["flatten", "encrypt_40bit", "owner_pw bar", "user_pw baz"]
     #
-    # {}} #=> ["flatten", "encrypt_40bit", "owner_pw bar", "user_pw baz"]
     def build_options(*args)
       abilities = args.shift || {}
       options = args.shift || {}
