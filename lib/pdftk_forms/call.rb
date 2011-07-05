@@ -10,7 +10,7 @@ module PdftkForms
     end
   end
 
-  # Error than is raised when pdftk CLI returns an error
+  # Error that is raised when pdftk CLI returns an error
   class CommandError < StandardError
     # Return the text of +stderr+ and the command that was attempted
     def initialize(args = {})
@@ -111,7 +111,7 @@ module PdftkForms
   #   {:pdf => 'b.pdf', :start => 12, :end => 16, :orientation => 'E', :pages => 'even'}
   #   ]
   # Don't forget to provide the same filenames in the :input part (I know it is boring, but the wrapper, make it easier)
-  # @note As inputs can use _path to files_ or _stdin_ data stream, you should take care to have only one input data stream in a single command, otherwise an +MultipleInputStream+ exception will be raised.
+  # @note As inputs can use a +path_to_files+ or +stdin+ data stream, you should take care to have only one input data stream in a single command, otherwise a +MultipleInputStream+ exception will be raised.
   #
   # ===Output
   # it could be any of +NilClass || String || File || StringIO || Tempfile+
@@ -276,7 +276,7 @@ module PdftkForms
       pdftk_version.to_f >= 1.40
     end
 
-    # Check if urf8 is supported by the current pdftk library
+    # Check if utf8 is supported by the current pdftk library
     #
     # @return [Boolean]
     #

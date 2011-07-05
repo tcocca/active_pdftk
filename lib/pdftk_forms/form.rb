@@ -18,7 +18,7 @@ module PdftkForms
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
     # @param [Hash] wrapper_statements is a hash containing default statements for the wrapper.
     #
-    # @return [Form]
+    # @return [PdftkForms::Form]
     #
     # @example
     #   bic = PdftkForms::Form.new(template, {:path => 'pdftk_path'})
@@ -58,7 +58,7 @@ module PdftkForms
     # Fields can also be accessed directly by their name (last example).
     # @param [String] field_name is the name of the field to retrieve.
     #
-    # @return [Field, nil] return nil if the field_name doesn't exists.
+    # @return [PdftkForms::Field, nil] return nil if the field_name doesn't exists.
     #
     # @example
     #   bic.get('first_field') #=> #<PdftkForms::Field:0x... >
@@ -122,7 +122,7 @@ module PdftkForms
     #
     # @param [Boolean] all_fields if it should return all fields, even empty one.
     #
-    # @return [Fdf]
+    # @return [PdftkForms::Fdf]
     #
     # @example
     #   bic.to_fdf #=> #<PdftkForms::Fdf:0x... >
@@ -135,7 +135,7 @@ module PdftkForms
     #
     # @param [Boolean] all_fields if it should return all fields, even empty one.
     #
-    # @return [Xfdf]
+    # @return [PdftkForms::Xfdf]
     #
     # @example
     #   bic.to_xfdf #=> #<PdftkForms::Xfdf:0x... >
