@@ -1,5 +1,8 @@
 = Changelog
 
+== v 0.2.0 - 07/05/11
+* Renamed the project from pdftk_forms to active_pdftk
+
 == v 0.1.0 - 05/09/11
 
 * Initial Release of the new gem
