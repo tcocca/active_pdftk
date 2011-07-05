@@ -2,12 +2,17 @@
 
 This gem is intended to be a wrapper for the PDFTK command line utility for working with pdfs, mainly editable pdfs.
 
-You must have PDFTK (http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/) installed.
-
 Currently this gem is intended to make the following much easier with pdftk:
-  1. Get all the form fields on the pdf along with the important information for those fields such as 'type', 'required?', options (for selects), etc..
-  2. Pass 'answers' for those form fields to be inserted into a new compressed pdf and returned
+  1. Perform all operations provided by PDFTK (burst, cat, ....).
+  2. Making pdf forms reading & filling easy.
+  3. Get all the form fields details (type, readonly, ...) in a structured way to use them within other frameworks (such as Rails).
+  4. More to come through specifics adapters...
 
+Library references : http://rubydoc.info/gems/pdftk_forms
+
+Official Repository : https://github.com/tcocca/pdftk_forms
+
+Issue tracker : https://github.com/tcocca/pdftk_forms/issues
 
 == Props
 
@@ -15,69 +20,96 @@ Props to this gem go out to jkraemer (Jens Krämer) for creating https://github.
 
 This gem is based on the work of those two projects and expands upon their functionality.
 
-
 == Installation
+
+You must have PDFTK binary installed :
+
+https://github.com/tcocca/pdftk_forms/wiki/Install-pdftk
+
+Or directly :
+
+http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit
+
+then install the gem:
 
   gem install pdftk_forms
 
-In a rails 2.3.x app
+or with Bundler :
+
+  gem 'pdftk_forms'
+
+or in a old rails 2.3.x app
 
   config.gem 'pdftk_forms'
 
-
 == Usage
+
+PDFTK provide all kind of operations (See below for a full list).
+Depending of your needs you will use different Adapters.
+
+For form handling use +PdftkForms::Form+ :
+
+  bic = PdftkForms::Form.new('bic.pdf')
+  bic.set('first_field', 'SomeString') #=> 'SomeString'
+  bic.save #=> 'bic_filled.pdf'
+
+it is quite straightforward !
+
+For read/write metadata on a pdf file use +PdftkForms::Metadata+ (coming soon).
+
+for other needs you will use +PdftkForms::Wrapper+ to access all operations of PDFTK.
+
+if you want to digg deeper check +PdftkForms::Call+ which build the command line from an options hash.
 
 === PdftkForms::Wrapper
 
-This is the class you will interact with.  You can optionally pass a full path to your 'pdftk' library or the gem assumes pdftk is in your path by default:
+This is the class you will interact with for all operations.
+The class will discover your 'pdftk' library (works on all *nix systems), but you can optionally give a path to the binary :
 
   @pdftk = PdftkForms::Wrapper.new
-  @pdftk.path # => 'pdftk'
-  
-  @pdftk = PdftkForms::Wrapper.new('/usr/local/bin/pdftk')
+  @pdftk.path # => 'etc/bin/pdftk'
+
+OR
+
+  @pdftk = PdftkForms::Wrapper.new(:path => '/usr/local/bin/pdftk')
   @pdftk.path # => '/usr/local/bin/pdftk'
 
-==== To get the fields from a form:
+Then all operations are available :
 
-  @pdftk.fields('/path/to/form.pdf')
+  @pdftk.cat([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
+  @pdftk.burst('in1.pdf')
+  @pdftk.dump_data_fields('~/Desktop/a.pdf', :output => '~/Desktop/data_fields.txt')
+  ...
 
-This will return an array of PdftkForms::Field objects. Each field responds to the following methods
+Other operations are :
 
-  #field_type => returns one of 'text_field', 'text_area', 'check_box', 'radio_button', 'select' or 'push button'.  All pdf Choice fields (combo box or list box) come back as 'select'.
-  #required? => returns true if the field is a required field
-  #options => returns an array of options if the field is a 'select', 'check_box' or 'radio_button'
+    cat (partially supported)
+    shuffle (partially supported)
+    burst (fully supported)
+    generate_fdf (fully supported) (this operation doesn't always provide readable FDF, we support this feature by our means)
+    fill_form (fully supported)
+    background (fully supported)
+    multibackground (fully supported)
+    stamp (fully supported)
+    multistamp (fully supported)
+    dump_data (fully supported)
+    dump_data_utf8 (fully supported)
+    dump_data_fields (fully supported)
+    dump_data_fields_utf8 (fully supported)
+    update_info (fully supported)
+    update_info_utf8 (fully supported)
+    attach_files (partially supported)
+    unpack_files (fully supported)
 
-There are also some useful fields used internally but that are exposed for determing the field_type
-  #multiline? => returns true if the field is a Text field and is specified as multiline (used to determine text_field vs. text_area)
-  #push_button?, #radio_button, #check_box? => Used to determine the different types of field based on the field flags when the original field type is 'Button'
+=== The Domain Specific Language
 
-Finally there are methods to get the original PDF field data:
-  #name => returns the FieldName from the pdf field
-  #type => returns the original FieldType (one of 'Text', 'Button', 'Choice')
-  #value => returns the original FieldValue for pre-filled text or options
-  #flags => returns the original FieldFlags a number that is used to determine information on the form such as required, radio vs. check box, multiline, etc ...
-  #alt_name => returns the FieldNameAlt data
+All operations & options are available through a hash corresponding to a DSL.
+A full explanation of this DSL could be read in +PdftkForms::Call+ reference.
 
-==== To fill out a form with answers
-
-The method for filling out the form take 3 required parameters, the path to the form, the destination for the new flattened pdf, the answer data.
-
-Also, there is a 4th optional param, whether or not to use an xfdf template to fill out the form, it defaults to true. PDFTK added support for xfdf in version 1.40 released on September 19, 2006.
-
-You can pass false in as a 4th param if your pdftk version does not support xfdf to use the standard fdf format.
-
-  @pdftk.fill_form('/path/to/form.pdf', '/path/to/destination_file.pdf', {'field_one' => 'value1', 'field_two' => 'value2'})
-
-or
-
-  @pdftk.fill_form('/path/to/form.pdf', '/path/to/destination_file.pdf', {'field_one' => 'value1', 'field_two' => 'value2'}, false)
-
-The data (3rd param) is a hash where the keys are the #name of the field and the value is the answer you are submitting for that field.
-This method submits the data and created a flattened uneditable version of the completed pdf and puts it in your destination path.
-
+#TODO write a more explicit, but concise paragraph.
 
 == Note on Patches/Pull Requests
- 
+
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a
