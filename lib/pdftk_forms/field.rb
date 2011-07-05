@@ -183,7 +183,7 @@ module PdftkForms
     # Returns a string of a field type based on the 'FieldType' and the 'FieldFlags'
     #
     # Return values are designed to match the rails form builder field methods (with the exception of 'push_button' but that field does not do anything anyway)
-    # @return [String] one of +radio_button, check_box, field_field, password_field, text_area, text_field, select, push_button+
+    # @return [String] one of +radio_button, check_box, field_field, password_field, text_area, text_field, select, push_button+.
     def field_type
       if self.type == 'Button'
         if push_button?
@@ -224,18 +224,17 @@ module PdftkForms
     end
 
     # Boolean method to tell whether the #value_was (default value from 'FieldValueDefault') is different from the the current #value.
+    # Designed to mimick the dirty attributes of an ActiveRecord model
     #
-    # Designed to mimick the dirty attributes of a Rails model
     # @return [Boolean]
     def changed?
       @value_was != value
     end
 
-    # If #changed? if true, returns a hash with 1 key of 'value' and a value that is a 2 element array: +[old value, new value]+,
-    # If #changed? is false, returns an empty hash
+    # Map of changes +value => [original value, new value]+ (only changed +value+ is supported).
+    # Designed to mimick the dirty attributes of an ActiveRecord model
     #
-    # Designed to mimick the dirty attributes of a Rails model
-    # @return [Hash]
+    # @return [Hash] a hash like +'value' => [original_value, new_value]+
     def changes
       changed? ? {'value' => [@value_was, value]} : {}
     end

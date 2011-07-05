@@ -13,13 +13,13 @@ module PdftkForms
     # @return [Hash] the options for FDF ('file', 'ufile' and 'id') all of which are optional for the header
     attr_reader :options
 
-    # Creates a new instance given the field names and values provided as a hash
+    # Creates a new instance given the field names and values provided as a hash.
     #
     # @param[Hash] A hash of fields where the key is the field name and the value is the value for the field.  The value can also be a nested hash of fields.
     # @param[Hash] options optional header options for the FDF
-    # @option options [String] :file (optional) The source file or target file: the PDF document file that this FDF file was exported from or is intended to be imported into. This option corresponds to the /F attribute in FDF content.
-    # @option options [String] :ufile (optional) The corresponding PDF filename of the form. This method corresponds to the /UF attribute in FDF content.
-    # @option options [String] :id (optional) An array of two strings constituting a file identifier. This method corresponds to the ID attribute in FDF content.
+    # @option options [String] :file, optional, The source file or target file: the PDF document file that this FDF file was exported from or is intended to be imported into. This option corresponds to the /F attribute in FDF content.
+    # @option options [String] :ufile, optional, The corresponding PDF filename of the form. This method corresponds to the /UF attribute in FDF content.
+    # @option options [String] :id, optional, An array of two strings constituting a file identifier. This method corresponds to the ID attribute in FDF content.
     #
     def initialize(data = {}, options = {})
       @data = data
@@ -30,7 +30,7 @@ module PdftkForms
       }.merge(options)
     end
 
-    # Generates a string of FDF using the +@data+ hash to construct the field and value pairs
+    # Generates a string of FDF using the +@data+ hash to construct the field and value pairs.
     #
     # @return [String]
     #
@@ -49,9 +49,9 @@ module PdftkForms
       return fdf
     end
     
-    # Writes the output from #to_s to a file at the specified path
+    # Writes the output from #to_s to a file at the specified path.
     #
-    # @param [String] path to save the generated file to
+    # @param [String] path to save the generated file to.
     #
     # @return [String]
     #
@@ -66,8 +66,8 @@ module PdftkForms
 
     protected
 
-    # Constructs the header of the FDF
-    # Adds the optional component of the header if they exist in the +options+ hash
+    # Constructs the header of the FDF.
+    # Adds the optional component of the header if they exist in the +options+ hash.
     #
     # @return [String]
     #
@@ -83,10 +83,10 @@ module PdftkForms
       return header
     end
 
-    # Constructs a string of FDF for a specific field
+    # Constructs a string of FDF for a specific field.
     #
-    # @param[String] name of the field
-    # @param[String] value that you want to set on the field
+    # @param[String] name of the field.
+    # @param[String] value that you want to set on the field.
     #
     # @return [String]
     #
@@ -96,7 +96,7 @@ module PdftkForms
         ">>\n"
     end
 
-    # Removes escaped slashes and parenthesis and newlines from a string and returns the string
+    # Removes escaped slashes and parenthesis and newlines from a string and returns the string.
     #
     # @return [String]
     #
@@ -108,7 +108,7 @@ module PdftkForms
         gsub( /\n/, '\r' )
     end
 
-    # Used to add the footer to the markup of the FDF
+    # Used to add the footer to the markup of the FDF.
     #
     # @return [String]
     #
