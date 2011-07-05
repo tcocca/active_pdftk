@@ -11,9 +11,9 @@ module PdftkForms
     # The full set of options on Call is supported here
     # @macro [new] see_options
     #   @see PdftkForms::Call#initialize PdftkForms::Call#initialize for the options hash argument
-    # @param [Hash] default options for the DSL
-    def initialize(options = {})
-      @call = Call.new(options)
+    # @param [Hash] dsl_statements default statements of the DSL, sent to the +Call+ instance
+    def initialize(dsl_statements = {})
+      @call = Call.new(dsl_statements)
     end
 
     # Delegates the method to the @call object that was instantiated
@@ -21,24 +21,24 @@ module PdftkForms
       @call.default_statements
     end
 
-    # Allowed by pdftk in order to apply some output options (flatten, compress), without changing the content of the file
-    # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
-    # @param [Hash] options is a hash containing default statements for the wrapper.
+    # Allowed by pdftk in order to apply some output options (flatten, compress), without changing the content of the file.
+    # @param [String, File, Tempfile, StringIO] template is the file to operate.
+    # @param [Hash] options is a hash containing statements for the wrapper.
     # @macro see_options
-    # @note :input in the options hash will be overwritten by +template+ and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return content of stdout in a StringIO
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
     # @example
     #   nop('a.pdf', :options => {:encrypt  => :'40bit'}) # will encrypt the input pdf
     def nop(template, options = {})
       @call.pdftk(options.merge(:input => template, :operation => nil))
     end
 
-    # Generate the FDF output of the template file
-    # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
-    # @param [Hash] options is a hash containing default statements for the wrapper.
+    # Generate the FDF output of the template file.
+    # @param [String, File, Tempfile, StringIO] template is the file to operate.
+    # @param [Hash] options is a hash containing statements for the wrapper.
     # @macro see_options
-    # @note :input in the options hash will be overwritten by +template+ and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return content of stdout in a StringIO
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
     # @example
     #   generate_fdf('a.pdf') # will yield the FDF as a StringIO output
     #   generate_fdf('a.pdf', :output => 'out.pdf') # will write the output to a file
@@ -46,52 +46,52 @@ module PdftkForms
       @call.pdftk(options.merge(:input => template, :operation => :generate_fdf))
     end
 
-    # Combine multiple files/sections of files into a single file
-    # @param [Array] ranges An array of range hashes (see ranges Hash options below)
-    # @param [Hash] options is a hash containing default statements for the wrapper.
-    # @option ranges [String, File, StringIO, Tempfile] :pdf (optional unless multiple inputs are required) the file to run the range on
-    # @option ranges [String] :pass (optional) the password for the file
-    # @option ranges [String] :start (optional) the first page number of a page range, can be +end+ for the last page of the pdf if you wish to reverse the pages, eg: end-1 or end-6
-    # @option ranges [String] :end (optional) the end of a range of pages, can be +end+ for the last page of the pdf
-    # @option ranges [String] :pages (optional) one of +even,odd+, leave off for all pages
-    # @option ranges [String] :orientation (optional) orientation of the page, one of +N,E,S,W,L,R,D+
+    # Combine multiple files/sections of files into a single file.
+    # @param [Array<Hash>] ranges An array of hashes representing a range (see ranges Hash options below)
+    # @param [Hash] options is a hash containing statements for the wrapper.
+    # @option ranges [String, File, StringIO, Tempfile] :pdf optional unless multiple inputs are required the file to run the range on.
+    # @option ranges [String] :pass optional, the password for the file.
+    # @option ranges [String] :start optional, the first page number of a page range, can be +end+ for the last page of the pdf if you wish to reverse the pages, eg: +end-1+ or +end-6+.
+    # @option ranges [String] :end optional, the end of a range of pages, can be +end+ for the last page of the pdf.
+    # @option ranges [String] :pages optional, one of +even,odd+, leave off for all pages.
+    # @option ranges [String] :orientation optional, orientation of the page, one of +N,E,S,W,L,R,D+.
     # @see PdftkForms::Call#initialize PdftkForms::Call#initialize for the options hash argument
-    # @note :input in the options hash will be overwritten by +template+ and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return content of stdout in a StringIO
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
     # @example
-    #   cat([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]) # will return StringIO of a single PDF containing a.pdf and the even pages of b.pdf
+    #   cat([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]) # will return +StringIO+ of a single PDF containing a.pdf and the even pages of b.pdf
     #   cat([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => 'c.pdf') # will write the same as above to c.pdf
     def cat(ranges = [], options = {})
       command_options = call_range_operation(:cat, ranges)
       @call.pdftk(options.merge(command_options))
     end
 
-    # Combine multiple files/sections of files into a single file similar to cat except used for collating
-    # @param [Array] ranges An array of range hashes (see ranges Hash options below)
-    # @param [Hash] options is a hash containing default statements for the wrapper.
-    # @option ranges [String, File, StringIO, Tempfile] :pdf (optional unless multiple inputs are required) the file to run the range on
-    # @option ranges [String] :pass (optional) the password for the file
-    # @option ranges [String] :start (optional) the first page number of a page range, can be +end+ for the last page of the pdf if you wish to reverse the pages, eg: end-1 or end-6
-    # @option ranges [String] :end (optional) the end of a range of pages, can be +end+ for the last page of the pdf
-    # @option ranges [String] :pages (optional) one of +even,odd+, leave off for all pages
-    # @option ranges [String] :orientation (optional) orientation of the page, one of +N,E,S,W,L,R,D+
+    # Combine multiple files/sections of files into a single file similar to cat except used for collating.
+    # @param [Array<Hash>] ranges An array of hashes representing a range (see ranges Hash options below).
+    # @param [Hash] options is a hash containing statements for the wrapper.
+    # @option ranges [String, File, StringIO, Tempfile] :pdf optional unless multiple inputs are required the file to run the range on.
+    # @option ranges [String] :pass optional, the password for the file.
+    # @option ranges [String] :start optional, the first page number of a page range, can be +end+ for the last page of the pdf if you wish to reverse the pages, eg: +end-1+ or +end-6+.
+    # @option ranges [String] :end optional, the end of a range of pages, can be +end+ for the last page of the pdf.
+    # @option ranges [String] :pages optional, one of +even,odd+, leave off for all pages.
+    # @option ranges [String] :orientation optional, orientation of the page, one of +N,E,S,W,L,R,D+.
     # @see PdftkForms::Call#initialize PdftkForms::Call#initialize for the options hash argument
-    # @note :input in the options hash will be overwritten by +template+ and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return content of stdout in a StringIO
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+
     # @example
-    #   shuffle([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]) # will return StringIO of a single PDF containing a.pdf and the even pages of b.pdf collated instead of back to back
+    #   shuffle([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]) # will return +StringIO+ of a single PDF containing a.pdf and the even pages of b.pdf collated instead of back to back
     #   shuffle([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => 'c.pdf') # will write the same as above to c.pdf
     def shuffle(ranges = [], options = {})
       command_options = call_range_operation(:shuffle, ranges)
       @call.pdftk(options.merge(command_options))
     end
 
-    # Burst the file into separate files for each page
-    # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
-    # @param [Hash] options is a hash containing default statements for the wrapper.
+    # Burst the file into separate files for each page.
+    # @param [String, File, Tempfile, StringIO] template is the file on which to be burst.
+    # @param [Hash] options is a hash containing statements for the wrapper.
     # @macro see_options
-    # @note :input in the options hash will be overwritten by +template+ and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return Dir.tmpdir
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return +Dir.tmpdir+.
     # @example
     #   burst('in1.pdf') # will split the input into pages with the default filename format of 'pg_%04d.pdf' ( 'pg_0001.pdf', 'pg_0002.pdf' )
     #   #To change the filename format, pass a printf style format to :output, ex:
@@ -100,13 +100,13 @@ module PdftkForms
       @call.pdftk(options.merge(:input => template, :operation => :burst))
     end
 
-    # Add a background/watermark image/file the template pdf
+    # Add a background/watermark image/file the template pdf.
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
-    # @param [String] background the location of the file you wish to background onto the template file
-    # @param [Hash] options is a hash containing default statements for the wrapper.
+    # @param [String] background the location of the file you wish to background onto the template file.
+    # @param [Hash] options is a hash containing statements for the wrapper.
     # @macro see_options
-    # @note :input in the options hash will be overwritten by +template+ and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return content of stdout in a StringIO
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
     # @example
     #   background('in1.pdf', 'bg.pdf') # for StringIO output
     #   background('in1.pdf', 'bg.pdf', :output => 'out.pdf') # to generate a pdf output
@@ -116,13 +116,13 @@ module PdftkForms
        @call.pdftk(options.merge(command_options))
     end
 
-    # Add a stamp/foreground image/file to the template pdf
+    # Add a stamp/foreground image/file to the template pdf.
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
-    # @param [String] stamp the location of the file you wish to stamp onto the template file
-    # @param [Hash] options is a hash containing default statements for the wrapper.
+    # @param [String] stamp the location of the file you wish to stamp onto the template file.
+    # @param [Hash] options is a hash containing statements for the wrapper.
     # @macro see_options
-    # @note :input in the options hash will be overwritten by +template+ and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return content of stdout in a StringIO
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
     # @example
     #   stamp('in1.pdf', 'stamp.pdf') # for StringIO output
     #   stamp('in1.pdf', 'stamp.pdf', :output => 'out.pdf') # to generate a pdf output
@@ -132,12 +132,12 @@ module PdftkForms
        @call.pdftk(options.merge(command_options))
     end
 
-    # Dump the field data info from the template file
+    # Dump the field data info from the template file.
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
-    # @param [Hash] options is a hash containing default statements for the wrapper.
+    # @param [Hash] options is a hash containing statements for the wrapper.
     # @macro see_options
-    # @note :input in the options hash will be overwritten by +template+ and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return content of stdout in a StringIO
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
     # @example
     #   dump_data_fields()
     #   dump_data_fields('~/Desktop/a.pdf') # returns StringIO of the output
@@ -147,25 +147,25 @@ module PdftkForms
       @call.pdftk(options.merge(:input => template, :operation => cmd))
     end
 
-    # Fill out the fields of a form on the template pdf
+    # Fill out the fields of a form on the template pdf.
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
-    # @param [Hash] data A Hash of key/value pairs of field names and field values
-    # @param [Hash] options is a hash containing default statements for the wrapper.
+    # @param [Hash] data A Hash of key/value pairs of field names and field values.
+    # @param [Hash] options is a hash containing statements for the wrapper.
     # @macro see_options
-    # @note :input in the options hash will be overwritten by +template+ and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return content of stdout in a StringIO
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
     # @example
-    #   fill_form('~/Desktop/form.pdf', {'field_1' => 'tom', 'field_2' => 'marco'}) # returns StringIO of the pdf with the form fields filled in
+    #   fill_form('~/Desktop/form.pdf', {'field_1' => 'tom', 'field_2' => 'marco'}) # returns +StringIO+ of the pdf with the form fields filled in
     #   fill_form('~/Desktop/form.pdf', {'field_1' => 'tom', 'field_2' => 'marco'}, :output => '~/Desktop/filled.pdf', :options => {:flatten => false}) # writes the pdf with the form fields filled in and flattened so that the fields can not be edited to '~/Desktop/filled.pdf'
     def fill_form(template, data = {}, options ={})
       input = @call.xfdf_support? ? Xfdf.new(data) : Fdf.new(data)
       @call.pdftk(options.merge(:input => template, :operation => {:fill_form => StringIO.new(input.to_s)}))
     end
 
-    # Dump the template file data
+    # Dump the template file data.
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
-    # @note :input in the options hash will be overwritten by +template+ and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return content of stdout in a StringIO
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
     # @example
     #   dump_data('~/Desktop/a.pdf') # returns StringIO of the output
     #   dump_data('~/Desktop/a.pdf', :output => '~/Desktop/data.txt) # writes the data file to '~/Desktop/data.txt' and returns '~/Desktop/data.txt'
@@ -174,13 +174,13 @@ module PdftkForms
       @call.pdftk(:input => template, :operation => cmd)
     end
 
-    # Modify the metadata info of the template pdf
+    # Modify the metadata info of the template pdf.
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
-    # @param [String, File, Tempfile, StringIO] infos the data (in the same format as dump_data) that you want to change on the template file
-    # @param [Hash] options is a hash containing default statements for the wrapper.
+    # @param [String, File, Tempfile, StringIO] infos the data (in the same format as dump_data) that you want to change on the template file.
+    # @param [Hash] options is a hash containing statements for the wrapper.
     # @macro see_options
-    # @note :input in the options hash will be overwritten by +template+ and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return content of stdout in a StringIO
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
     # @example
     #   update_info('~/Desktop/a.pdf', '~/Desktop/meta.txt') # returns StringIO of the new pdf
     #   update_info('~/Desktop/a.pdf', '~/Desktop/meta.txt', :output => '~/Desktop/b.pdf') # writes the new pdf to '~/Desktop/b.pdf' and returns '~/Desktop/b.pdf'
@@ -189,12 +189,13 @@ module PdftkForms
       @call.pdftk(options.merge(:input => template, :operation => {cmd => infos}))
     end
 
-    # Attach files to the template pdf
+    # Attach files to the template pdf.
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
-    # @param [Hash] options is a hash containing default statements for the wrapper.
+    # @param [Array<String>] files to be attached to the pdf template.
+    # @param [Hash] options is a hash containing statements for the wrapper.
     # @macro see_options
-    # @note :input in the options hash will be overwritten by +template+ and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return content of stdout in a StringIO
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
     # @example
     #   attach_files('~/Desktop/a.pdf', ['~/Desktop/b.txt']) # returns StringIO of the new pdf with the file attached
     #   attach_files('~/Desktop/a.pdf', ['~/Desktop/b.txt'], :output => '~/Desktop/b.pdf') # writes the new pdf to '~/Desktop/b.pdf' and returns '~/Desktop/b.pdf'
@@ -204,11 +205,11 @@ module PdftkForms
 
     # TODO: add support for nil directory
     #
-    # Unpack attached file from the template pdf
+    # Unpack attached file from the template pdf.
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
-    # @param [String] directory location to unpack the files into
-    # @note :input in the options hash will be overwritten by +template+, :output will be overwritten by the directory and :operation will be overwritten
-    # @return resource specified in :output, if :ouput is not provided (or nil), return Dir.tmpdir
+    # @param [String] directory location to unpack the files into.
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return +Dir.tmpdir+.
     # @example
     #   unpack_files('a.pdf', '~/Desktop') # will unpack the files to the desktop and return '~/Desktop'
     def unpack_files(template, directory)
@@ -217,7 +218,7 @@ module PdftkForms
 
     private
 
-    # Takes and operation as a symbol and an array of ranges to construct the options hash
+    # Takes and operation as a symbol and an array of ranges to construct the options hash.
     # @param [Symbol] operation
     # @param [Array] ranges an Array of range Hashes
     # @return [Hash] a hash of the inputs extracted from the ranges and the operation with the correct ranges passed in
@@ -234,7 +235,7 @@ module PdftkForms
       {:input => inputs, :operation => {operation => ranges}}
     end
 
-    # Takes a command, template file, overlay file and whether the command is a multi or single command to construct the options hash
+    # Takes a command, template file, overlay file and whether the command is a multi or single command to construct the options hash.
     # @param [Symbol] command
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based
     # @param [String, File, Tempfile, StringIO] overlay is the file which will be backgrounded or stamped
