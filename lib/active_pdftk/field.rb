@@ -1,4 +1,4 @@
-module PdftkForms
+module ActivePdftk
   # Represents a fillable form field on a PDF form
   #
   # Contains a nice wrapper to check field flags to determine possible options

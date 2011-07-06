@@ -1,4 +1,4 @@
-require File.expand_path('../../lib/pdftk_forms', __FILE__)
+require File.expand_path('../../lib/active_pdftk', __FILE__)
 
 require 'rspec'
 

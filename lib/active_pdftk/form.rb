@@ -1,10 +1,10 @@
-module PdftkForms
+module ActivePdftk
   # Represents a fillable form on a particular PDF.
   # It should be your preferred abstraction layer, for editable form content
-  # Use a PdftkForms::Form object as an electronic document, read, edit & save it!
+  # Use a ActivePdftk::Form object as an electronic document, read, edit & save it!
   #
   # @example
-  #   bic = PdftkForms::Form.new('bic.pdf')
+  #   bic = ActivePdftk::Form.new('bic.pdf')
   #   bic.field_mapping_fill!
   #   bic.save
   #
@@ -18,11 +18,11 @@ module PdftkForms
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
     # @param [Hash] wrapper_statements is a hash containing default statements for the wrapper.
     #
-    # @return [PdftkForms::Form]
+    # @return [ActivePdftk::Form]
     #
     # @example
-    #   bic = PdftkForms::Form.new(template, {:path => 'pdftk_path'})
-    #   bic = PdftkForms::Form.new('bic.pdf')
+    #   bic = ActivePdftk::Form.new(template, {:path => 'pdftk_path'})
+    #   bic = ActivePdftk::Form.new('bic.pdf')
     def initialize(template, wrapper_statements = {})
       @pdftk = Wrapper.new(wrapper_statements)
       @template = template
@@ -34,7 +34,7 @@ module PdftkForms
     # @return [Array] return an array of Field objects
     #
     # @example
-    #   bic.fields #=> [#<PdftkForms::Field:0x... >, #<PdftkForms::Field:0x... >, ...]
+    #   bic.fields #=> [#<ActivePdftk::Field:0x... >, #ActivePdftks::Field:0x... >, ...]
     def fields
       @fields ||= begin
         field_output = @pdftk.dump_data_fields(@template)
@@ -58,12 +58,12 @@ module PdftkForms
     # Fields can also be accessed directly by their name (last example).
     # @param [String] field_name is the name of the field to retrieve.
     #
-    # @return [PdftkForms::Field, nil] return nil if the field_name doesn't exists.
+    # @return [ActivePdftk::Field, nil] return nil if the field_name doesn't exists.
     #
     # @example
-    #   bic.get('first_field') #=> #<PdftkForms::Field:0x... >
+    #   bic.get('first_field') #=> #<ActivePdftk::Field:0x... >
     #   bic.get('not_a_field') #=> nil
-    #   bic.first_field #=> #<PdftkForms::Field:0x... >
+    #   bic.first_field #=> #<ActivePdftk::Field:0x... >
     def get(field_name)
       #TODO check if several inputs with same names are allowed
       fields.detect {|f| f.name == field_name.to_s}
@@ -112,7 +112,7 @@ module PdftkForms
     # @return [String, File, Tempfile, StringIO, nil] return the modified template.
     #
     # @example
-    #   bic = PdftkForms::Form.new('bic.pdf')
+    #   bic = ActivePdftk::Form.new('bic.pdf')
     #   bic.save! #=> 'bic.pdf'
     def save!(options = {})
       save(@template, options)
@@ -122,11 +122,11 @@ module PdftkForms
     #
     # @param [Boolean] all_fields if it should return all fields, even empty one.
     #
-    # @return [PdftkForms::Fdf]
+    # @return [ActivePdftk::Fdf]
     #
     # @example
-    #   bic.to_fdf #=> #<PdftkForms::Fdf:0x... >
-    #   bic.to_fdf(true) #=> #<PdftkForms::Fdf:0x... >
+    #   bic.to_fdf #=> #<ActivePdftk::Fdf:0x... >
+    #   bic.to_fdf(true) #=> #<ActivePdftk::Fdf:0x... >
     def to_fdf(all_fields = false)
       Fdf.new(to_h(all_fields))
     end
@@ -135,11 +135,11 @@ module PdftkForms
     #
     # @param [Boolean] all_fields if it should return all fields, even empty one.
     #
-    # @return [PdftkForms::Xfdf]
+    # @return [ActivePdftk::Xfdf]
     #
     # @example
-    #   bic.to_xfdf #=> #<PdftkForms::Xfdf:0x... >
-    #   bic.to_xfdf(true) #=> #<PdftkForms::Xfdf:0x... >
+    #   bic.to_xfdf #=> #<ActivePdftk::Xfdf:0x... >
+    #   bic.to_xfdf(true) #=> #<ActivePdftk::Xfdf:0x... >
     def to_xfdf(all_fields = false)
       Xfdf.new(to_h(all_fields))
     end
@@ -152,7 +152,7 @@ module PdftkForms
     # @note Only fills Text fields (will respect the default value for Choice or Button fields)
     #
     # @example
-    #   bic.field_mapping_fill! #=> #<PdftkForms::Form:0x... >
+    #   bic.field_mapping_fill! #=> #<ActivePdftk::Form:0x... >
     #
     def field_mapping_fill!
       fields.each { |f| f.value = f.name.to_s if f.type == 'Text'}
@@ -190,7 +190,7 @@ module PdftkForms
 
     # Allow direct access to fields for a form by calling the field name as the method name, this will use method_missing to find the field
     #
-    # @return [PdftkForms::Field]
+    # @return [ActivePdftk::Field]
     def method_missing(method_name, *args)
       field_name = method_name.to_s.delete('=')
       if fields.any? {|f| f.name == field_name}

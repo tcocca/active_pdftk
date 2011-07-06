@@ -1,7 +1,7 @@
 require "open3"
 require "tmpdir"
 
-module PdftkForms
+module ActivePdftk
   # Error that is raised when +pdftk+ could not be located on the system and the path to the library is not passed in
   class MissingLibrary < StandardError
     # Calls super with the message and a link to pdftk

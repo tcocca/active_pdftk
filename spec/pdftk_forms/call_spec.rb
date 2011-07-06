@@ -1,12 +1,12 @@
 require 'spec_helper'
 require 'tempfile'
 
-describe PdftkForms::Call do
+describe ActivePdftk::Call do
   context "#new" do
     before do
       options = {}
       options[:path] = ENV['path'] unless ENV['path'].nil?
-      @pdftk = PdftkForms::Call.new(options)
+      @pdftk = ActivePdftk::Call.new(options)
     end
 
     it "should set the path (not nil)" do
@@ -28,7 +28,7 @@ describe PdftkForms::Call do
       end
 
       it "should allow a custom path" do # not very testing ~!?
-        @pdftk = PdftkForms::Call.new(:path => @pdftk.default_statements[:path])
+        @pdftk = ActivePdftk::Call.new(:path => @pdftk.default_statements[:path])
         @pdftk.default_statements[:path].should == @pdftk.default_statements[:path]
       end
     end
@@ -40,8 +40,8 @@ describe PdftkForms::Call do
     end
 
     it "should store default options" do
-      path =  PdftkForms::Call.new.locate_pdftk
-      @pdftk = PdftkForms::Call.new(:input => 'test.pdf', :options => {:flatten => true})
+      path =  ActivePdftk::Call.new.locate_pdftk
+      @pdftk = ActivePdftk::Call.new(:input => 'test.pdf', :options => {:flatten => true})
       @pdftk.default_statements.should == {:input => 'test.pdf', :options => {:flatten => true}, :path => path}
     end
   end
@@ -49,7 +49,7 @@ describe PdftkForms::Call do
   context "#set_cmd" do
     context "prepare command" do
       before do
-        @pdftk = PdftkForms::Call.new
+        @pdftk = ActivePdftk::Call.new
       end
 
       it "should convert input" do
@@ -84,17 +84,17 @@ describe PdftkForms::Call do
         @pdftk.set_cmd(:output => StringIO.new('specs')).should == "output -"
       end
 
-      it "should raise an PdftkForms::IllegalStatement exception" do
-        expect{ @pdftk.pdftk(:options => {:ionize => true}) }.to raise_error(PdftkForms::IllegalStatement)
-        expect{ @pdftk.pdftk(:operation => {:vote => 'for_me'}) }.to raise_error(PdftkForms::IllegalStatement)
-        expect{ @pdftk.pdftk(:options => {:fill_form => 'a.fdf'}) }.to raise_error(PdftkForms::IllegalStatement)
-        expect{ @pdftk.pdftk(:operation => {:flatten => true}) }.to raise_error(PdftkForms::IllegalStatement)
+      it "should raise an ActivePdftk::IllegalStatement exception" do
+        expect{ @pdftk.pdftk(:options => {:ionize => true}) }.to raise_error(ActivePdftk::IllegalStatement)
+        expect{ @pdftk.pdftk(:operation => {:vote => 'for_me'}) }.to raise_error(ActivePdftk::IllegalStatement)
+        expect{ @pdftk.pdftk(:options => {:fill_form => 'a.fdf'}) }.to raise_error(ActivePdftk::IllegalStatement)
+        expect{ @pdftk.pdftk(:operation => {:flatten => true}) }.to raise_error(ActivePdftk::IllegalStatement)
       end
     end
 
     context "build_range_option" do
       before do
-        @pdftk = PdftkForms::Call.new
+        @pdftk = ActivePdftk::Call.new
       end
 
       it "should set the operation with arguments" do
@@ -127,21 +127,21 @@ describe PdftkForms::Call do
       end
 
       it "should raise missing input errors" do
-        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}) }.to raise_error(PdftkForms::MissingInput)
-        expect { @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}) }.to raise_error(PdftkForms::MissingInput)
-        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil, 'c.pdf' => 'foo'}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}) }.to raise_error(PdftkForms::MissingInput, "Missing Input file, `b.pdf`")
+        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}) }.to raise_error(ActivePdftk::MissingInput)
+        expect { @pdftk.set_cmd(:input => 'a.pdf', :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}) }.to raise_error(ActivePdftk::MissingInput)
+        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil, 'c.pdf' => 'foo'}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf'}]}) }.to raise_error(ActivePdftk::MissingInput, "Missing Input file, `b.pdf`")
       end
 
       it "should raise an invalid options error" do
-        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => nil}) }.to raise_error(PdftkForms::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
-        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => []}) }.to raise_error(PdftkForms::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
-        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => "test"}) }.to raise_error(PdftkForms::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
+        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => nil}) }.to raise_error(ActivePdftk::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
+        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => []}) }.to raise_error(ActivePdftk::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
+        expect { @pdftk.set_cmd(:input => {'a.pdf' => nil}, :operation => {:cat => "test"}) }.to raise_error(ActivePdftk::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
       end
     end
 
     context "build command" do
       before do
-        @pdftk = PdftkForms::Call.new(:input => 'test.pdf', :options => {:flatten => true})
+        @pdftk = ActivePdftk::Call.new(:input => 'test.pdf', :options => {:flatten => true})
       end
 
       it "should use default command statements" do
@@ -152,8 +152,8 @@ describe PdftkForms::Call do
         @pdftk.set_cmd(:options => { :flatten => false, :owner_pw => 'bar'}).split('').sort.should == "test.pdf owner_pw bar".split('').sort
       end
 
-      it "should raise an PdftkForms::MultipleInputStream exception" do
-        expect{ @pdftk.set_cmd(:input => Tempfile.new('specs'), :operation => {:fill_form => StringIO.new('')}) }.to raise_error(PdftkForms::MultipleInputStream)
+      it "should raise an ActivePdftk::MultipleInputStream exception" do
+        expect{ @pdftk.set_cmd(:input => Tempfile.new('specs'), :operation => {:fill_form => StringIO.new('')}) }.to raise_error(ActivePdftk::MultipleInputStream)
       end
 
       # Give up in testing this one
@@ -168,7 +168,7 @@ describe PdftkForms::Call do
 
   context "#pdftk" do
     before do
-      @pdftk = PdftkForms::Call.new
+      @pdftk = ActivePdftk::Call.new
       @file = File.new path_to_pdf('fields.pdf')
       @tempfile = Tempfile.new('specs')
       @stringio = StringIO.new
@@ -182,34 +182,34 @@ describe PdftkForms::Call do
       @tempfile.rewind
       @stringio.rewind
 
-      expect{ @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data) }.to_not raise_error(PdftkForms::CommandError)
-      expect{ @pdftk.pdftk(:input => @file, :operation => :dump_data) }.to_not raise_error(PdftkForms::CommandError)
-      expect{ @pdftk.pdftk(:input => @tempfile, :operation => :dump_data) }.to_not raise_error(PdftkForms::CommandError)
-      expect{ @pdftk.pdftk(:input => @stringio, :operation => :dump_data) }.to_not raise_error(PdftkForms::CommandError)
+      expect{ @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data) }.to_not raise_error(ActivePdftk::CommandError)
+      expect{ @pdftk.pdftk(:input => @file, :operation => :dump_data) }.to_not raise_error(ActivePdftk::CommandError)
+      expect{ @pdftk.pdftk(:input => @tempfile, :operation => :dump_data) }.to_not raise_error(ActivePdftk::CommandError)
+      expect{ @pdftk.pdftk(:input => @stringio, :operation => :dump_data) }.to_not raise_error(ActivePdftk::CommandError)
     end
 
     it "should output without exception and give the appropriate result" do
       @data_string = File.new(path_to_pdf('fields.data')).read
       
-      expect{ @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data, :output => @tempfile) }.to_not raise_error(PdftkForms::CommandError)
+      expect{ @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data, :output => @tempfile) }.to_not raise_error(ActivePdftk::CommandError)
       @tempfile.rewind
       @tempfile.read.should == @data_string
 
-      expect{ @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data, :output => @stringio) }.to_not raise_error(PdftkForms::CommandError)
+      expect{ @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data, :output => @stringio) }.to_not raise_error(ActivePdftk::CommandError)
       @stringio.string.should == @data_string
 
-      expect{@return_stringio =  @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data) }.to_not raise_error(PdftkForms::CommandError)
+      expect{@return_stringio =  @pdftk.pdftk(:input => path_to_pdf('fields.pdf'), :operation => :dump_data) }.to_not raise_error(ActivePdftk::CommandError)
       @return_stringio.string.should == @data_string
     end
 
     it "should input a File, output a StringIO without exception and give the appropriate result" do
       @data_fields_string = File.new(path_to_pdf('fields.data_fields')).read
-      expect{ @pdftk.pdftk(:input => @file, :operation => :dump_data_fields, :output => @stringio) }.to_not raise_error(PdftkForms::CommandError)
+      expect{ @pdftk.pdftk(:input => @file, :operation => :dump_data_fields, :output => @stringio) }.to_not raise_error(ActivePdftk::CommandError)
       @stringio.string.should == @data_fields_string
     end
 
-    it "should raise a PdftkForms::CommandError exception" do
-      expect{ @pdftk.pdftk(:input => {'a.pdf' => 'foo', 'b.pdf' => 'bar', 'c.pdf' => nil}, :operation => {}, :output => 'out.pdf',:options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'}) }.to raise_error(PdftkForms::CommandError)
+    it "should raise a ActivePdftk::CommandError exception" do
+      expect{ @pdftk.pdftk(:input => {'a.pdf' => 'foo', 'b.pdf' => 'bar', 'c.pdf' => nil}, :operation => {}, :output => 'out.pdf',:options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'}) }.to raise_error(ActivePdftk::CommandError)
     end
 
     context "#burst" do

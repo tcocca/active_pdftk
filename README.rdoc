@@ -1,4 +1,4 @@
-= PdftkForms
+= ActivePdftk
 
 This gem is intended to be a wrapper for the PDFTK command line utility for working with pdfs, mainly editable pdfs.
 
@@ -8,11 +8,11 @@ Currently this gem is intended to make the following much easier with pdftk:
   3. Get all the form fields details (type, readonly, ...) in a structured way to use them within other frameworks (such as Rails).
   4. More to come through specifics adapters...
 
-Library references : http://rubydoc.info/gems/pdftk_forms
+Library references : http://rubydoc.info/gems/active_pdftk
 
-Official Repository : https://github.com/tcocca/pdftk_forms
+Official Repository : https://github.com/tcocca/active_pdftk
 
-Issue tracker : https://github.com/tcocca/pdftk_forms/issues
+Issue tracker : https://github.com/tcocca/active_pdftk/issues
 
 == Props
 
@@ -24,7 +24,7 @@ This gem is based on the work of those two projects and expands upon their funct
 
 You must have PDFTK binary installed :
 
-https://github.com/tcocca/pdftk_forms/wiki/Install-pdftk
+https://github.com/tcocca/active_pdftk/wiki/Install-pdftk
 
 Or directly :
 
@@ -32,46 +32,46 @@ http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit
 
 then install the gem:
 
-  gem install pdftk_forms
+  gem install active_pdftk
 
 or with Bundler :
 
-  gem 'pdftk_forms'
+  gem 'active_pdftk'
 
 or in a old rails 2.3.x app
 
-  config.gem 'pdftk_forms'
+  config.gem 'active_pdftk'
 
 == Usage
 
 PDFTK provide all kind of operations (See below for a full list).
 Depending of your needs you will use different Adapters.
 
-For form handling use +PdftkForms::Form+ :
+For form handling use +ActivePdftk::Form+ :
 
-  bic = PdftkForms::Form.new('bic.pdf')
+  bic = ActivePdftk::Form.new('bic.pdf')
   bic.set('first_field', 'SomeString') #=> 'SomeString'
   bic.save #=> 'bic_filled.pdf'
 
 it is quite straightforward !
 
-For read/write metadata on a pdf file use +PdftkForms::Metadata+ (coming soon).
+For read/write metadata on a pdf file use +ActivePdftk::Metadata+ (coming soon).
 
-for other needs you will use +PdftkForms::Wrapper+ to access all operations of PDFTK.
+for other needs you will use +ActivePdftk::Wrapper+ to access all operations of PDFTK.
 
-if you want to digg deeper check +PdftkForms::Call+ which build the command line from an options hash.
+if you want to digg deeper check +ActivePdftk::Call+ which build the command line from an options hash.
 
-=== PdftkForms::Wrapper
+=== ActivePdftk::Wrapper
 
 This is the class you will interact with for all operations.
 The class will discover your 'pdftk' library (works on all *nix systems), but you can optionally give a path to the binary :
 
-  @pdftk = PdftkForms::Wrapper.new
+  @pdftk = ActivePdftk::Wrapper.new
   @pdftk.path # => 'etc/bin/pdftk'
 
 OR
 
-  @pdftk = PdftkForms::Wrapper.new(:path => '/usr/local/bin/pdftk')
+  @pdftk = ActivePdftk::Wrapper.new(:path => '/usr/local/bin/pdftk')
   @pdftk.path # => '/usr/local/bin/pdftk'
 
 Then all operations are available :
@@ -104,7 +104,7 @@ Other operations are :
 === The Domain Specific Language
 
 All operations & options are available through a hash corresponding to a DSL.
-A full explanation of this DSL could be read in +PdftkForms::Call+ reference.
+A full explanation of this DSL could be read in +ActivePdftk::Call+ reference.
 
 #TODO write a more explicit, but concise paragraph.
 

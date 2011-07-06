@@ -1,30 +1,30 @@
 require 'spec_helper'
 
-describe PdftkForms::Wrapper do
+describe ActivePdftk::Wrapper do
   context "new" do
     it "should instantiate the object." do
-      @pdftk = PdftkForms::Wrapper.new
-      @pdftk.should be_an_instance_of(PdftkForms::Wrapper)
+      @pdftk = ActivePdftk::Wrapper.new
+      @pdftk.should be_an_instance_of(ActivePdftk::Wrapper)
     end
 
     it "should pass the defaults statements to the call instance." do
-      path = PdftkForms::Call.new.locate_pdftk
-      @pdftk = PdftkForms::Wrapper.new(:path => path, :operation => {:fill_form => 'a.fdf'}, :options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'})
+      path = ActivePdftk::Call.new.locate_pdftk
+      @pdftk = ActivePdftk::Wrapper.new(:path => path, :operation => {:fill_form => 'a.fdf'}, :options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'})
       @pdftk.default_statements.should == {:path => path, :operation => {:fill_form => 'a.fdf'}, :options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'}}
     end
   end
 
   context "operation :" do
     before do
-      @pdftk = PdftkForms::Wrapper.new
+      @pdftk = ActivePdftk::Wrapper.new
     end
 
     context "dump_data_fields" do
       it "should call #pdftk on @call" do
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :dump_data_fields_utf8})
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :dump_data_fields_utf8})
         @pdftk.dump_data_fields(path_to_pdf('fields.pdf'))
-        @pdftk = PdftkForms::Wrapper.new
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :dump_data_fields_utf8, :options => {:encrypt  => :'40bit'}})
+        @pdftk = ActivePdftk::Wrapper.new
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :dump_data_fields_utf8, :options => {:encrypt  => :'40bit'}})
         @pdftk.dump_data_fields(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'})
       end
 
@@ -77,10 +77,10 @@ describe PdftkForms::Wrapper do
 
     context "generate_fdf" do
       it "should call #pdftk on @call" do
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :generate_fdf})
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :generate_fdf})
         @pdftk.generate_fdf(path_to_pdf('fields.pdf'))
-        @pdftk = PdftkForms::Wrapper.new
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :generate_fdf, :options => {:encrypt  => :'40bit'}})
+        @pdftk = ActivePdftk::Wrapper.new
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :generate_fdf, :options => {:encrypt  => :'40bit'}})
         @pdftk.generate_fdf(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'})
       end
 
@@ -96,10 +96,10 @@ describe PdftkForms::Wrapper do
 
     context "burst" do
       it "should call #pdtk on @call" do
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst})
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst})
         @pdftk.burst(path_to_pdf('fields.pdf'))
-        @pdftk = PdftkForms::Wrapper.new
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst, :options => {:encrypt  => :'40bit'}})
+        @pdftk = ActivePdftk::Wrapper.new
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst, :options => {:encrypt  => :'40bit'}})
         @pdftk.burst(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'})
       end
       
@@ -121,10 +121,10 @@ describe PdftkForms::Wrapper do
 
     context "background" do
       it "should call #pdtk on @call" do
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:background => path_to_pdf('b.pdf')}})
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:background => path_to_pdf('b.pdf')}})
         @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'))
-        @pdftk = PdftkForms::Wrapper.new
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:background => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
+        @pdftk = ActivePdftk::Wrapper.new
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:background => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
         @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :options => {:encrypt  => :'40bit'})
       end
       
@@ -136,20 +136,20 @@ describe PdftkForms::Wrapper do
 
     context "multibackground" do
       it "should call #pdtk on @call" do
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multibackground => path_to_pdf('b.pdf')}})
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multibackground => path_to_pdf('b.pdf')}})
         @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :multi => true)
-        @pdftk = PdftkForms::Wrapper.new
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multibackground => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
+        @pdftk = ActivePdftk::Wrapper.new
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multibackground => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
         @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :multi => true, :options => {:encrypt  => :'40bit'})
       end
     end
 
     context "stamp" do
       it "should call #pdtk on @call" do
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:stamp => path_to_pdf('b.pdf')}})
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:stamp => path_to_pdf('b.pdf')}})
         @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'))
-        @pdftk = PdftkForms::Wrapper.new
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:stamp => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
+        @pdftk = ActivePdftk::Wrapper.new
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:stamp => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
         @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :options => {:encrypt  => :'40bit'})
       end
       
@@ -161,17 +161,17 @@ describe PdftkForms::Wrapper do
 
     context "multistamp" do
       it "should call #pdtk on @call" do
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multistamp => path_to_pdf('b.pdf')}})
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multistamp => path_to_pdf('b.pdf')}})
         @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :multi => true)
-        @pdftk = PdftkForms::Wrapper.new
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multistamp => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
+        @pdftk = ActivePdftk::Wrapper.new
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multistamp => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
         @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :multi => true, :options => {:encrypt  => :'40bit'})
       end
     end
 
     context "cat" do
       it "should call #pdftk on @call" do
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
         @pdftk.cat([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
       end
       
@@ -183,7 +183,7 @@ describe PdftkForms::Wrapper do
 
     context "shuffle" do
       it "should call #pdftk on @call" do
-        PdftkForms::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:shuffle => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
+        ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:shuffle => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
         @pdftk.shuffle([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
       end
       

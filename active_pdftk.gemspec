@@ -1,18 +1,18 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "pdftk_forms/version"
+require "active_pdftk/version"
 
 Gem::Specification.new do |s|
-  s.name        = "pdftk_forms"
-  s.version     = PdftkForms::VERSION
+  s.name        = "active_pdftk"
+  s.version     = ActivePdftk::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Tom Cocca"]
   s.email       = ["tom.cocca@gmail.com"]
-  s.homepage    = "http://github.com/tcocca/pdftk_forms"
+  s.homepage    = "http://github.com/tcocca/active_pdftk"
   s.summary     = "Fill out PDF forms with pdftk."
   s.description = "Fill out editable PDF forms with pdftk (http://www.accesspdf.com/pdftk/)."
 
-  s.rubyforge_project = "pdftk_forms"
+  s.rubyforge_project = "active_pdftk"
 
   s.add_dependency "builder", '>= 2.1.2'
   s.add_development_dependency "rspec", "~> 2.6.0"

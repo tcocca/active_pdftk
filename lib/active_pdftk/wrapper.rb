@@ -1,16 +1,16 @@
 require 'tempfile'
 
-module PdftkForms
-  # Wraps calls to the PdftkForms::Call class
+module ActivePdftk
+  # Wraps calls to the ActivePdftk::Call class
   #
-  # provides methods around every operation for pdftk to make constructing the call with options easier than working directly with the PdftkForms::Call class
+  # provides methods around every operation for pdftk to make constructing the call with options easier than working directly with the ActivePdftk::Call class
   class Wrapper
 
-    # Instantiates a new instance of wrapper and passes through the options hash to an instance of PdftkForms::Call
+    # Instantiates a new instance of wrapper and passes through the options hash to an instance of ActivePdftk::Call
     #
     # The full set of options on Call is supported here
     # @macro [new] see_options
-    #   @see PdftkForms::Call#initialize PdftkForms::Call#initialize for the options hash argument
+    #   @see ActivePdftk::Call#initialize ActivePdftk::Call#initialize for the options hash argument
     # @param [Hash] dsl_statements default statements of the DSL, sent to the +Call+ instance
     def initialize(dsl_statements = {})
       @call = Call.new(dsl_statements)
@@ -55,7 +55,7 @@ module PdftkForms
     # @option ranges [String] :end optional, the end of a range of pages, can be +end+ for the last page of the pdf.
     # @option ranges [String] :pages optional, one of +even,odd+, leave off for all pages.
     # @option ranges [String] :orientation optional, orientation of the page, one of +N,E,S,W,L,R,D+.
-    # @see PdftkForms::Call#initialize PdftkForms::Call#initialize for the options hash argument
+    # @see ActivePdftk::Call#initialize ActivePdftk::Call#initialize for the options hash argument
     # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
     # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
     # @example
@@ -75,7 +75,7 @@ module PdftkForms
     # @option ranges [String] :end optional, the end of a range of pages, can be +end+ for the last page of the pdf.
     # @option ranges [String] :pages optional, one of +even,odd+, leave off for all pages.
     # @option ranges [String] :orientation optional, orientation of the page, one of +N,E,S,W,L,R,D+.
-    # @see PdftkForms::Call#initialize PdftkForms::Call#initialize for the options hash argument
+    # @see ActivePdftk::Call#initialize ActivePdftk::Call#initialize for the options hash argument
     # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
     # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+
     # @example

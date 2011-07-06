@@ -1,17 +1,17 @@
 require 'spec_helper'
 
-describe PdftkForms::Form do
+describe ActivePdftk::Form do
   context "new" do
-    it "should create a PdftkForms::Form object" do
-      @form = PdftkForms::Form.new(path_to_pdf('fields.pdf'))
-      @form.should be_kind_of(PdftkForms::Form)
+    it "should create a ActivePdftk::Form object" do
+      @form = ActivePdftk::Form.new(path_to_pdf('fields.pdf'))
+      @form.should be_kind_of(ActivePdftk::Form)
       @form.template.should == path_to_pdf('fields.pdf')
     end
   end
 
   context "Instantiate a Form, " do
     before do
-      @form = PdftkForms::Form.new(path_to_pdf('fields.pdf'))
+      @form = ActivePdftk::Form.new(path_to_pdf('fields.pdf'))
     end
 
     context "fields" do
@@ -19,9 +19,9 @@ describe PdftkForms::Form do
         @form.fields.size.should == 28
       end
 
-      it "should return an array of PdftkForms::Field objects" do
+      it "should return an array of ActivePdftk::Field objects" do
         @form.fields.each do |field|
-          field.should be_kind_of(PdftkForms::Field)
+          field.should be_kind_of(ActivePdftk::Field)
         end
       end
 
@@ -408,20 +408,20 @@ describe PdftkForms::Form do
         @form.save('/tmp/pdftk_test.pdf').should == '/tmp/pdftk_test.pdf'
       end
 
-      it "should return a PdftkForms::Fdf object" do
-        @form.to_fdf.should be_kind_of(PdftkForms::Fdf)
+      it "should return a ActivePdftk::Fdf object" do
+        @form.to_fdf.should be_kind_of(ActivePdftk::Fdf)
       end
 
-      it "should return a PdftkForms::Fdf object with all inputs" do
-        @form.to_fdf(true).should be_kind_of(PdftkForms::Fdf)
+      it "should return a ActivePdftk::Fdf object with all inputs" do
+        @form.to_fdf(true).should be_kind_of(ActivePdftk::Fdf)
       end
 
-      it "should return a PdftkForms::Xfdf object" do
-        @form.to_xfdf.should be_kind_of(PdftkForms::Xfdf)
+      it "should return a ActivePdftk::Xfdf object" do
+        @form.to_xfdf.should be_kind_of(ActivePdftk::Xfdf)
       end
 
-      it "should return a PdftkForms::Xfdf object with all inputs" do
-        @form.to_xfdf(true).should be_kind_of(PdftkForms::Xfdf)
+      it "should return a ActivePdftk::Xfdf object with all inputs" do
+        @form.to_xfdf(true).should be_kind_of(ActivePdftk::Xfdf)
       end
     end
 
@@ -429,7 +429,7 @@ describe PdftkForms::Form do
       it "should save the form with the fields filled in with their FieldName" do
         @form.field_mapping_fill!.save(@output = StringIO.new)
         @output.rewind
-        @form_field_mapping = PdftkForms::Form.new(@output)
+        @form_field_mapping = ActivePdftk::Form.new(@output)
         @form.fields.each do |f|
           next unless f.type == 'Text'
           @form_field_mapping.get(f.name).value.should == f.name

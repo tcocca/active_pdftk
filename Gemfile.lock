@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pdftk_forms (0.1.0)
+    active_pdftk (0.1.0)
       builder (>= 2.1.2)
 
 GEM
@@ -24,7 +24,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  pdftk_forms!
+  active_pdftk!
   rake (>= 0.8.7)
   rspec (~> 2.6.0)
   yard

@@ -1,4 +1,4 @@
-module PdftkForms
+module ActivePdftk
   
   # Map keys and values to Adobe's FDF format.
   #

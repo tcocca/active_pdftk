@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe PdftkForms::Field do
+describe ActivePdftk::Field do
 
   context "aliased attributes" do
     before do
-      @field = PdftkForms::Field.new(
+      @field = ActivePdftk::Field.new(
         'FieldName' => 'test',
         'FieldType' => 'Text',
         'FieldValue' => '',
@@ -35,7 +35,7 @@ describe PdftkForms::Field do
 
   context "aliased attributes defaults" do
     before do
-      @field = PdftkForms::Field.new(
+      @field = ActivePdftk::Field.new(
         'FieldName' => 'test',
         'FieldType' => 'Text',
         'FieldValue' => 'pdftk_test',
@@ -69,16 +69,16 @@ describe PdftkForms::Field do
     end
 
     it "should be false" do
-      @field1 = PdftkForms::Field.new(@attributes)
+      @field1 = ActivePdftk::Field.new(@attributes)
       @field1.read_only?.should be_false
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 2))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 2))
       @field2.read_only?.should be_false
     end
 
     it "should be true" do
-      @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 1))
+      @field1 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 1))
       @field1.read_only?.should be_true
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 3))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 3))
       @field2.read_only?.should be_true
     end
   end
@@ -94,18 +94,18 @@ describe PdftkForms::Field do
     end
 
     it "should be false" do
-      @field1 = PdftkForms::Field.new(@attributes)
+      @field1 = ActivePdftk::Field.new(@attributes)
       @field1.required?.should be_false
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 1))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 1))
       @field2.required?.should be_false
-      @field3 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 4))
+      @field3 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 4))
       @field3.required?.should be_false
     end
 
     it "should be true" do
-      @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 2))
+      @field1 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 2))
       @field1.required?.should be_true
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 3))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 3))
       @field2.required?.should be_true
     end
   end
@@ -121,20 +121,20 @@ describe PdftkForms::Field do
     end
 
     it "should be false" do
-      @field1 = PdftkForms::Field.new(@attributes)
+      @field1 = ActivePdftk::Field.new(@attributes)
       @field1.multiline?.should be_false
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 4096))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 4096))
       @field2.multiline?.should be_false
-      @field3 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 4095))
+      @field3 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 4095))
       @field3.multiline?.should be_false
-      @field3 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 8192))
+      @field3 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 8192))
       @field3.multiline?.should be_false
     end
 
     it "should be true" do
-      @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 4096))
+      @field1 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 4096))
       @field1.multiline?.should be_true
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 12288))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 12288))
       @field2.multiline?.should be_true
     end
   end
@@ -150,18 +150,18 @@ describe PdftkForms::Field do
     end
 
     it "should be false" do
-      @field1 = PdftkForms::Field.new(@attributes)
+      @field1 = ActivePdftk::Field.new(@attributes)
       @field1.push_button?.should be_false
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 32768))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 32768))
       @field2.push_button?.should be_false
-      @field3 = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 131072))
+      @field3 = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 131072))
       @field3.push_button?.should be_false
     end
 
     it "should be true" do
-      @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 65536))
+      @field1 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 65536))
       @field1.push_button?.should be_true
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 196608))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 196608))
       @field2.push_button?.should be_true
     end
   end
@@ -177,20 +177,20 @@ describe PdftkForms::Field do
     end
 
     it "should be false" do
-      @field1 = PdftkForms::Field.new(@attributes)
+      @field1 = ActivePdftk::Field.new(@attributes)
       @field1.radio_button?.should be_false
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 65536))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 65536))
       @field2.radio_button?.should be_false
-      @field3 = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 32767))
+      @field3 = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 32767))
       @field3.radio_button?.should be_false
-      @field4 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 98304))
+      @field4 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 98304))
       @field4.radio_button?.should be_false
     end
 
     it "should be true" do
-      @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 32768))
+      @field1 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 32768))
       @field1.radio_button?.should be_true
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 49153))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 49153))
       @field2.radio_button?.should be_true
     end
   end
@@ -206,16 +206,16 @@ describe PdftkForms::Field do
     end
 
     it "should be false" do
-      @field1 = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 65536))
+      @field1 = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 65536))
       @field1.check_box?.should be_false
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 32768))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 32768))
       @field2.check_box?.should be_false
     end
 
     it "should be true" do
-      @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 0))
+      @field1 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 0))
       @field1.check_box?.should be_true
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 32767))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 32767))
       @field2.check_box?.should be_true
     end
   end
@@ -231,136 +231,136 @@ describe PdftkForms::Field do
     end
 
     it "should be false" do
-      @field1 = PdftkForms::Field.new(@attributes)
+      @field1 = ActivePdftk::Field.new(@attributes)
       @field1.no_export?.should be_false
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 3))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 3))
       @field2.no_export?.should be_false
-      @field3 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 8))
+      @field3 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 8))
       @field3.no_export?.should be_false
     end
 
     it "should be true" do
-      @field1 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 4))
+      @field1 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 4))
       @field1.no_export?.should be_true
-      @field2 = PdftkForms::Field.new(@attributes.merge('FieldFlags' => 6))
+      @field2 = ActivePdftk::Field.new(@attributes.merge('FieldFlags' => 6))
       @field2.no_export?.should be_true
     end
   end
 
   context "password?" do
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldFlags' => 8192})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldFlags' => 8192})
       @field1.password?.should be_true
     end
   end
 
   context "file?" do
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldFlags' => 1048576})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldFlags' => 1048576})
       @field1.file?.should be_true
     end
   end
 
   context "no_spell_check?" do
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldFlags' => 4194304})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldFlags' => 4194304})
       @field1.no_spell_check?.should be_true
     end
   end
 
   context "no_scroll?" do
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldFlags' => 8388608})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldFlags' => 8388608})
       @field1.no_scroll?.should be_true
     end
   end
 
   context "comb?" do
     it "should be false" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldFlags' => 16777216})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldFlags' => 16777216})
       @field1.comb?.should be_false
     end
     
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldMaxLength' => 100, 'FieldFlags' => 16777216})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldMaxLength' => 100, 'FieldFlags' => 16777216})
       @field1.comb?.should be_true
     end
   end
 
   context "rich_text?" do
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldFlags' => 33554432})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Text', 'FieldFlags' => 33554432})
       @field1.rich_text?.should be_true
     end
   end
 
   context "multiselect?" do
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 2097152})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 2097152})
       @field1.multiselect?.should be_true
     end
   end
 
   context "combo_box?" do
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 131072})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 131072})
       @field1.combo_box?.should be_true
     end
   end
 
   context "list_box?" do
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 131071})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 131071})
       @field1.list_box?.should be_true
     end
   end
 
   context "editable_list?" do
     it "should be false" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 262144})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 262144})
       @field1.editable_list?.should be_false
     end
 
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 393216})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 393216})
       @field1.editable_list?.should be_true
     end
   end
 
   context "sorted_list?" do
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 524288})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 524288})
       @field1.sorted_list?.should be_true
     end
   end
 
   context "commit_on_change?" do
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 67108864})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Choice', 'FieldFlags' => 67108864})
       @field1.commit_on_change?.should be_true
     end
   end
 
   context "no_toggle_off?" do
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Button', 'FieldFlags' => 49152})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Button', 'FieldFlags' => 49152})
       @field1.no_toggle_off?.should be_true
     end
 
     it "should be false" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Button', 'FieldFlags' => 81920})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Button', 'FieldFlags' => 81920})
       @field1.no_toggle_off?.should be_false
     end
   end
 
   context "in_unison?" do
     it "should be true" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Button', 'FieldFlags' => 33587200})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Button', 'FieldFlags' => 33587200})
       @field1.in_unison?.should be_true
     end
 
     it "should be false" do
-      @field1 = PdftkForms::Field.new({'FieldName' => 'test', 'FieldType' => 'Button', 'FieldFlags' => 33652736})
+      @field1 = ActivePdftk::Field.new({'FieldName' => 'test', 'FieldType' => 'Button', 'FieldFlags' => 33652736})
       @field1.in_unison?.should be_false
     end
   end
@@ -375,54 +375,54 @@ describe PdftkForms::Field do
     end
 
     it "should reutrn check_box" do
-      @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button'))
+      @field = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Button'))
       @field.field_type.should == "check_box"
     end
 
     it "should return radio_button" do
-      @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 32768))
+      @field = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 32768))
       @field.field_type.should == "radio_button"
     end
 
     it "should return push_button" do
-      @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 65536))
+      @field = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Button', 'FieldFlags' => 65536))
       @field.field_type.should == "push_button"
     end
 
     it "should return text_field" do
-      @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Text'))
+      @field = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Text'))
       @field.field_type.should == "text_field"
     end
 
     it "should return text_area" do
-      @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Text', 'FieldFlags' => 4096))
+      @field = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Text', 'FieldFlags' => 4096))
       @field.field_type.should == "text_area"
     end
 
     it "should return password_field" do
-      @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Text', 'FieldFlags' => 8192))
+      @field = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Text', 'FieldFlags' => 8192))
       @field.field_type.should == "password_field"
     end
 
     it "should return file_field" do
-      @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Text', 'FieldFlags' => 1048576))
+      @field = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Text', 'FieldFlags' => 1048576))
       @field.field_type.should == "file_field"
     end
 
     it "should return select" do
-      @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Choice'))
+      @field = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Choice'))
       @field.field_type.should == "select"
     end
 
     it "should return lowercased FieldType" do
-      @field = PdftkForms::Field.new(@attributes.merge('FieldType' => 'Something'))
+      @field = ActivePdftk::Field.new(@attributes.merge('FieldType' => 'Something'))
       @field.field_type.should == "something"
     end
   end
 
   context "value" do
     before do
-      @field = PdftkForms::Field.new(
+      @field = ActivePdftk::Field.new(
         'FieldName' => 'test',
         'FieldType' => 'Text',
         'FieldValue' => '',
@@ -462,7 +462,7 @@ describe PdftkForms::Field do
 
   context "setting value on readonly" do
     before do
-      @field = PdftkForms::Field.new(
+      @field = ActivePdftk::Field.new(
         'FieldName' => 'test',
         'FieldType' => 'Text',
         'FieldValue' => '',
@@ -482,7 +482,7 @@ describe PdftkForms::Field do
   context 'nil initial value' do
     context 'no FieldValue data' do
       before do
-        @field = PdftkForms::Field.new(
+        @field = ActivePdftk::Field.new(
           'FieldName' => 'test',
           'FieldType' => 'Text',
           'FieldFlags' => 2
@@ -499,7 +499,7 @@ describe PdftkForms::Field do
 
     context 'explicity nil FieldValue data' do
       before do
-        @field = PdftkForms::Field.new(
+        @field = ActivePdftk::Field.new(
           'FieldName' => 'test',
           'FieldType' => 'Text',
           'FieldValue' => nil,

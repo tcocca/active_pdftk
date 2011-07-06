@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe PdftkForms::Fdf do
+describe ActivePdftk::Fdf do
   context "multiple fields" do
     before do
-      @fdf = PdftkForms::Fdf.new :field1 => 'fieldvalue1', :other_field => 'some other value'
+      @fdf = ActivePdftk::Fdf.new :field1 => 'fieldvalue1', :other_field => 'some other value'
       @fdf_text = @fdf.to_s
     end
     
@@ -20,7 +20,7 @@ describe PdftkForms::Fdf do
   
   context "quoting fields" do
     before do
-      @fdf = PdftkForms::Fdf.new :field1 => 'field(va)lue1'
+      @fdf = ActivePdftk::Fdf.new :field1 => 'field(va)lue1'
       @fdf_text = @fdf.to_s
     end
     
@@ -30,7 +30,7 @@ describe PdftkForms::Fdf do
   
   context "multi-value fields" do
     before do
-      @fdf = PdftkForms::Fdf.new :field1 => %w(one two)
+      @fdf = ActivePdftk::Fdf.new :field1 => %w(one two)
       @fdf_text = @fdf.to_s
     end
     
