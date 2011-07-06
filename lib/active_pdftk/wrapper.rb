@@ -203,8 +203,6 @@ module ActivePdftk
       @call.pdftk(options.merge(:input => template, :operation => {:attach_files => files}))
     end
 
-    # TODO: add support for nil directory
-    #
     # Unpack attached file from the template pdf.
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
     # @param [String] directory location to unpack the files into.
@@ -212,7 +210,8 @@ module ActivePdftk
     # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return +Dir.tmpdir+.
     # @example
     #   unpack_files('a.pdf', '~/Desktop') # will unpack the files to the desktop and return '~/Desktop'
-    def unpack_files(template, directory)
+    #   unpack_files('a.pdf') # will unpack the files to Dir.tmpdir and return Dir.tmpdir
+    def unpack_files(template, directory = nil)
       @call.pdftk(:input => template, :operation => :unpack_files, :output => directory)
     end
 
