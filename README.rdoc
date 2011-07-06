@@ -8,17 +8,12 @@ Currently this gem is intended to make the following much easier with pdftk:
   3. Get all the form fields details (type, readonly, ...) in a structured way to use them within other frameworks (such as Rails).
   4. More to come through specifics adapters...
 
-Library references : http://rubydoc.info/gems/active_pdftk
-
 Official Repository : https://github.com/tcocca/active_pdftk
+
+Library references : http://rubydoc.info/gems/active_pdftk
 
 Issue tracker : https://github.com/tcocca/active_pdftk/issues
 
-== Props
-
-Props to this gem go out to jkraemer (Jens Krämer) for creating https://github.com/jkraemer/pdf-forms and devfu (Dev Fu!) for creating https://github.com/devfu/pdftk.
-
-This gem is based on the work of those two projects and expands upon their functionality.
 
 == Installation
 
@@ -41,6 +36,7 @@ or with Bundler :
 or in a old rails 2.3.x app
 
   config.gem 'active_pdftk'
+
 
 == Usage
 
@@ -108,6 +104,7 @@ A full explanation of this DSL could be read in +ActivePdftk::Call+ reference.
 
 #TODO write a more explicit, but concise paragraph.
 
+
 == Note on Patches/Pull Requests
 
 * Fork the project.
@@ -123,6 +120,14 @@ A full explanation of this DSL could be read in +ActivePdftk::Call+ reference.
 
 Copyright (c) 2011 Tom Cocca. See LICENSE for details.
 
-=== Contributors
+
+== Contributors
 
 Marco ( https://github.com/elmatou ) - Thanks for contributing so much to the re-write of this gem and for adding most of the support for other methods in the Call class.
+
+
+== Props
+
+Props to this gem go out to jkraemer (Jens Krämer) for creating https://github.com/jkraemer/pdf-forms and devfu (Dev Fu!) for creating https://github.com/devfu/pdftk.
+
+This gem was originally based on the work of those two projects and greatly expands upon their functionality.
