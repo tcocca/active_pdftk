@@ -87,30 +87,25 @@ module ActivePdftk
     end
 
     # Save +self+ to a new pdf file.
-    # if no output is given (or nil), the pdf will be saved in the same directory of the template
-    # but extension will be changed from '.pdf' to '_filled.pdf'.
-    #
+    # If no output is given (or nil), the pdf will be written and returned as StringIO which can be saved.
     # @param [String, File, Tempfile, StringIO, nil] output where the PDF should be saved.
     # @param [Hash] options to apply to the output.
-
-    # @return [String, File, Tempfile, StringIO, nil] Corresponding to the output argument, or false if the command fails but no error is raised.
+    # @return [String, File, Tempfile, StringIO] Corresponding to the output argument.
     #
     # @example
-    #   bic.set(..., ...) #=> ...
-    #   bic.save #=> 'bic_filled.pdf'
+    #   bic.set(..., ...) #=> Before you call #save you must set the values of the form fields
+    #   bic.save #=> StringIO
     #   bic.save('bic.custom.pdf') #=> 'bic.custom.pdf'
     def save(output = nil, options = {})
-      output = @template.split('.pdf').first + '_filled.pdf' if output.nil?
+      output = StringIO.new if output.nil?
       @pdftk.fill_form(@template, to_h, options.merge(:output => output))
       output
     end
 
-    # Save +self+ to the current PDF file
+    # Save +self+ to the current PDF file.
     #
     # @param [Hash] options to apply to the output.
-
     # @return [String, File, Tempfile, StringIO, nil] return the modified template.
-    #
     # @example
     #   bic = ActivePdftk::Form.new('bic.pdf')
     #   bic.save! #=> 'bic.pdf'

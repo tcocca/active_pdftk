@@ -47,7 +47,8 @@ For form handling use +ActivePdftk::Form+ :
 
   bic = ActivePdftk::Form.new('bic.pdf')
   bic.set('first_field', 'SomeString') #=> 'SomeString'
-  bic.save #=> 'bic_filled.pdf'
+  bic.save #=> StringIO
+  bic.save('/path/to/filled.pdf') #=> '/path/to/filled.pdf'
 
 it is quite straightforward !
 

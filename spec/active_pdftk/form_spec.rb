@@ -397,17 +397,34 @@ describe ActivePdftk::Form do
       end
     end
 
-    context "save/export :" do
+    context "save" do
       # TODO set exeception and write test for pdftk writting error.
       it "save should create the pdf with '_filled' file_name" do
         # TODO check presence of the file
-        @form.save.should == path_to_pdf('fields_filled.pdf')
+        @form.save.should be_kind_of(StringIO)
       end
 
       it "save should create pdf with specific path" do
         @form.save('/tmp/pdftk_test.pdf').should == '/tmp/pdftk_test.pdf'
       end
+    end
 
+    context "save!" do
+      before do
+        require "ftools"
+        File.copy(path_to_pdf('fields.pdf'), path_to_pdf('fields_modified.pdf'))
+        @mtime = File.mtime(path_to_pdf('fields_modified.pdf'))
+        @form = ActivePdftk::Form.new(path_to_pdf('fields_modified.pdf'))
+      end
+
+      it "should return the modified template" do
+        @form.save!.should == path_to_pdf('fields_modified.pdf')
+        File.mtime(path_to_pdf('fields_modified.pdf')).should > @mtime
+        File.unlink(path_to_pdf('fields_modified.pdf')).should == 1
+      end
+    end
+
+    context "fdf/xfdf" do
       it "should return a ActivePdftk::Fdf object" do
         @form.to_fdf.should be_kind_of(ActivePdftk::Fdf)
       end
