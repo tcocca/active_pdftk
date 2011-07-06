@@ -192,5 +192,19 @@ describe ActivePdftk::Wrapper do
         File.unlink(path_to_pdf('shuffle.pdf')).should == 1
       end
     end
+
+    context "unpack_files" do
+      it "should return Dir.tmpdir" do
+        @pdftk.attach_files(path_to_pdf('fields.pdf'), [path_to_pdf('attached_file.txt')], :output => path_to_pdf('attached.pdf'))
+        @pdftk.unpack_files(path_to_pdf('attached.pdf')).should == Dir.tmpdir
+        File.unlink(path_to_pdf('attached.pdf')).should == 1
+      end
+
+      it "should return the specified output directory" do
+        @pdftk.attach_files(path_to_pdf('fields.pdf'), [path_to_pdf('attached_file.txt')], :output => path_to_pdf('attached.pdf'))
+        @pdftk.unpack_files(path_to_pdf('attached.pdf'), path_to_pdf(nil)).should == path_to_pdf(nil)
+        File.unlink(path_to_pdf('attached.pdf')).should == 1
+      end
+    end
   end
 end
