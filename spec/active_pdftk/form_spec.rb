@@ -399,7 +399,7 @@ describe ActivePdftk::Form do
 
     context "save" do
       # TODO set exeception and write test for pdftk writting error.
-      it "save should create the pdf with '_filled' file_name" do
+      it "save should save the form as StringIO" do
         # TODO check presence of the file
         @form.save.should be_kind_of(StringIO)
       end
@@ -410,18 +410,17 @@ describe ActivePdftk::Form do
     end
 
     context "save!" do
-      before do
-        require "ftools"
-        File.copy(path_to_pdf('fields.pdf'), path_to_pdf('fields_modified.pdf'))
-        @mtime = File.mtime(path_to_pdf('fields_modified.pdf'))
-        @form = ActivePdftk::Form.new(path_to_pdf('fields_modified.pdf'))
+      it "should return the modified template as StringIO if @template is a string" do
+        @form.save!.should be_kind_of(StringIO)
       end
 
-      it "should return the modified template" do
-        @form.save!.should == path_to_pdf('fields_modified.pdf')
-        File.mtime(path_to_pdf('fields_modified.pdf')).should > @mtime
-        File.unlink(path_to_pdf('fields_modified.pdf')).should == 1
+      it "should return StringIO if the template is StringIO" do
+        stringio = StringIO.new(path_to_pdf('fields.pdf'))
+        stringio.rewind
+        @form = ActivePdftk::Form.new(stringio)
+        @form.save!.should be_kind_of(StringIO)
       end
+
     end
 
     context "fdf/xfdf" do

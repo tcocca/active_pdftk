@@ -108,9 +108,15 @@ module ActivePdftk
     # @return [String, File, Tempfile, StringIO, nil] return the modified template.
     # @example
     #   bic = ActivePdftk::Form.new('bic.pdf')
-    #   bic.save! #=> 'bic.pdf'
+    #   bic.save! #=> StringIO # Can't write the output to the input, pdftk will raise an error
+    #   bic = ActivePdftk::Form.new(StringIO.new(File.read('bic.pdf')))
+    #   bic.save! #=> StringIO
     def save!(options = {})
-      save(@template, options)
+      if @template.is_a?(String)
+        save(nil, options)
+      else
+        save(@template, options)
+      end
     end
 
     # Create the fdf file corresponding to the current state of +self+.
