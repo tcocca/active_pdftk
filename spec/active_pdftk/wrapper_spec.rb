@@ -14,6 +14,7 @@ def get_input(input_type)
   when :tempfile
     t = Tempfile.new('specs')
     t.write(File.read(path_to_pdf('fields.pdf')))
+    t
   when :stringio
     StringIO.new(File.read(path_to_pdf('fields.pdf')))
   end
@@ -24,7 +25,7 @@ def get_output(output_type)
   when :path
     path_to_pdf('output.spec')
   when :file
-    File.new(path_to_pdf('output.spec'), 'r+')
+    File.new(path_to_pdf('output.spec'), 'w+')
   when :tempfile
     Tempfile.new('specs2')
   when :stringio
@@ -87,8 +88,11 @@ describe ActivePdftk::Wrapper do
             end
 
             after(:each) do
-              @call_output.unlink rescue nil
-              @call_output = nil
+              if @call_output.is_a?(String)
+                File.unlink(@call_output)
+              elsif @call_output.is_a?(File)
+                File.unlink(@call_output.path)
+              end
             end
           end
         end
