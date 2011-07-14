@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 inputs = [:path, :hash, :file, :tempfile, :stringio]
-outputs = [:path, :file, :tempfile, :stringio]
+outputs = [:path, :file, :tempfile, :stringio, :nil]
 
 def get_input(input_type)
   case input_type
@@ -29,6 +29,8 @@ def get_output(output_type)
     Tempfile.new('specs2')
   when :stringio
     StringIO.new()
+  when :nil
+    nil
   end
 end
 
