@@ -1,3 +1,5 @@
+require 'tempfile'
+
 module ActivePdftk
   # Represents a fillable form on a particular PDF.
   # It should be your preferred abstraction layer, for editable form content
@@ -98,7 +100,16 @@ module ActivePdftk
     #   bic.save('bic.custom.pdf') #=> 'bic.custom.pdf'
     def save(output = nil, options = {})
       output = StringIO.new if output.nil?
-      @pdftk.fill_form(@template, to_h, options.merge(:output => output))
+      data = @pdftk.xfdf_support? ? Xfdf.new(to_h) : Fdf.new(to_h)
+      if @template.is_a?(String)
+        data_input = StringIO.new(data.to_s)
+      else
+        t = Tempfile.new('fdf_data')
+        t.write(data.to_s)
+        t.close
+        data_input = t.path
+      end
+      @pdftk.fill_form(@template, data_input, options.merge(:output => output))
       output
     end
 

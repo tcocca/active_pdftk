@@ -415,12 +415,11 @@ describe ActivePdftk::Form do
       end
 
       it "should return StringIO if the template is StringIO" do
-        stringio = StringIO.new(path_to_pdf('fields.pdf'))
+        stringio = StringIO.new(File.read(path_to_pdf('fields.pdf')))
         stringio.rewind
         @form = ActivePdftk::Form.new(stringio)
         @form.save!.should be_kind_of(StringIO)
       end
-
     end
 
     context "fdf/xfdf" do
