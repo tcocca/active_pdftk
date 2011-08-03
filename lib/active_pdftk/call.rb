@@ -187,7 +187,10 @@ module ActivePdftk
         cmd.insert(0, "cd #{Dir.tmpdir} && ")
       end
       Open3.popen3(cmd) do |stdin, stdout, stderr|
-        stdin.puts @input.read if @input
+        if @input
+          @input.rewind
+          stdin.puts @input.read
+        end
         stdin.close
         @output.puts stdout.read if @output && !@output.is_a?(String)
         raise(CommandError, {:stderr => @error, :cmd => cmd}) unless (@error = stderr.read).empty?

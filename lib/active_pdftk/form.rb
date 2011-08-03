@@ -101,15 +101,19 @@ module ActivePdftk
     def save(output = nil, options = {})
       output = StringIO.new if output.nil?
       data = @pdftk.xfdf_support? ? Xfdf.new(to_h) : Fdf.new(to_h)
-      if @template.is_a?(String)
-        data_input = StringIO.new(data.to_s)
-      else
-        t = Tempfile.new('fdf_data')
-        t.write(data.to_s)
-        t.close
-        data_input = t.path
+      begin
+        if @template.is_a?(String)
+          data_input = StringIO.new(data.to_s)
+        else
+          t = Tempfile.new('fdf_data')
+          t.write(data.to_s)
+          data_input = t.path
+          t.close
+        end
+        @pdftk.fill_form(@template, data_input, options.merge(:output => output))
+      ensure
+        t.unlink if t
       end
-      @pdftk.fill_form(@template, data_input, options.merge(:output => output))
       output
     end
 

@@ -162,13 +162,6 @@ module ActivePdftk
     # @example
     #   fill_form('~/Desktop/form.pdf', {'field_1' => 'tom', 'field_2' => 'marco'}) # returns +StringIO+ of the pdf with the form fields filled in
     #   fill_form('~/Desktop/form.pdf', {'field_1' => 'tom', 'field_2' => 'marco'}, :output => '~/Desktop/filled.pdf', :options => {:flatten => false}) # writes the pdf with the form fields filled in and flattened so that the fields can not be edited to '~/Desktop/filled.pdf'
-=begin
-    def fill_form(template, data = {}, options ={})
-      input = @call.xfdf_support? ? Xfdf.new(data) : Fdf.new(data)
-      @call.pdftk(options.merge(:input => template, :operation => {:fill_form => StringIO.new(input.to_s)}))
-    end
-=end
-
     def fill_form(template, fdf, options ={})
       @call.pdftk(options.merge(:input => template, :operation => {:fill_form => fdf}))
     end
