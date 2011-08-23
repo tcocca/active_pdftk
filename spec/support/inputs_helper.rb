@@ -1,5 +1,5 @@
 def path_to_pdf(filename)
-  file = File.join(File.dirname(__FILE__), '../', 'test_pdfs')
+  file = File.join(File.dirname(__FILE__), '../', 'fixtures')
   file = File.join(file, "#{filename}") unless filename.nil?
   file
 end
