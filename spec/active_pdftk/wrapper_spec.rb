@@ -50,8 +50,6 @@ describe ActivePdftk::Wrapper do
     end
   end
 
-
-
   shared_examples "a working command" do
     it "should return a #{@output.nil? ? StringIO : @output.class}" do
       @call_output.should be_kind_of(@output.nil? ? StringIO : @output.class)
@@ -91,6 +89,17 @@ describe ActivePdftk::Wrapper do
           end
         end
 
+        describe "#fill_form" do
+          it_behaves_like "a working command" do
+            before(:all) { @example_expect = File.new(path_to_pdf('fields.fill_form')).read }
+            before(:each) { @call_output = @pdftk.fill_form(@input, path_to_pdf('fields.fdf.spec'), :output => @output) }
+          end
+          it_behaves_like "a working command" do
+            before(:all) { @example_expect = File.new(path_to_pdf('fields.fill_form')).read }
+            before(:each) { @call_output = @pdftk.fill_form(@input, path_to_pdf('fields.xfdf.spec'), :output => @output) }
+          end
+        end
+
         describe "#generate_fdf" do
           it_behaves_like "a working command" do
             before(:all) { @example_expect = File.new(path_to_pdf('fields.fdf')).read }
@@ -105,61 +114,56 @@ describe ActivePdftk::Wrapper do
           end
         end
 
-        describe "#attach_file", :unless => output_type == :nil  do
+        describe "#update_info" do
+          it_behaves_like "a working command" do
+            before(:all) { @example_expect = File.new(path_to_pdf('fields.update_info')).read }
+            before(:each) { @call_output = @pdftk.update_info(@input, path_to_pdf('fields.data.spec'), :output => @output) }
+          end
+        end
+
+        describe "#attach_file" do
           it_behaves_like "a working command"do
             before(:all) { @example_expect = File.new(path_to_pdf('fields.attach')).read }
             before(:each) { @call_output = @pdftk.attach_files(@input, [path_to_pdf('fields.data'), path_to_pdf('fields.fdf')], :output => @output) }
           end
         end
 
-        #cat (partially supported)
-        #shuffle (partially supported)
-        #burst (fully supported)
-        #
-        #fill_form (fully supported)
-        #background (fully supported)
-        #multibackground (fully supported)
-        #stamp (fully supported)
-        #multistamp (fully supported)
-        #
-        #update_info (fully supported)
-        #update_info_utf8 (fully supported)
-        #unpack_files (fully supported)
+        describe "#unpack_files", :if => output_type == :path do
+          pending "implementation"
+        end
+
+
+        describe "#background" do
+          it_behaves_like "a working command"do
+            before(:all) { @example_expect = File.new(path_to_pdf('fields.background')).read }
+            before(:each) { @call_output = @pdftk.background(@input, path_to_pdf('a.pdf'), :output => @output) }
+          end
+
+          pending "spec multibackground also"
+        end
+
+        describe "#stamp" do
+          it_behaves_like "a working command"do
+            before(:all) { @example_expect = File.new(path_to_pdf('fields.stamp')).read }
+            before(:each) { @call_output = @pdftk.stamp(@input, path_to_pdf('a.pdf'), :output => @output) }
+          end
+          pending "check if the output is really a stamp & spec multistamp also"
+        end
+
+        describe "#cat" do
+          pending "implementation"
+        end
+
+        describe "#shuffle" do
+          pending "implementation"
+        end
+
+        describe "#burst", :if => output_type == :path do
+          pending "implementation"
+        end
 
       end
 
-      #context "fill_form" do
-      #  it "should fill the field of the pdf" do
-      #    @pdftk.fill_form(path_to_pdf('fields.pdf'), {'text_not_required' => 'Running specs'}, :output => path_to_pdf('filled_spec.pdf'))
-      #    temp = @pdftk.dump_data_fields(path_to_pdf('filled_spec.pdf'))
-      #    temp.rewind
-      #    temp.read.should match(/FieldValue: Running specs/)
-      #    File.unlink(path_to_pdf('filled_spec.pdf')).should == 1
-      #  end
-      #end
-      #
-      #context "update_info" do
-      #  it "should update file info of the pdf" do
-      #    @s_info = @pdftk.dump_data(path_to_pdf('fields.pdf'))
-      #    @s_info.string = @s_info.string.gsub('InfoValue: Untitled', 'InfoValue: Data Updated')
-      #    @pdftk.update_info(path_to_pdf('fields.pdf'), @s_info, :output => @s_out = StringIO.new)
-      #    @s_out.rewind
-      #    @pdftk.dump_data(@s_out).string.should == @s_info.string
-      #  end
-      #end
-      #
-      #context "attach_files/unpack_files" do
-      #  it "should bind the file ine the pdf" do
-      #    @pdftk.attach_files(path_to_pdf('fields.pdf'), path_to_pdf('attached_file.txt'), :output => path_to_pdf('fields.pdf.attached'))
-      #    File.unlink(path_to_pdf('attached_file.txt')).should == 1
-      #  end
-      #
-      #  it "should retrieve the file" do
-      #    @pdftk.unpack_files(path_to_pdf('fields.pdf.attached'), path_to_pdf(''))
-      #    File.unlink(path_to_pdf('fields.pdf.attached')).should == 1
-      #  end
-      #end
-      #
       #context "burst" do
       #  it "should call #pdtk on @call" do
       #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst})
@@ -182,56 +186,6 @@ describe ActivePdftk::Wrapper do
       #  it "should put a file in the specified path" do
       #    @pdftk.burst(path_to_pdf('fields.pdf'), :output => path_to_pdf('page_%02d.pdf').to_s)
       #    File.unlink(path_to_pdf('page_01.pdf')).should == 1
-      #  end
-      #end
-      #
-      #context "background" do
-      #  it "should call #pdtk on @call" do
-      #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:background => path_to_pdf('b.pdf')}})
-      #    @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'))
-      #    @pdftk = ActivePdftk::Wrapper.new
-      #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:background => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
-      #    @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :options => {:encrypt  => :'40bit'})
-      #  end
-      #
-      #  it "should output the generated pdf" do
-      #    @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :output => path_to_pdf('background.pdf'))
-      #    File.unlink(path_to_pdf('background.pdf')).should == 1
-      #  end
-      #end
-      #
-      #context "multibackground" do
-      #  it "should call #pdtk on @call" do
-      #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multibackground => path_to_pdf('b.pdf')}})
-      #    @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :multi => true)
-      #    @pdftk = ActivePdftk::Wrapper.new
-      #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multibackground => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
-      #    @pdftk.background(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :multi => true, :options => {:encrypt  => :'40bit'})
-      #  end
-      #end
-      #
-      #context "stamp" do
-      #  it "should call #pdtk on @call" do
-      #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:stamp => path_to_pdf('b.pdf')}})
-      #    @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'))
-      #    @pdftk = ActivePdftk::Wrapper.new
-      #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:stamp => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
-      #    @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :options => {:encrypt  => :'40bit'})
-      #  end
-      #
-      #  it "should output the generated pdf" do
-      #    @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :output => path_to_pdf('stamp.pdf'))
-      #    File.unlink(path_to_pdf('stamp.pdf')).should == 1
-      #  end
-      #end
-      #
-      #context "multistamp" do
-      #  it "should call #pdtk on @call" do
-      #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multistamp => path_to_pdf('b.pdf')}})
-      #    @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :multi => true)
-      #    @pdftk = ActivePdftk::Wrapper.new
-      #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('a.pdf'), :operation => {:multistamp => path_to_pdf('b.pdf')}, :options => {:encrypt  => :'40bit'}})
-      #    @pdftk.stamp(path_to_pdf('a.pdf'), path_to_pdf('b.pdf'), :multi => true, :options => {:encrypt  => :'40bit'})
       #  end
       #end
       #

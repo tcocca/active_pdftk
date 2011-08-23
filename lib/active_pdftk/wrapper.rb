@@ -154,16 +154,16 @@ module ActivePdftk
 
     # Fill out the fields of a form on the template pdf.
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
-    # @param [Hash] data A Hash of key/value pairs of field names and field values.
+    # @param [String, File, Tempfile, StringIO] data is the Fdf or Xfdf file of key/value pairs of field names and field values.
     # @param [Hash] options is a hash containing statements for the wrapper.
     # @macro see_options
     # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
     # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
     # @example
-    #   fill_form('~/Desktop/form.pdf', {'field_1' => 'tom', 'field_2' => 'marco'}) # returns +StringIO+ of the pdf with the form fields filled in
-    #   fill_form('~/Desktop/form.pdf', {'field_1' => 'tom', 'field_2' => 'marco'}, :output => '~/Desktop/filled.pdf', :options => {:flatten => false}) # writes the pdf with the form fields filled in and flattened so that the fields can not be edited to '~/Desktop/filled.pdf'
-    def fill_form(template, fdf, options ={})
-      @call.pdftk(options.merge(:input => template, :operation => {:fill_form => fdf}))
+    #   fill_form('~/Desktop/form.pdf', '~/Desktop/form.xfdf') # returns +StringIO+ of the pdf with the form fields filled in
+    #   fill_form('~/Desktop/form.pdf', '~/Desktop/form.fdf', :output => '~/Desktop/filled.pdf', :options => {:flatten => false}) # writes the pdf with the form fields filled in and flattened so that the fields can not be edited to '~/Desktop/filled.pdf'
+    def fill_form(template, data, options ={})
+      @call.pdftk(options.merge(:input => template, :operation => {:fill_form => data}))
     end
 
     # Dump the template file data.

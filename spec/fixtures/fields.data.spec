@@ -1,0 +1,13 @@
+InfoKey: Creator
+InfoValue: ActivePdftk
+InfoKey: Title
+InfoValue: ActivePdftk
+InfoKey: Producer
+InfoValue: ActivePdftk
+InfoKey: ModDate
+InfoValue: D:20110620202530-04'00'
+InfoKey: CreationDate
+InfoValue: D:20110314125114-04'00'
+PdfID0: 6cac1734f454cee9944c0531b475f11
+PdfID1: 8351c12604849c09f4031118d632bc
+NumberOfPages: 1

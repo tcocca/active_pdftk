@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8"?><xfdf xmlns="http://ns.adobe.com/xfdf/" xml:space="preserve"><fields><field name="text_not_required"><value>text_not_required</value></field><field name="text_required"><value>text_required</value></field></fields></xfdf>
