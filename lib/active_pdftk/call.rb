@@ -302,9 +302,15 @@ module ActivePdftk
     # @note Should work on all unix systems (Linux, Mac Os X)
     #
     def locate_pdftk
-      auto_path = %x{locate pdftk | grep "/bin/pdftk"}.strip.split("\n").first
+      auto_path = nil
+      %x{locate -qer "/pdftk$"}.strip.split("\n").each do |p|
+        if File.executable?(p)
+          auto_path = p
+          break
+        end
+      end
       #TODO find a valid Win32 procedure (not in my top priorities)
-      (auto_path.nil? || auto_path.empty?) ? nil : auto_path
+      auto_path
     end
 
     private
