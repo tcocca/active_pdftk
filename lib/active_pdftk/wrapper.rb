@@ -173,9 +173,9 @@ module ActivePdftk
     # @example
     #   dump_data('~/Desktop/a.pdf') # returns StringIO of the output
     #   dump_data('~/Desktop/a.pdf', :output => '~/Desktop/data.txt) # writes the data file to '~/Desktop/data.txt' and returns '~/Desktop/data.txt'
-    def dump_data(template)
+    def dump_data(template, options = {})
       cmd = @call.utf8_support? ? :dump_data_utf8 : :dump_data
-      @call.pdftk(:input => template, :operation => cmd)
+      @call.pdftk(options.merge(:input => template, :operation => cmd))
     end
 
     # Modify the metadata info of the template pdf.
