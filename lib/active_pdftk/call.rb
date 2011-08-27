@@ -302,15 +302,9 @@ module ActivePdftk
     # @note Should work on all unix systems (Linux, Mac Os X)
     #
     def locate_pdftk
-      auto_path = nil
-      %x{locate -qer "/pdftk$"}.strip.split("\n").each do |p|
-        if File.executable?(p)
-          auto_path = p
-          break
-        end
-      end
+      auto_path = %x{locate pdftk | grep "/bin/pdftk"}.strip.split("\n").first
       #TODO find a valid Win32 procedure (not in my top priorities)
-      auto_path
+      (auto_path.nil? || auto_path.empty?) ? nil : auto_path
     end
 
     private
@@ -365,6 +359,7 @@ module ActivePdftk
       operation = {operation.to_sym => nil} if (operation.is_a?(String) || operation.is_a?(Symbol))
       operation = operation.to_a.flatten(1)
       check_statement(abilities, operation.first)
+      @operation_name = operation.first
       if [:cat, :shuffle].include?(operation.first)
         if operation.last.nil? || operation.last.empty? || !operation.last.is_a?(Array)
           raise(InvalidOptions, {:cmd => operation.first})
@@ -404,7 +399,11 @@ module ActivePdftk
       case value
         when NilClass
           @output = StringIO.new
-          ""
+          unless [:burst, :unpack_files].include?(@operation_name)
+            "output -"
+          else
+            ""
+          end
         when String
           @output = value
           "output #{value}"

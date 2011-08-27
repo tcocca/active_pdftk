@@ -89,11 +89,11 @@ describe ActivePdftk::Wrapper do
 
         describe "#fill_form" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.fill_form')).read }
+            before(:all) { @example_expect = File.new(path_to_pdf('fields.fill_form.pdf')).read }
             before(:each) { @call_output = @pdftk.fill_form(@input, path_to_pdf('fields.fdf.spec'), :output => @output) }
           end
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.fill_form')).read }
+            before(:all) { @example_expect = File.new(path_to_pdf('fields.fill_form.pdf')).read }
             before(:each) { @call_output = @pdftk.fill_form(@input, path_to_pdf('fields.xfdf.spec'), :output => @output) }
           end
         end
@@ -116,15 +116,40 @@ describe ActivePdftk::Wrapper do
 
         describe "#update_info" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.update_info')).read }
+            before(:all) { @example_expect = File.new(path_to_pdf('fields.update_info.pdf')).read }
             before(:each) { @call_output = @pdftk.update_info(@input, path_to_pdf('fields.data.spec'), :output => @output) }
           end
         end
 
-        describe "#attach_file" do
-          it_behaves_like "a working command"do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.attach')).read }
-            before(:each) { @call_output = @pdftk.attach_files(@input, [path_to_pdf('fields.data'), path_to_pdf('fields.fdf')], :output => @output) }
+        describe "#attach_files" do
+          before(:all) { @attachment_size = File.size(path_to_pdf('attached_file.txt')) }
+          before(:each) { @call_output = @pdftk.attach_files(@input, [path_to_pdf('attached_file.txt')], :output => @output) }
+          it "should bind the file ine the pdf" do
+            if @call_output.is_a?(String)
+              output_size = File.size(@call_output)
+            else
+              @call_output.rewind
+              t = Tempfile.new('attachment_output')
+              t.write(@call_output.read)
+              output_size = File.size(t.path)
+              t.close
+            end
+            if @input.is_a?(String)
+              input_size = File.size(@input)
+            elsif @input.is_a?(Hash)
+              input_size = 0
+              @input.each do |file_path, name|
+                input_size += File.size(file_path)
+              end
+            else
+              @input.rewind
+              t = Tempfile.new('attachment_input')
+              t.write(@input.read)
+              input_size = File.size(t.path)
+              t.close
+            end
+            total_size = input_size + @attachment_size
+            output_size.should >= total_size
           end
         end
 
@@ -132,10 +157,9 @@ describe ActivePdftk::Wrapper do
           pending "implementation"
         end
 
-
         describe "#background" do
           it_behaves_like "a working command"do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.background')).read }
+            before(:all) { @example_expect = File.new(path_to_pdf('fields.background.pdf')).read }
             before(:each) { @call_output = @pdftk.background(@input, path_to_pdf('a.pdf'), :output => @output) }
           end
 
@@ -144,7 +168,7 @@ describe ActivePdftk::Wrapper do
 
         describe "#stamp" do
           it_behaves_like "a working command"do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.stamp')).read }
+            before(:all) { @example_expect = File.new(path_to_pdf('fields.stamp.pdf')).read }
             before(:each) { @call_output = @pdftk.stamp(@input, path_to_pdf('a.pdf'), :output => @output) }
           end
           pending "check if the output is really a stamp & spec multistamp also"
@@ -161,7 +185,6 @@ describe ActivePdftk::Wrapper do
         describe "#burst", :if => output_type == :path do
           pending "implementation"
         end
-
       end
 
       #context "burst" do
