@@ -3,20 +3,20 @@ require 'spec_helper'
 inputs = [:path, :hash, :file, :tempfile, :stringio]
 outputs = [:path, :file, :tempfile, :stringio, :nil]
 
-def get_input(input_type)
+def get_input(input_type, file_name = nil)
   case input_type
   when :path
-    path_to_pdf('fields.pdf')
+    path_to_pdf(file_name || 'fields.pdf')
   when :hash
-    {path_to_pdf('fields.pdf') => nil}
+    {path_to_pdf(file_name || 'fields.pdf') => nil}
   when :file
-    File.new(path_to_pdf('fields.pdf'))
+    File.new(path_to_pdf(file_name || 'fields.pdf'))
   when :tempfile
     t = Tempfile.new('specs')
-    t.write(File.read(path_to_pdf('fields.pdf')))
+    t.write(File.read(path_to_pdf(file_name || 'fields.pdf')))
     t
   when :stringio
-    StringIO.new(File.read(path_to_pdf('fields.pdf')))
+    StringIO.new(File.read(path_to_pdf(file_name || 'fields.pdf')))
   end
 end
 
@@ -32,6 +32,19 @@ def get_output(output_type)
     StringIO.new()
   when :nil
     nil
+  end
+end
+
+def map_output_type(output_specified)
+  case output_specified
+  when :path
+    String
+  when :file
+    File
+  when :tempfile
+    Tempfile
+  when :stringio, :nil
+    StringIO
   end
 end
 
@@ -151,10 +164,34 @@ describe ActivePdftk::Wrapper do
             total_size = input_size + @attachment_size
             output_size.should >= total_size
           end
+          it "should output the correct type" do
+            @call_output.should be_kind_of(map_output_type(output_type))
+          end
         end
 
-        describe "#unpack_files", :if => output_type == :path do
-          pending "implementation"
+        describe "#unpack_files to path", :if => output_type == :path do
+          before(:each) do
+            @input = get_input(input_type, 'fields.unpack_files.pdf')
+            @input.rewind rescue nil # rewind if possible.
+            @output = path_to_pdf('')
+            @call_output = @pdftk.unpack_files(@input, @output)
+          end
+          it "should unpack the files" do
+            @call_output.should == @output
+            File.unlink(path_to_pdf('unpacked_file.txt')).should == 1
+          end
+        end
+
+        describe "#unpack_files to tmp dir", :if => output_type == :nil do
+          before(:each) do
+            @input = get_input(input_type, 'fields.unpack_files.pdf')
+            @input.rewind rescue nil # rewind if possible.
+            @call_output = @pdftk.unpack_files(@input, @output)
+          end
+          it "should unpack the files" do
+            @call_output.should == Dir.tmpdir
+            File.unlink(File.join(Dir.tmpdir, 'unpacked_file.txt')).should == 1
+          end
         end
 
         describe "#background" do
@@ -171,6 +208,7 @@ describe ActivePdftk::Wrapper do
             before(:all) { @example_expect = File.new(path_to_pdf('fields.stamp.pdf')).read }
             before(:each) { @call_output = @pdftk.stamp(@input, path_to_pdf('a.pdf'), :output => @output) }
           end
+
           pending "check if the output is really a stamp & spec multistamp also"
         end
 
