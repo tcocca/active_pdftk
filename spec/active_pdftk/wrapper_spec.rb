@@ -56,19 +56,18 @@ describe ActivePdftk::Wrapper do
     end
 
     it "should return expected data" do
-      if @call_output.is_a? String
-        File.new(@call_output).read.should == @example_expect
-      else
-        @call_output.rewind
-        @call_output.read.should == @example_expect
+      case @call_output
+        when String then File.new(@call_output).read.should == @example_expect
+        else
+          @call_output.rewind
+          @call_output.read.should == @example_expect
       end
     end
 
-    after(:each) do
-      if @call_output.is_a?(String)
-        File.unlink(@call_output)
-      elsif @call_output.is_a?(File)
-        File.unlink(@call_output.path)
+    after(:all) do
+      case @call_output
+        when String then File.unlink(@call_output)
+        when File then File.unlink(@call_output.path)
       end
     end
   end
@@ -76,16 +75,15 @@ describe ActivePdftk::Wrapper do
   inputs.each do |input_type|
     outputs.each do |output_type|
       context "(Input:#{input_type}|Output:#{output_type})" do
-        before :each do
-          @input = get_input(input_type)
-          @input.rewind rescue nil # rewind if possible.
-          @output = get_output(output_type)
-        end
+        before(:all) { @input, @output = get_input(input_type), get_output(output_type) }
+        after(:each) { @input.rewind rescue nil }
 
         describe "#dump_data_fields" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.data_fields')).read }
-            before(:each) { @call_output = @pdftk.dump_data_fields(@input, :output => @output) }
+            before(:all) do
+              @example_expect = File.new(path_to_pdf('fields.data_fields')).read
+              @call_output = @pdftk.dump_data_fields(@input, :output => @output)
+            end
           end
         end
 
@@ -102,8 +100,10 @@ describe ActivePdftk::Wrapper do
 
         describe "#generate_fdf" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.fdf')).read }
-            before(:each) { @call_output = @pdftk.generate_fdf(@input,:output => @output) }
+            before(:all) do
+              @example_expect = File.new(path_to_pdf('fields.fdf')).read
+              @call_output = @pdftk.generate_fdf(@input,:output => @output)
+            end
           end
         end
 
