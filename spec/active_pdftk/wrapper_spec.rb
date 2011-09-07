@@ -221,7 +221,32 @@ describe ActivePdftk::Wrapper do
         end
 
         describe "#burst", :if => output_type == :path do
-          pending "implementation"
+          before(:each) do
+            @input = get_input(input_type, 'a.pdf')
+            @input.rewind rescue nil # rewind if possible.
+            @output = path_to_pdf('pg_%04d.pdf')
+            @call_output = @pdftk.burst(@input, :output => @output)
+          end
+          it "should file into single pages" do
+            @call_output.should == @output
+            File.unlink(path_to_pdf('pg_0001.pdf')).should == 1
+            File.unlink(path_to_pdf('pg_0002.pdf')).should == 1
+            File.unlink(path_to_pdf('pg_0003.pdf')).should == 1
+          end
+        end
+
+        describe "#burst to tmp dir", :if => output_type == :nil do
+          before(:each) do
+            @input = get_input(input_type, 'a.pdf')
+            @input.rewind rescue nil # rewind if possible.
+            @call_output = @pdftk.burst(@input, :output => @output)
+          end
+          it "should file into single pages" do
+            @call_output.should == Dir.tmpdir
+            File.unlink(File.join(Dir.tmpdir, 'pg_0001.pdf')).should == 1
+            File.unlink(File.join(Dir.tmpdir, 'pg_0002.pdf')).should == 1
+            File.unlink(File.join(Dir.tmpdir, 'pg_0003.pdf')).should == 1
+          end
         end
       end
 
