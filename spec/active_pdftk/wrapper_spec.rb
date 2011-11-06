@@ -48,6 +48,14 @@ def map_output_type(output_specified)
   end
 end
 
+def remove_output(output)
+  if output.is_a?(String)
+    File.unlink(output)
+  elsif output.is_a?(File)
+    File.unlink(output.path)
+  end
+end
+
 describe ActivePdftk::Wrapper do
   before(:all) { @pdftk = ActivePdftk::Wrapper.new }
 
@@ -77,17 +85,36 @@ describe ActivePdftk::Wrapper do
       end
     end
 
-    after(:each) do
-      if @call_output.is_a?(String)
-        File.unlink(@call_output)
-      elsif @call_output.is_a?(File)
-        File.unlink(@call_output.path)
-      end
+    after(:each) { remove_output(@call_output) }
+  end
+
+  shared_examples "a combination command" do
+    it "should return a #{@output.nil? ? StringIO : @output.class}" do
+      @call_output.should be_kind_of(@output.nil? ? StringIO : @output.class)
     end
+
+    it "should return expected data" do
+      @example_expect.gsub!(/\(D\:.*\)/, '')
+      @example_expect.gsub!(/\[<[a-z0-9]*><[a-z0-9]*>\]/, '')
+      if @call_output.is_a?(String)
+        text = File.read(@call_output) 
+        text.gsub!(/\(D\:.*\)/, '')
+        text.gsub!(/\[<[a-z0-9]*><[a-z0-9]*>\]/, '')
+      else
+        @call_output.rewind
+        text = @call_output.read
+        text.gsub!(/\(D\:.*\)/, '')
+        text.gsub!(/\[<[a-z0-9]*><[a-z0-9]*>\]/, '')
+      end
+      text.should == @example_expect
+    end
+
+    after(:each) { remove_output(@call_output) }
   end
 
   inputs.each do |input_type|
     outputs.each do |output_type|
+
       context "(Input:#{input_type}|Output:#{output_type})" do
         before :each do
           @input = get_input(input_type)
@@ -195,7 +222,7 @@ describe ActivePdftk::Wrapper do
         end
 
         describe "#background" do
-          it_behaves_like "a working command"do
+          it_behaves_like "a working command" do
             before(:all) { @example_expect = File.new(path_to_pdf('fields.background.pdf')).read }
             before(:each) { @call_output = @pdftk.background(@input, path_to_pdf('a.pdf'), :output => @output) }
           end
@@ -204,7 +231,7 @@ describe ActivePdftk::Wrapper do
         end
 
         describe "#stamp" do
-          it_behaves_like "a working command"do
+          it_behaves_like "a working command" do
             before(:all) { @example_expect = File.new(path_to_pdf('fields.stamp.pdf')).read }
             before(:each) { @call_output = @pdftk.stamp(@input, path_to_pdf('a.pdf'), :output => @output) }
           end
@@ -213,11 +240,17 @@ describe ActivePdftk::Wrapper do
         end
 
         describe "#cat" do
-          pending "implementation"
+          it_behaves_like "a combination command" do
+            before(:all) { @example_expect = File.new(path_to_pdf('fields.cat.pdf')).read }
+            before(:each) { @call_output = @pdftk.cat([{:pdf => path_to_pdf('a.pdf')}, {:pdf => path_to_pdf('b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => @output) }
+          end
         end
 
         describe "#shuffle" do
-          pending "implementation"
+          it_behaves_like "a combination command" do
+            before(:all) { @example_expect = File.new(path_to_pdf('fields.shuffle.pdf')).read }
+            before(:each) { @call_output = @pdftk.shuffle([{:pdf => path_to_pdf('a.pdf')}, {:pdf => path_to_pdf('b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => @output) }
+          end
         end
 
         describe "#burst", :if => output_type == :path do
@@ -250,69 +283,77 @@ describe ActivePdftk::Wrapper do
         end
       end
 
-      #context "burst" do
-      #  it "should call #pdtk on @call" do
-      #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst})
-      #    @pdftk.burst(path_to_pdf('fields.pdf'))
-      #    @pdftk = ActivePdftk::Wrapper.new
-      #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst, :options => {:encrypt  => :'40bit'}})
-      #    @pdftk.burst(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'})
-      #  end
-      #
-      #  it "should put a file in the system tmpdir when no output location given" do
-      #    @pdftk.burst(path_to_pdf('fields.pdf'))
-      #    File.unlink(File.join(Dir.tmpdir, 'pg_0001.pdf')).should == 1
-      #  end
-      #
-      #  it "should put a file in the system tmpdir when no output location given but a page name format given" do
-      #    @pdftk.burst(path_to_pdf('fields.pdf'), :output => 'page_%02d.pdf')
-      #    File.unlink(File.join(Dir.tmpdir, 'page_01.pdf')).should == 1
-      #  end
-      #
-      #  it "should put a file in the specified path" do
-      #    @pdftk.burst(path_to_pdf('fields.pdf'), :output => path_to_pdf('page_%02d.pdf').to_s)
-      #    File.unlink(path_to_pdf('page_01.pdf')).should == 1
-      #  end
-      #end
-      #
-      #context "cat" do
-      #  it "should call #pdftk on @call" do
-      #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
-      #    @pdftk.cat([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
-      #  end
-      #
-      #  it "should output the generated pdf" do
-      #    @pdftk.cat([{:pdf => path_to_pdf('a.pdf'), :pass => 'foo'}, {:pdf => path_to_pdf('b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => path_to_pdf('cat.pdf'))
-      #    File.unlink(path_to_pdf('cat.pdf')).should == 1
-      #  end
-      #end
-      #
-      #context "shuffle" do
-      #  it "should call #pdftk on @call" do
-      #    ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:shuffle => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
-      #    @pdftk.shuffle([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
-      #  end
-      #
-      #  it "should output the generated pdf" do
-      #    @pdftk.shuffle([{:pdf => path_to_pdf('a.pdf'), :pass => 'foo'}, {:pdf => path_to_pdf('b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => path_to_pdf('shuffle.pdf'))
-      #    File.unlink(path_to_pdf('shuffle.pdf')).should == 1
-      #  end
-      #end
-      #
-      #context "unpack_files" do
-      #  it "should return Dir.tmpdir" do
-      #    @pdftk.attach_files(path_to_pdf('fields.pdf'), [path_to_pdf('attached_file.txt')], :output => path_to_pdf('attached.pdf'))
-      #    @pdftk.unpack_files(path_to_pdf('attached.pdf')).should == Dir.tmpdir
-      #    File.unlink(path_to_pdf('attached.pdf')).should == 1
-      #  end
-      #
-      #  it "should return the specified output directory" do
-      #    @pdftk.attach_files(path_to_pdf('fields.pdf'), [path_to_pdf('attached_file.txt')], :output => path_to_pdf('attached.pdf'))
-      #    @pdftk.unpack_files(path_to_pdf('attached.pdf'), path_to_pdf(nil)).should == path_to_pdf(nil)
-      #    File.unlink(path_to_pdf('attached.pdf')).should == 1
-      #  end
-      #end
-
     end # each outputs
   end # each inputs
+
+  context "burst" do
+    it "should call #pdtk on @call" do
+      ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst})
+      @pdftk.burst(path_to_pdf('fields.pdf'))
+      @pdftk = ActivePdftk::Wrapper.new
+      ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst, :options => {:encrypt  => :'40bit'}})
+      @pdftk.burst(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'})
+    end
+
+    it "should put a file in the system tmpdir when no output location given" do
+      @pdftk = ActivePdftk::Wrapper.new
+      @pdftk.burst(path_to_pdf('fields.pdf'))
+      File.unlink(File.join(Dir.tmpdir, 'pg_0001.pdf')).should == 1
+    end
+
+    it "should put a file in the system tmpdir when no output location given but a page name format given" do
+      @pdftk = ActivePdftk::Wrapper.new
+      @pdftk.burst(path_to_pdf('fields.pdf'), :output => 'page_%02d.pdf')
+      File.unlink(File.join(Dir.tmpdir, 'page_01.pdf')).should == 1
+    end
+
+    it "should put a file in the specified path" do
+      @pdftk = ActivePdftk::Wrapper.new
+      @pdftk.burst(path_to_pdf('fields.pdf'), :output => path_to_pdf('page_%02d.pdf').to_s)
+      File.unlink(path_to_pdf('page_01.pdf')).should == 1
+    end
+  end
+
+  context "cat" do
+    it "should call #pdftk on @call" do
+      ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
+      @pdftk.cat([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
+    end
+
+    it "should output the generated pdf" do
+      @pdftk = ActivePdftk::Wrapper.new
+      @pdftk.cat([{:pdf => path_to_pdf('a.pdf'), :pass => 'foo'}, {:pdf => path_to_pdf('b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => path_to_pdf('cat.pdf'))
+      File.unlink(path_to_pdf('cat.pdf')).should == 1
+    end
+  end
+
+  context "shuffle" do
+    it "should call #pdftk on @call" do
+      ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:shuffle => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
+      @pdftk.shuffle([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
+    end
+
+    it "should output the generated pdf" do
+      @pdftk = ActivePdftk::Wrapper.new
+      @pdftk.shuffle([{:pdf => path_to_pdf('a.pdf'), :pass => 'foo'}, {:pdf => path_to_pdf('b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => path_to_pdf('shuffle.pdf'))
+      File.unlink(path_to_pdf('shuffle.pdf')).should == 1
+    end
+  end
+
+  context "unpack_files" do
+    it "should return Dir.tmpdir" do
+      @pdftk = ActivePdftk::Wrapper.new
+      @pdftk.attach_files(path_to_pdf('fields.pdf'), [path_to_pdf('attached_file.txt')], :output => path_to_pdf('attached.pdf'))
+      @pdftk.unpack_files(path_to_pdf('attached.pdf')).should == Dir.tmpdir
+      File.unlink(path_to_pdf('attached.pdf')).should == 1
+    end
+
+    it "should return the specified output directory" do
+      @pdftk = ActivePdftk::Wrapper.new
+      @pdftk.attach_files(path_to_pdf('fields.pdf'), [path_to_pdf('attached_file.txt')], :output => path_to_pdf('attached.pdf'))
+      @pdftk.unpack_files(path_to_pdf('attached.pdf'), path_to_pdf(nil)).should == path_to_pdf(nil)
+      File.unlink(path_to_pdf('attached.pdf')).should == 1
+    end
+  end
+
 end # Wrapper
