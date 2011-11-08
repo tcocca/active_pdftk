@@ -300,25 +300,23 @@ describe ActivePdftk::Wrapper do
 
   context "burst" do
     it "should call #pdtk on @call" do
-      pending "integration of Call receiver tests in looping strategy for all operations."
-      #ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst})
-      #@pdftk.burst(path_to_pdf('fields.pdf'))
-      #@pdftk = ActivePdftk::Wrapper.new
-      #ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst, :options => {:encrypt  => :'40bit'}})
-      #@pdftk.burst(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'})
+      @pdftk.call.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst})
+      @pdftk.burst(path_to_pdf('fields.pdf'))
+      @pdftk.call.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst, :options => {:encrypt  => :'40bit'}})
+      @pdftk.burst(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'})
     end
   end
 
   context "cat" do
     it "should call #pdftk on @call" do
-      ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
+      @pdftk.call.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
       @pdftk.cat([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
     end
   end
 
   context "shuffle" do
     it "should call #pdftk on @call" do
-      ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:shuffle => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
+      @pdftk.call.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:shuffle => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
       @pdftk.shuffle([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
     end
   end

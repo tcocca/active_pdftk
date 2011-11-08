@@ -6,6 +6,8 @@ module ActivePdftk
   # provides methods around every operation for pdftk to make constructing the call with options easier than working directly with the ActivePdftk::Call class
   class Wrapper
 
+    attr_reader :call
+
     # Instantiates a new instance of wrapper and passes through the options hash to an instance of ActivePdftk::Call
     #
     # The full set of options on Call is supported here
