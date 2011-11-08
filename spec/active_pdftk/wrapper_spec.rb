@@ -3,20 +3,20 @@ require 'spec_helper'
 inputs = [:path, :hash, :file, :tempfile, :stringio]
 outputs = [:path, :file, :tempfile, :stringio, :nil]
 
-def get_input(input_type, file_name = nil)
+def get_input(input_type, file_name = 'fields.pdf')
   case input_type
   when :path
-    path_to_pdf(file_name || 'fields.pdf')
+    path_to_pdf(file_name)
   when :hash
-    {path_to_pdf(file_name || 'fields.pdf') => nil}
+    {path_to_pdf(file_name) => nil}
   when :file
-    File.new(path_to_pdf(file_name || 'fields.pdf'))
+    File.new(path_to_pdf(file_name))
   when :tempfile
-    t = Tempfile.new('specs')
-    t.write(File.read(path_to_pdf(file_name || 'fields.pdf')))
+    t = Tempfile.new('input.spec')
+    t.write(File.read(path_to_pdf(file_name)))
     t
   when :stringio
-    StringIO.new(File.read(path_to_pdf(file_name || 'fields.pdf')))
+    StringIO.new(File.read(path_to_pdf(file_name)))
   end
 end
 
@@ -27,7 +27,7 @@ def get_output(output_type)
   when :file
     File.new(path_to_pdf('output.spec'), 'w+')
   when :tempfile
-    Tempfile.new('specs2')
+    Tempfile.new('output.spec')
   when :stringio
     StringIO.new()
   when :nil
@@ -56,6 +56,22 @@ def remove_output(output)
   end
 end
 
+def open_or_rewind(target)
+  if target.is_a? String
+    File.new(target).read
+  else
+    target.rewind if target.respond_to? :rewind
+    target.read
+  end
+end
+
+def cleanup_file_content(text)
+  text.force_encoding('ASCII-8BIT') if text.respond_to? :force_encoding
+  text.gsub!(/\(D\:.*\)/, '')
+  text.gsub!(/\[<[a-z0-9]*><[a-z0-9]*>\]/, '')
+  text
+end
+
 describe ActivePdftk::Wrapper do
   before(:all) { @pdftk = ActivePdftk::Wrapper.new }
 
@@ -77,12 +93,7 @@ describe ActivePdftk::Wrapper do
     end
 
     it "should return expected data" do
-      if @call_output.is_a? String
-        File.new(@call_output).read.should == @example_expect
-      else
-        @call_output.rewind
-        @call_output.read.should == @example_expect
-      end
+      open_or_rewind(@call_output).should == @example_expect
     end
 
     after(:each) { remove_output(@call_output) }
@@ -94,18 +105,9 @@ describe ActivePdftk::Wrapper do
     end
 
     it "should return expected data" do
-      @example_expect.gsub!(/\(D\:.*\)/, '')
-      @example_expect.gsub!(/\[<[a-z0-9]*><[a-z0-9]*>\]/, '')
-      if @call_output.is_a?(String)
-        text = File.read(@call_output) 
-        text.gsub!(/\(D\:.*\)/, '')
-        text.gsub!(/\[<[a-z0-9]*><[a-z0-9]*>\]/, '')
-      else
-        @call_output.rewind
-        text = @call_output.read
-        text.gsub!(/\(D\:.*\)/, '')
-        text.gsub!(/\[<[a-z0-9]*><[a-z0-9]*>\]/, '')
-      end
+      cleanup_file_content(@example_expect)
+      text = open_or_rewind(@call_output)
+      cleanup_file_content(text)
       text.should == @example_expect
     end
 
@@ -191,6 +193,7 @@ describe ActivePdftk::Wrapper do
             total_size = input_size + @attachment_size
             output_size.should >= total_size
           end
+
           it "should output the correct type" do
             @call_output.should be_kind_of(map_output_type(output_type))
           end
@@ -203,6 +206,7 @@ describe ActivePdftk::Wrapper do
             @output = path_to_pdf('')
             @call_output = @pdftk.unpack_files(@input, @output)
           end
+
           it "should unpack the files" do
             @call_output.should == @output
             File.unlink(path_to_pdf('unpacked_file.txt')).should == 1
@@ -215,6 +219,7 @@ describe ActivePdftk::Wrapper do
             @input.rewind rescue nil # rewind if possible.
             @call_output = @pdftk.unpack_files(@input, @output)
           end
+
           it "should unpack the files" do
             @call_output.should == Dir.tmpdir
             File.unlink(File.join(Dir.tmpdir, 'unpacked_file.txt')).should == 1
@@ -257,11 +262,11 @@ describe ActivePdftk::Wrapper do
           before(:each) do
             @input = get_input(input_type, 'a.pdf')
             @input.rewind rescue nil # rewind if possible.
-            @output = path_to_pdf('pg_%04d.pdf')
-            @call_output = @pdftk.burst(@input, :output => @output)
           end
+
           it "should file into single pages" do
-            @call_output.should == @output
+            output = path_to_pdf('pg_%04d.pdf')
+            @pdftk.burst(@input, :output => output).should == output
             File.unlink(path_to_pdf('pg_0001.pdf')).should == 1
             File.unlink(path_to_pdf('pg_0002.pdf')).should == 1
             File.unlink(path_to_pdf('pg_0003.pdf')).should == 1
@@ -272,13 +277,20 @@ describe ActivePdftk::Wrapper do
           before(:each) do
             @input = get_input(input_type, 'a.pdf')
             @input.rewind rescue nil # rewind if possible.
-            @call_output = @pdftk.burst(@input, :output => @output)
           end
+
           it "should file into single pages" do
-            @call_output.should == Dir.tmpdir
+            @pdftk.burst(@input).should == Dir.tmpdir
             File.unlink(File.join(Dir.tmpdir, 'pg_0001.pdf')).should == 1
             File.unlink(File.join(Dir.tmpdir, 'pg_0002.pdf')).should == 1
             File.unlink(File.join(Dir.tmpdir, 'pg_0003.pdf')).should == 1
+          end
+
+          it "should put a file in the system tmpdir when no output location given but a page name format given" do
+            @pdftk.burst(@input, :output => 'page_%02d.pdf').should == 'page_%02d.pdf'
+            File.unlink(File.join(Dir.tmpdir, 'page_01.pdf')).should == 1
+            File.unlink(File.join(Dir.tmpdir, 'page_02.pdf')).should == 1
+            File.unlink(File.join(Dir.tmpdir, 'page_03.pdf')).should == 1
           end
         end
       end
@@ -288,29 +300,12 @@ describe ActivePdftk::Wrapper do
 
   context "burst" do
     it "should call #pdtk on @call" do
-      ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst})
-      @pdftk.burst(path_to_pdf('fields.pdf'))
-      @pdftk = ActivePdftk::Wrapper.new
-      ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst, :options => {:encrypt  => :'40bit'}})
-      @pdftk.burst(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'})
-    end
-
-    it "should put a file in the system tmpdir when no output location given" do
-      @pdftk = ActivePdftk::Wrapper.new
-      @pdftk.burst(path_to_pdf('fields.pdf'))
-      File.unlink(File.join(Dir.tmpdir, 'pg_0001.pdf')).should == 1
-    end
-
-    it "should put a file in the system tmpdir when no output location given but a page name format given" do
-      @pdftk = ActivePdftk::Wrapper.new
-      @pdftk.burst(path_to_pdf('fields.pdf'), :output => 'page_%02d.pdf')
-      File.unlink(File.join(Dir.tmpdir, 'page_01.pdf')).should == 1
-    end
-
-    it "should put a file in the specified path" do
-      @pdftk = ActivePdftk::Wrapper.new
-      @pdftk.burst(path_to_pdf('fields.pdf'), :output => path_to_pdf('page_%02d.pdf').to_s)
-      File.unlink(path_to_pdf('page_01.pdf')).should == 1
+      pending "integration of Call receiver tests in looping strategy for all operations."
+      #ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst})
+      #@pdftk.burst(path_to_pdf('fields.pdf'))
+      #@pdftk = ActivePdftk::Wrapper.new
+      #ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst, :options => {:encrypt  => :'40bit'}})
+      #@pdftk.burst(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'})
     end
   end
 
@@ -319,40 +314,12 @@ describe ActivePdftk::Wrapper do
       ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
       @pdftk.cat([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
     end
-
-    it "should output the generated pdf" do
-      @pdftk = ActivePdftk::Wrapper.new
-      @pdftk.cat([{:pdf => path_to_pdf('a.pdf'), :pass => 'foo'}, {:pdf => path_to_pdf('b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => path_to_pdf('cat.pdf'))
-      File.unlink(path_to_pdf('cat.pdf')).should == 1
-    end
   end
 
   context "shuffle" do
     it "should call #pdftk on @call" do
       ActivePdftk::Call.any_instance.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:shuffle => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
       @pdftk.shuffle([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
-    end
-
-    it "should output the generated pdf" do
-      @pdftk = ActivePdftk::Wrapper.new
-      @pdftk.shuffle([{:pdf => path_to_pdf('a.pdf'), :pass => 'foo'}, {:pdf => path_to_pdf('b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => path_to_pdf('shuffle.pdf'))
-      File.unlink(path_to_pdf('shuffle.pdf')).should == 1
-    end
-  end
-
-  context "unpack_files" do
-    it "should return Dir.tmpdir" do
-      @pdftk = ActivePdftk::Wrapper.new
-      @pdftk.attach_files(path_to_pdf('fields.pdf'), [path_to_pdf('attached_file.txt')], :output => path_to_pdf('attached.pdf'))
-      @pdftk.unpack_files(path_to_pdf('attached.pdf')).should == Dir.tmpdir
-      File.unlink(path_to_pdf('attached.pdf')).should == 1
-    end
-
-    it "should return the specified output directory" do
-      @pdftk = ActivePdftk::Wrapper.new
-      @pdftk.attach_files(path_to_pdf('fields.pdf'), [path_to_pdf('attached_file.txt')], :output => path_to_pdf('attached.pdf'))
-      @pdftk.unpack_files(path_to_pdf('attached.pdf'), path_to_pdf(nil)).should == path_to_pdf(nil)
-      File.unlink(path_to_pdf('attached.pdf')).should == 1
     end
   end
 
