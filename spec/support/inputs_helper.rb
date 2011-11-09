@@ -33,3 +33,20 @@ def map_inputs(input_pdfs)
   end
   input_map
 end
+
+def remove_output(output)
+  if output.is_a?(String)
+    File.unlink(output)
+  elsif output.is_a?(File)
+    File.unlink(output.path)
+  end
+end
+
+def open_or_rewind(target)
+  if target.is_a? String
+    File.new(target).read
+  else
+    target.rewind if target.respond_to? :rewind
+    target.read
+  end
+end
