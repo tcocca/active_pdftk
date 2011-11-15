@@ -1,5 +1,4 @@
 module ActivePdftk
-  
   # Map keys and values to Adobe's FDF format.
   #
   # Straight port of Perl's PDF::FDF::Simple by Steffen Schwigon.
@@ -48,7 +47,7 @@ module ActivePdftk
       fdf << footer
       return fdf
     end
-    
+
     # Writes the output from #to_s to a file at the specified path.
     #
     # @param [String] path to save the generated file to.
