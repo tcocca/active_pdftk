@@ -301,7 +301,6 @@ module ActivePdftk
     #
     # @note Should work on all unix systems (Linux, Mac Os X)
     #
-    
     def self.locate_pdftk
       @pdftk_location ||= begin
         auto_path = %x{locate pdftk | grep "/bin/pdftk"}.strip.split("\n").first
@@ -309,7 +308,7 @@ module ActivePdftk
         (auto_path.nil? || auto_path.empty?) ? nil : auto_path
       end
     end
-    
+
     def locate_pdftk
       self.class.locate_pdftk
     end

@@ -3,15 +3,15 @@ require 'spec_helper'
 describe ActivePdftk::Form do
   context "new" do
     it "should create a ActivePdftk::Form object" do
-      @form = ActivePdftk::Form.new(path_to_pdf('fields.pdf'))
+      @form = ActivePdftk::Form.new(path_to_pdf('spec.fields.pdf'))
       @form.should be_kind_of(ActivePdftk::Form)
-      @form.template.should == path_to_pdf('fields.pdf')
+      @form.template.should == path_to_pdf('spec.fields.pdf')
     end
   end
 
   context "Instantiate a Form, " do
     before do
-      @form = ActivePdftk::Form.new(path_to_pdf('fields.pdf'))
+      @form = ActivePdftk::Form.new(path_to_pdf('spec.fields.pdf'))
     end
 
     context "fields" do
@@ -415,7 +415,7 @@ describe ActivePdftk::Form do
       end
 
       it "should return StringIO if the template is StringIO" do
-        stringio = StringIO.new(File.read(path_to_pdf('fields.pdf')))
+        stringio = StringIO.new(File.read(path_to_pdf('spec.fields.pdf')))
         stringio.rewind
         @form = ActivePdftk::Form.new(stringio)
         @form.save!.should be_kind_of(StringIO)

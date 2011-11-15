@@ -11,7 +11,6 @@ module ActivePdftk
   #   bic.save
   #
   class Form
-    
     # @return [String, File, Tempfile, StringIO] return the given PDF template.
     attr_reader :template
 
@@ -193,7 +192,7 @@ module ActivePdftk
       hash
     end
 
-    # Check to see if the form has a field of the given name, 
+    # Check to see if the form has a field of the given name,
     # added to support the method_missing for accessing fields directly without having to access the fields array
     #
     # @return [Boolean]

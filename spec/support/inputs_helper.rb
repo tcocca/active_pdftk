@@ -1,7 +1,14 @@
 def path_to_pdf(filename)
-  file = File.join(File.dirname(__FILE__), '../', 'fixtures')
-  file = File.join(file, "#{filename}") unless filename.nil?
-  file
+  File.expand_path(File.join(File.dirname(__FILE__), '../', 'fixtures', "#{filename}"))
+end
+
+def fixtures_path(entry, expand = false)
+  entry_path = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../', 'fixtures', "#{entry}")))
+  if expand && entry_path.directory?
+    entry_path.children
+  else
+    entry_path
+  end
 end
 
 # Because with Ruby 1.8 Hashes are unordered, and options in cli are unordered too,
@@ -32,4 +39,21 @@ def map_inputs(input_pdfs)
     input_map[parts[1]] = parts[0]
   end
   input_map
+end
+
+def remove_output(output)
+  if output.is_a?(String)
+    File.unlink(output)
+  elsif output.is_a?(File)
+    File.unlink(output.path)
+  end
+end
+
+def open_or_rewind(target)
+  if target.is_a? String
+    File.new(target).read
+  else
+    target.rewind if target.respond_to? :rewind
+    target.read
+  end
 end

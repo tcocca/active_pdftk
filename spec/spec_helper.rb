@@ -10,4 +10,7 @@ RSpec.configure do |config|
       ActivePdftk::Call.stub(:locate_pdftk).and_return(File.dirname(__FILE__) + '/support/pdftk')
     end
   end
+
+  config.filter_run :focus => true
+  config.run_all_when_everything_filtered = true
 end

@@ -3,7 +3,7 @@ require 'spec_helper'
 inputs = [:path, :hash, :file, :tempfile, :stringio]
 outputs = [:path, :file, :tempfile, :stringio, :nil]
 
-def get_input(input_type, file_name = 'fields.pdf')
+def get_input(input_type, file_name = 'spec.fields.pdf')
   case input_type
   when :path
     path_to_pdf(file_name)
@@ -48,27 +48,10 @@ def map_output_type(output_specified)
   end
 end
 
-def remove_output(output)
-  if output.is_a?(String)
-    File.unlink(output)
-  elsif output.is_a?(File)
-    File.unlink(output.path)
-  end
-end
-
-def open_or_rewind(target)
-  if target.is_a? String
-    File.new(target).read
-  else
-    target.rewind if target.respond_to? :rewind
-    target.read
-  end
-end
-
 def cleanup_file_content(text)
-  text.force_encoding('ASCII-8BIT') if text.respond_to? :force_encoding
-  text.gsub!(/\(D\:.*\)/, '')
-  text.gsub!(/\[<[a-z0-9]*><[a-z0-9]*>\]/, '')
+  text.force_encoding('ASCII-8BIT') if text.respond_to? :force_encoding   # PDF embed some binary data breaking gsub with ruby 1.9.2
+  text.gsub!(/\(D\:.*\)/, '')                                             # Remove dates ex: /CreationDate (D:20111106104455-05'00')
+  text.gsub!(/\/ID \[<\w*><\w*>\]/, '')                                   # Remove ID values ex: /ID [<4ba02a4cf55b1fc842299e6f01eb838e><33bec7dc37839cadf7ab76f3be4d4306>]
   text
 end
 
@@ -93,7 +76,7 @@ describe ActivePdftk::Wrapper do
     end
 
     it "should return expected data" do
-      open_or_rewind(@call_output).should == @example_expect
+      @call_output.should have_the_content_of(@example_expect)
     end
 
     after(:each) { remove_output(@call_output) }
@@ -126,72 +109,92 @@ describe ActivePdftk::Wrapper do
 
         describe "#dump_data_fields" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.data_fields')).read }
+            before(:all) { @example_expect = fixtures_path('dump_data_fields/expect.data_fields') }
             before(:each) { @call_output = @pdftk.dump_data_fields(@input, :output => @output) }
           end
         end
 
         describe "#fill_form" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.fill_form.pdf')).read }
-            before(:each) { @call_output = @pdftk.fill_form(@input, path_to_pdf('fields.fdf.spec'), :output => @output) }
+            before(:all) { @example_expect = fixtures_path('fill_form/expect.pdf') }
+            before(:each) { @call_output = @pdftk.fill_form(@input, path_to_pdf('fill_form/spec.fdf'), :output => @output) }
           end
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.fill_form.pdf')).read }
-            before(:each) { @call_output = @pdftk.fill_form(@input, path_to_pdf('fields.xfdf.spec'), :output => @output) }
+            before(:all) { @example_expect = fixtures_path('fill_form/expect.pdf') }
+            before(:each) { @call_output = @pdftk.fill_form(@input, path_to_pdf('fill_form/spec.xfdf'), :output => @output) }
           end
         end
 
         describe "#generate_fdf" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.fdf')).read }
+            before(:all) { @example_expect = fixtures_path('generate_fdf/expect.fdf') }
             before(:each) { @call_output = @pdftk.generate_fdf(@input,:output => @output) }
           end
         end
 
         describe "#dump_data" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.data')).read }
+            before(:all) { @example_expect = fixtures_path('dump_data/expect.data') }
             before(:each) { @call_output = @pdftk.dump_data(@input,:output => @output) }
           end
         end
 
         describe "#update_info" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.update_info.pdf')).read }
-            before(:each) { @call_output = @pdftk.update_info(@input, path_to_pdf('fields.data.spec'), :output => @output) }
+            before(:all) { @example_expect = fixtures_path('update_info/expect.pdf') }
+            before(:each) { @call_output = @pdftk.update_info(@input, path_to_pdf('update_info/spec.data'), :output => @output) }
+          end
+        end
+
+        describe "#unpack_files" do
+          before(:all) { @example_expect = fixtures_path('unpack_files/expect') }
+
+          context "to path", :if => output_type == :path do
+            before(:each) do
+              @input = get_input(input_type, 'unpack_files/spec.pdf')
+              @input.rewind rescue nil # rewind if possible.
+
+              Dir.mkdir(out_path = fixtures_path('output'))
+              @output = Dir.new(out_path)
+
+              @call_output = @pdftk.unpack_files(@input, @output.path)
+            end
+
+            after(:each) { FileUtils.remove_entry_secure @output.path }
+
+            it "should unpack the files" do
+              @call_output.should == @output.path
+              fixtures_path('output').should have_the_content_of(@example_expect)
+            end
+          end
+
+          context "to temporary directory", :if => output_type == :nil do
+            before(:each) do
+              @input = get_input(input_type, 'unpack_files/spec.pdf')
+              @input.rewind rescue nil # rewind if possible.
+              @call_output = @pdftk.unpack_files(@input, nil)
+            end
+
+            it "should unpack the files" do
+              @call_output.should == Dir.tmpdir
+
+              @example_expect.children(false).each do |file|
+                (Pathname.new(Dir.tmpdir) + file).should have_the_content_of(@example_expect + file)
+              end
+            end
           end
         end
 
         describe "#attach_files" do
-          before(:all) { @attachment_size = File.size(path_to_pdf('attached_file.txt')) }
-          before(:each) { @call_output = @pdftk.attach_files(@input, [path_to_pdf('attached_file.txt')], :output => @output) }
-          it "should bind the file ine the pdf" do
-            if @call_output.is_a?(String)
-              output_size = File.size(@call_output)
-            else
-              @call_output.rewind
-              t = Tempfile.new('attachment_output')
-              t.write(@call_output.read)
-              output_size = File.size(t.path)
-              t.close
+          before(:each) do
+            @call_output = @pdftk.attach_files(@input, fixtures_path('attach_files/expect', true).collect(&:to_s), :output => @output)
+          end
+
+          it "should bind the file in the pdf" do
+            Dir.mktmpdir do |directory|
+              @pdftk.unpack_files(@call_output, directory)
+              Pathname.new(directory).should have_the_content_of(fixtures_path('attach_files/expect'))
             end
-            if @input.is_a?(String)
-              input_size = File.size(@input)
-            elsif @input.is_a?(Hash)
-              input_size = 0
-              @input.each do |file_path, name|
-                input_size += File.size(file_path)
-              end
-            else
-              @input.rewind
-              t = Tempfile.new('attachment_input')
-              t.write(@input.read)
-              input_size = File.size(t.path)
-              t.close
-            end
-            total_size = input_size + @attachment_size
-            output_size.should >= total_size
           end
 
           it "should output the correct type" do
@@ -199,37 +202,10 @@ describe ActivePdftk::Wrapper do
           end
         end
 
-        describe "#unpack_files to path", :if => output_type == :path do
-          before(:each) do
-            @input = get_input(input_type, 'fields.unpack_files.pdf')
-            @input.rewind rescue nil # rewind if possible.
-            @output = path_to_pdf('')
-            @call_output = @pdftk.unpack_files(@input, @output)
-          end
-
-          it "should unpack the files" do
-            @call_output.should == @output
-            File.unlink(path_to_pdf('unpacked_file.txt')).should == 1
-          end
-        end
-
-        describe "#unpack_files to tmp dir", :if => output_type == :nil do
-          before(:each) do
-            @input = get_input(input_type, 'fields.unpack_files.pdf')
-            @input.rewind rescue nil # rewind if possible.
-            @call_output = @pdftk.unpack_files(@input, @output)
-          end
-
-          it "should unpack the files" do
-            @call_output.should == Dir.tmpdir
-            File.unlink(File.join(Dir.tmpdir, 'unpacked_file.txt')).should == 1
-          end
-        end
-
         describe "#background" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.background.pdf')).read }
-            before(:each) { @call_output = @pdftk.background(@input, path_to_pdf('a.pdf'), :output => @output) }
+            before(:all) { @example_expect = fixtures_path('background/expect.pdf') }
+            before(:each) { @call_output = @pdftk.background(@input, path_to_pdf('spec.a.pdf'), :output => @output) }
           end
 
           pending "spec multibackground also"
@@ -237,8 +213,8 @@ describe ActivePdftk::Wrapper do
 
         describe "#stamp" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.stamp.pdf')).read }
-            before(:each) { @call_output = @pdftk.stamp(@input, path_to_pdf('a.pdf'), :output => @output) }
+            before(:all) { @example_expect = fixtures_path('stamp/expect.pdf') }
+            before(:each) { @call_output = @pdftk.stamp(@input, path_to_pdf('spec.a.pdf'), :output => @output) }
           end
 
           pending "check if the output is really a stamp & spec multistamp also"
@@ -246,51 +222,53 @@ describe ActivePdftk::Wrapper do
 
         describe "#cat" do
           it_behaves_like "a combination command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.cat.pdf')).read }
-            before(:each) { @call_output = @pdftk.cat([{:pdf => path_to_pdf('a.pdf')}, {:pdf => path_to_pdf('b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => @output) }
+            before(:all) { @example_expect = File.new(path_to_pdf('cat/expect.pdf')).read }
+            before(:each) { @call_output = @pdftk.cat([{:pdf => path_to_pdf('spec.a.pdf')}, {:pdf => path_to_pdf('spec.b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => @output) }
           end
         end
 
         describe "#shuffle" do
           it_behaves_like "a combination command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fields.shuffle.pdf')).read }
-            before(:each) { @call_output = @pdftk.shuffle([{:pdf => path_to_pdf('a.pdf')}, {:pdf => path_to_pdf('b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => @output) }
+            before(:all) { @example_expect = File.new(path_to_pdf('shuffle/expect.pdf')).read }
+            before(:each) { @call_output = @pdftk.shuffle([{:pdf => path_to_pdf('spec.a.pdf')}, {:pdf => path_to_pdf('spec.b.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => @output) }
           end
         end
 
-        describe "#burst", :if => output_type == :path do
-          before(:each) do
-            @input = get_input(input_type, 'a.pdf')
-            @input.rewind rescue nil # rewind if possible.
+        describe "#burst" do
+          context 'to path', :if => output_type == :path do
+            before(:each) do
+              @input = get_input(input_type, 'spec.a.pdf')
+              @input.rewind rescue nil # rewind if possible.
+            end
+
+            it "should file into single pages" do
+              output = path_to_pdf('burst/pg_%04d.pdf')
+              @pdftk.burst(@input, :output => output).should == output
+              File.unlink(path_to_pdf('burst/pg_0001.pdf')).should == 1
+              File.unlink(path_to_pdf('burst/pg_0002.pdf')).should == 1
+              File.unlink(path_to_pdf('burst/pg_0003.pdf')).should == 1
+            end
           end
 
-          it "should file into single pages" do
-            output = path_to_pdf('pg_%04d.pdf')
-            @pdftk.burst(@input, :output => output).should == output
-            File.unlink(path_to_pdf('pg_0001.pdf')).should == 1
-            File.unlink(path_to_pdf('pg_0002.pdf')).should == 1
-            File.unlink(path_to_pdf('pg_0003.pdf')).should == 1
-          end
-        end
+          context "#to temporary directory", :if => output_type == :nil do
+            before(:each) do
+              @input = get_input(input_type, 'spec.a.pdf')
+              @input.rewind rescue nil # rewind if possible.
+            end
 
-        describe "#burst to tmp dir", :if => output_type == :nil do
-          before(:each) do
-            @input = get_input(input_type, 'a.pdf')
-            @input.rewind rescue nil # rewind if possible.
-          end
+            it "should file into single pages" do
+              @pdftk.burst(@input, :output => nil).should == Dir.tmpdir
+              File.unlink(File.join(Dir.tmpdir, 'pg_0001.pdf')).should == 1
+              File.unlink(File.join(Dir.tmpdir, 'pg_0002.pdf')).should == 1
+              File.unlink(File.join(Dir.tmpdir, 'pg_0003.pdf')).should == 1
+            end
 
-          it "should file into single pages" do
-            @pdftk.burst(@input).should == Dir.tmpdir
-            File.unlink(File.join(Dir.tmpdir, 'pg_0001.pdf')).should == 1
-            File.unlink(File.join(Dir.tmpdir, 'pg_0002.pdf')).should == 1
-            File.unlink(File.join(Dir.tmpdir, 'pg_0003.pdf')).should == 1
-          end
-
-          it "should put a file in the system tmpdir when no output location given but a page name format given" do
-            @pdftk.burst(@input, :output => 'page_%02d.pdf').should == 'page_%02d.pdf'
-            File.unlink(File.join(Dir.tmpdir, 'page_01.pdf')).should == 1
-            File.unlink(File.join(Dir.tmpdir, 'page_02.pdf')).should == 1
-            File.unlink(File.join(Dir.tmpdir, 'page_03.pdf')).should == 1
+            it "should put a file in the system tmpdir when no output location given but a page name format given" do
+              @pdftk.burst(@input, :output => 'page_%02d.pdf').should == 'page_%02d.pdf'
+              File.unlink(File.join(Dir.tmpdir, 'page_01.pdf')).should == 1
+              File.unlink(File.join(Dir.tmpdir, 'page_02.pdf')).should == 1
+              File.unlink(File.join(Dir.tmpdir, 'page_03.pdf')).should == 1
+            end
           end
         end
       end
@@ -300,10 +278,10 @@ describe ActivePdftk::Wrapper do
 
   context "burst" do
     it "should call #pdtk on @call" do
-      @pdftk.call.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst})
-      @pdftk.burst(path_to_pdf('fields.pdf'))
-      @pdftk.call.should_receive(:pdftk).with({:input => path_to_pdf('fields.pdf'), :operation => :burst, :options => {:encrypt  => :'40bit'}})
-      @pdftk.burst(path_to_pdf('fields.pdf'), :options => {:encrypt  => :'40bit'})
+      @pdftk.call.should_receive(:pdftk).with({:input => path_to_pdf('spec.fields.pdf'), :operation => :burst})
+      @pdftk.burst(path_to_pdf('spec.fields.pdf'))
+      @pdftk.call.should_receive(:pdftk).with({:input => path_to_pdf('spec.fields.pdf'), :operation => :burst, :options => {:encrypt  => :'40bit'}})
+      @pdftk.burst(path_to_pdf('spec.fields.pdf'), :options => {:encrypt  => :'40bit'})
     end
   end
 
