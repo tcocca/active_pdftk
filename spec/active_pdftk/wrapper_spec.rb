@@ -178,7 +178,7 @@ describe ActivePdftk::Wrapper do
           end
         end
 
-        describe "#attach_files", :focus => true do
+        describe "#attach_files" do
           before(:each) do
             @call_output = @pdftk.attach_files(@input,  fixtures_path('attach_files/expect', true).collect(&:to_s), :output => @output)
           end
