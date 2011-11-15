@@ -42,7 +42,6 @@ module ActivePdftk
       check_bit_true(2)
     end
 
-    
     # @macro global_method
     # @macro boolean
     # Boolean method to determine if the field should not be exported to fill out the PDF form
@@ -216,7 +215,7 @@ module ActivePdftk
       attributes['FieldValue']
     end
 
-    # Setter method for the 'FieldValue' attribute in the +attributes+ hash. 
+    # Setter method for the 'FieldValue' attribute in the +attributes+ hash.
     # The value does not change if the field is a read only true
     # @return [String]
     def value=(attr)

@@ -1,0 +1,184 @@
+---
+FieldType: Text
+FieldName: text_not_required
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Choice
+FieldName: combo_box
+FieldFlags: 131072
+FieldJustification: Left
+FieldStateOption: Jason
+FieldStateOption: Tom
+---
+FieldType: Text
+FieldName: text_required
+FieldFlags: 2
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: check_box
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Button
+FieldName: radio_button
+FieldFlags: 49152
+FieldJustification: Left
+FieldStateOption: No
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Choice
+FieldName: list_box
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: dave
+FieldStateOption: sam
+---
+FieldType: Button
+FieldName: button
+FieldNameAlt: Push Me
+FieldFlags: 65536
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: text_area
+FieldFlags: 4096
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: read_only
+FieldFlags: 1
+FieldValue: read_only
+FieldValueDefault: read_only
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: password
+FieldFlags: 12591106
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: file
+FieldFlags: 5242880
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: locked_field
+FieldFlags: 12582912
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: default_value
+FieldNameAlt: Tooltip Text
+FieldFlags: 12582912
+FieldValue: default_value
+FieldValueDefault: default_value
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: multi_line
+FieldFlags: 12587008
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: scroll_text
+FieldFlags: 4194304
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: max_100
+FieldFlags: 12582912
+FieldJustification: Left
+FieldMaxLength: 100
+---
+FieldType: Text
+FieldName: rich_text
+FieldFlags: 46137344
+FieldJustification: Left
+FieldStyleDefault: font: Helvetica,sans-serif 12.0pt; text-align:left; color:#000000 
+---
+FieldType: Text
+FieldName: check_spellings
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: comb_20
+FieldFlags: 29360128
+FieldJustification: Left
+FieldMaxLength: 20
+---
+FieldType: Choice
+FieldName: edit_combo
+FieldFlags: 4587520
+FieldJustification: Left
+FieldStateOption: Marco
+FieldStateOption: Tom
+---
+FieldType: Choice
+FieldName: sort_combo
+FieldFlags: 4849664
+FieldJustification: Left
+FieldStateOption: John
+FieldStateOption: Matt
+---
+FieldType: Choice
+FieldName: commit_combo
+FieldFlags: 71434242
+FieldJustification: Left
+FieldStateOption: Jim
+FieldStateOption: Steve
+---
+FieldType: Choice
+FieldName: sort_list
+FieldFlags: 524288
+FieldJustification: Left
+FieldStateOption: Jason
+FieldStateOption: Matt
+---
+FieldType: Choice
+FieldName: multi_select_list
+FieldFlags: 2097152
+FieldJustification: Left
+FieldStateOption: John
+FieldStateOption: Tom
+---
+FieldType: Button
+FieldName: default_checked
+FieldFlags: 0
+FieldValue: Yes
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Button
+FieldName: default_radio
+FieldFlags: 33603584
+FieldValue: Yes
+FieldJustification: Left
+FieldStateOption: Both
+FieldStateOption: No
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Choice
+FieldName: default_list
+FieldFlags: 0
+FieldValue: Tom
+FieldValueDefault: Tom
+FieldJustification: Left
+FieldStateOption: Matt
+FieldStateOption: Tom
+---
+FieldType: Choice
+FieldName: default_combo
+FieldFlags: 4587520
+FieldValue: Marco
+FieldValueDefault: Marco
+FieldJustification: Left
+FieldStateOption: Marco
+FieldStateOption: Tom
