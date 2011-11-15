@@ -76,7 +76,7 @@ describe ActivePdftk::Wrapper do
     end
 
     it "should return expected data" do
-      open_or_rewind(@call_output).should == @example_expect
+      @call_output.should have_the_content_of(@example_expect)
     end
 
     after(:each) { remove_output(@call_output) }
@@ -109,57 +109,62 @@ describe ActivePdftk::Wrapper do
 
         describe "#dump_data_fields" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('dump_data_fields/expect.data_fields')).read }
+            before(:all) { @example_expect = fixtures_path('dump_data_fields/expect.data_fields') }
             before(:each) { @call_output = @pdftk.dump_data_fields(@input, :output => @output) }
           end
         end
 
         describe "#fill_form" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fill_form/expect.pdf')).read }
+            before(:all) { @example_expect = fixtures_path('fill_form/expect.pdf') }
             before(:each) { @call_output = @pdftk.fill_form(@input, path_to_pdf('fill_form/spec.fdf'), :output => @output) }
           end
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('fill_form/expect.pdf')).read }
+            before(:all) { @example_expect = fixtures_path('fill_form/expect.pdf') }
             before(:each) { @call_output = @pdftk.fill_form(@input, path_to_pdf('fill_form/spec.xfdf'), :output => @output) }
           end
         end
 
         describe "#generate_fdf" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('generate_fdf/expect.fdf')).read }
+            before(:all) { @example_expect = fixtures_path('generate_fdf/expect.fdf') }
             before(:each) { @call_output = @pdftk.generate_fdf(@input,:output => @output) }
           end
         end
 
         describe "#dump_data" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('dump_data/expect.data')).read }
+            before(:all) { @example_expect = fixtures_path('dump_data/expect.data') }
             before(:each) { @call_output = @pdftk.dump_data(@input,:output => @output) }
           end
         end
 
         describe "#update_info" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('update_info/expect.pdf')).read }
+            before(:all) { @example_expect = fixtures_path('update_info/expect.pdf') }
             before(:each) { @call_output = @pdftk.update_info(@input, path_to_pdf('update_info/spec.data'), :output => @output) }
           end
         end
 
         describe "#unpack_files" do
-          before(:all) { @example_expect = open_or_rewind(path_to_pdf('unpack_files/expect.txt')) }
+          before(:all) { @example_expect = fixtures_path('unpack_files/expect') }
 
           context "to path", :if => output_type == :path do
             before(:each) do
               @input = get_input(input_type, 'unpack_files/spec.pdf')
               @input.rewind rescue nil # rewind if possible.
-              @call_output = @pdftk.unpack_files(@input, path_to_pdf('unpack_files'))
+
+              Dir.mkdir(out_path = fixtures_path('output'))
+              @output = Dir.new(out_path)
+
+              @call_output = @pdftk.unpack_files(@input, @output.path)
             end
 
+            after(:each) { FileUtils.remove_entry_secure @output.path }
+
             it "should unpack the files" do
-              @call_output.should == path_to_pdf('unpack_files')
-              open_or_rewind(path_to_pdf('unpack_files/unpacked_file.txt')).should == @example_expect
-              File.unlink(path_to_pdf('unpack_files/unpacked_file.txt')).should == 1
+              @call_output.should == @output.path
+              fixtures_path('output').should have_the_content_of(@example_expect)
             end
           end
 
@@ -172,15 +177,17 @@ describe ActivePdftk::Wrapper do
 
             it "should unpack the files" do
               @call_output.should == Dir.tmpdir
-              open_or_rewind(File.join(Dir.tmpdir, 'unpacked_file.txt')).should == @example_expect
-              File.unlink(File.join(Dir.tmpdir, 'unpacked_file.txt')).should == 1
+
+              @example_expect.children(false).each do |file|
+                (Pathname.new(Dir.tmpdir) + file).should have_the_content_of(@example_expect + file)
+              end
             end
           end
         end
 
         describe "#attach_files" do
           before(:each) do
-            @call_output = @pdftk.attach_files(@input,  fixtures_path('attach_files/expect', true).collect(&:to_s), :output => @output)
+            @call_output = @pdftk.attach_files(@input, fixtures_path('attach_files/expect', true).collect(&:to_s), :output => @output)
           end
 
           it "should bind the file in the pdf" do
@@ -197,7 +204,7 @@ describe ActivePdftk::Wrapper do
 
         describe "#background" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('background/expect.pdf')).read }
+            before(:all) { @example_expect = fixtures_path('background/expect.pdf') }
             before(:each) { @call_output = @pdftk.background(@input, path_to_pdf('spec.a.pdf'), :output => @output) }
           end
 
@@ -206,7 +213,7 @@ describe ActivePdftk::Wrapper do
 
         describe "#stamp" do
           it_behaves_like "a working command" do
-            before(:all) { @example_expect = File.new(path_to_pdf('stamp/expect.pdf')).read }
+            before(:all) { @example_expect = fixtures_path('stamp/expect.pdf') }
             before(:each) { @call_output = @pdftk.stamp(@input, path_to_pdf('spec.a.pdf'), :output => @output) }
           end
 

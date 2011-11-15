@@ -3,13 +3,7 @@ RSpec::Matchers.define :have_the_content_of do |expected|
     sha256_hash_of(actual) == sha256_hash_of(expected)
   end
 
-  failure_message_for_should do |actual|
-    "expected that #{actual} would have the content of #{expected}"
-  end
-
-  failure_message_for_should_not do |actual|
-    "expected that #{actual} would differ from #{expected}"
-  end
+  diffable
 end
 
 #TODO it would be great to implement an inclusion matcher, just for fun.
@@ -20,6 +14,7 @@ end
 #end
 
 def sha256_hash_of(entry)
+  entry.rewind if entry.respond_to? :rewind
   case entry
     when File, Tempfile then Digest::SHA256.file(entry.path).hexdigest
     when Dir            then (entry.entries - ['.', '..']).collect { |filename| sha256_hash_of(Pathname.new(File.join(entry.path, filename))) }.compact.sort

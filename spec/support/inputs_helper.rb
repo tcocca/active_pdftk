@@ -5,7 +5,7 @@ end
 def fixtures_path(entry, expand = false)
   entry_path = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../', 'fixtures', "#{entry}")))
   if expand && entry_path.directory?
-    (entry_path.entries - [Pathname.new('.'), Pathname.new('..')]).collect { |obj| entry_path + obj}
+    entry_path.children
   else
     entry_path
   end
