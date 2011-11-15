@@ -1,7 +1,14 @@
 def path_to_pdf(filename)
-  file = File.join(File.dirname(__FILE__), '../', 'fixtures')
-  file = File.join(file, "#{filename}") unless filename.nil?
-  file
+  File.expand_path(File.join(File.dirname(__FILE__), '../', 'fixtures', "#{filename}"))
+end
+
+def fixtures_path(entry, expand = false)
+  entry_path = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../', 'fixtures', "#{entry}")))
+  if expand && entry_path.directory?
+    (entry_path.entries - [Pathname.new('.'), Pathname.new('..')]).collect { |obj| entry_path + obj}
+  else
+    entry_path
+  end
 end
 
 # Because with Ruby 1.8 Hashes are unordered, and options in cli are unordered too,

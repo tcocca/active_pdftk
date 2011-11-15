@@ -146,44 +146,7 @@ describe ActivePdftk::Wrapper do
           end
         end
 
-        describe "#attach_files" do
-          before(:all) { @attachment_size = File.size(path_to_pdf('attach_files/spec.txt')) }
-          before(:each) { @call_output = @pdftk.attach_files(@input, [path_to_pdf('attach_files/spec.txt')], :output => @output) }
-          it "should bind the file ine the pdf" do
-            if @call_output.is_a?(String)
-              output_size = File.size(@call_output)
-            else
-              @call_output.rewind
-              t = Tempfile.new('attachment_output')
-              t.write(@call_output.read)
-              output_size = File.size(t.path)
-              t.close
-            end
-            if @input.is_a?(String)
-              input_size = File.size(@input)
-            elsif @input.is_a?(Hash)
-              input_size = 0
-              @input.each do |file_path, name|
-                input_size += File.size(file_path)
-              end
-            else
-              @input.rewind
-              t = Tempfile.new('attachment_input')
-              t.write(@input.read)
-              input_size = File.size(t.path)
-              t.close
-            end
-            total_size = input_size + @attachment_size
-            output_size.should >= total_size
-          end
-
-          it "should output the correct type" do
-            @call_output.should be_kind_of(map_output_type(output_type))
-          end
-        end
-
         describe "#unpack_files" do
-
           before(:all) { @example_expect = open_or_rewind(path_to_pdf('unpack_files/expect.txt')) }
 
           context "to path", :if => output_type == :path do
@@ -212,6 +175,23 @@ describe ActivePdftk::Wrapper do
               open_or_rewind(File.join(Dir.tmpdir, 'unpacked_file.txt')).should == @example_expect
               File.unlink(File.join(Dir.tmpdir, 'unpacked_file.txt')).should == 1
             end
+          end
+        end
+
+        describe "#attach_files", :focus => true do
+          before(:each) do
+            @call_output = @pdftk.attach_files(@input,  fixtures_path('attach_files/expect', true).collect(&:to_s), :output => @output)
+          end
+
+          it "should bind the file in the pdf" do
+            Dir.mktmpdir do |directory|
+              @pdftk.unpack_files(@call_output, directory)
+              Pathname.new(directory).should have_the_content_of(fixtures_path('attach_files/expect'))
+            end
+          end
+
+          it "should output the correct type" do
+            @call_output.should be_kind_of(map_output_type(output_type))
           end
         end
 

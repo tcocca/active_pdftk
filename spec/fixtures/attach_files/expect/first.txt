@@ -1,4 +1,4 @@
-Testing pdftk_forms
+Testing active_pdftk
 https://github.com/tcocca/active_pdftk
 
 This file can be attached to any PDF.
