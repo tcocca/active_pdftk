@@ -207,8 +207,16 @@ describe ActivePdftk::Wrapper do
             before(:all) { @example_expect = fixtures_path('background/expect.pdf') }
             before(:each) { @call_output = @pdftk.background(@input, path_to_pdf('spec.a.pdf'), :output => @output) }
           end
+        end
 
-          pending "spec multibackground also"
+        describe "#multibackground" do
+          it_behaves_like "a working command" do
+            before(:all) { @example_expect = fixtures_path('multibackground/expect.pdf') }
+            before(:each) do
+              @input = get_input(input_type, 'spec.a.pdf')
+              @call_output = @pdftk.multibackground(@input, path_to_pdf('spec.b.pdf'), :output => @output)
+            end
+          end
         end
 
         describe "#stamp" do
@@ -216,8 +224,16 @@ describe ActivePdftk::Wrapper do
             before(:all) { @example_expect = fixtures_path('stamp/expect.pdf') }
             before(:each) { @call_output = @pdftk.stamp(@input, path_to_pdf('spec.a.pdf'), :output => @output) }
           end
+        end
 
-          pending "check if the output is really a stamp & spec multistamp also"
+        describe "#multistamp" do
+          it_behaves_like "a working command" do
+            before(:all) { @example_expect = fixtures_path('multistamp/expect.pdf') }
+            before(:each) do
+              @input = get_input(input_type, 'spec.a.pdf')
+              @call_output = @pdftk.multistamp(@input, path_to_pdf('spec.b.pdf'), :output => @output)
+            end
+          end
         end
 
         describe "#cat" do

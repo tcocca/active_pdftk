@@ -123,6 +123,10 @@ module ActivePdftk
        @call.pdftk(options.merge(command_options))
     end
 
+    def multibackground(template, background, options = {})
+      background(template, background, options.merge(:multi => true))
+    end
+
     # Add a stamp/foreground image/file to the template pdf.
     # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
     # @param [String] stamp the location of the file you wish to stamp onto the template file.
@@ -137,6 +141,10 @@ module ActivePdftk
     def stamp(template, stamp, options = {})
        command_options = call_multi_operation("stamp", template, stamp, options.delete(:multi))
        @call.pdftk(options.merge(command_options))
+    end
+
+    def multistamp(template, stamp, options = {})
+      stamp(template, stamp, options.merge(:multi => true))
     end
 
     # Dump the field data info from the template file.
