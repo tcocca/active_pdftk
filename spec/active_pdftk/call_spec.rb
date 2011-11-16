@@ -3,13 +3,13 @@ require 'tempfile'
 
 describe ActivePdftk::Call do
   context "#new" do
-    before do
+    before :all do
       options = {}
       options[:path] = ENV['path'] unless ENV['path'].nil?
       @pdftk = ActivePdftk::Call.new(options)
     end
 
-    it "should set the path (not nil)" do
+    it "should set the path (not nil)"do
       @pdftk.default_statements[:path].should_not be_nil
     end
 
@@ -24,7 +24,7 @@ describe ActivePdftk::Call do
 
     if ENV['path']
       it "should find the path of pdftk (unstable)" do
-        @pdftk.default_statements[:path].should == ENV['path']
+        ActivePdftk::Call.locate_pdftk.should == ENV['path']
       end
 
       it "should allow a custom path" do # not very testing ~!?
@@ -48,7 +48,7 @@ describe ActivePdftk::Call do
 
   context "#set_cmd" do
     context "prepare command" do
-      before do
+      before :all do
         @pdftk = ActivePdftk::Call.new
       end
 
@@ -95,7 +95,7 @@ describe ActivePdftk::Call do
     end
 
     context "build_range_option" do
-      before do
+      before :all do
         @pdftk = ActivePdftk::Call.new
       end
 
@@ -142,7 +142,7 @@ describe ActivePdftk::Call do
     end
 
     context "build command" do
-      before do
+      before :all do
         @pdftk = ActivePdftk::Call.new(:input => 'test.pdf', :options => {:flatten => true})
       end
 
@@ -161,7 +161,7 @@ describe ActivePdftk::Call do
   end
 
   context "#pdftk" do
-    before do
+    before :each do
       @pdftk = ActivePdftk::Call.new
       @file = File.new path_to_pdf('spec.fields.pdf')
       @tempfile = Tempfile.new('specs')
