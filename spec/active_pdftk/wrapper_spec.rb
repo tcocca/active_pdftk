@@ -52,6 +52,8 @@ def cleanup_file_content(text)
   text.force_encoding('ASCII-8BIT') if text.respond_to? :force_encoding   # PDF embed some binary data breaking gsub with ruby 1.9.2
   text.gsub!(/\(D\:.*\)/, '')                                             # Remove dates ex: /CreationDate (D:20111106104455-05'00')
   text.gsub!(/\/ID \[<\w*><\w*>\]/, '')                                   # Remove ID values ex: /ID [<4ba02a4cf55b1fc842299e6f01eb838e><33bec7dc37839cadf7ab76f3be4d4306>]
+  text.gsub!(/x.*(\?|\%|\#|\$)/, '')
+  text.gsub!(/\/Contents \[.*R\]/, '')
   text
 end
 
@@ -209,9 +211,9 @@ describe ActivePdftk::Wrapper do
           end
         end
 
-        describe "#multibackground" do
-          it_behaves_like "a working command" do
-            before(:all) { @example_expect = fixtures_path('multibackground/expect.pdf') }
+        describe "#multibackground", :focus => true do
+          it_behaves_like "a combination command" do
+            before(:all) { @example_expect = File.new(path_to_pdf('multibackground/expect.pdf')).read }
             before(:each) do
               @input = get_input(input_type, 'spec.a.pdf')
               @call_output = @pdftk.multibackground(@input, path_to_pdf('spec.b.pdf'), :output => @output)
@@ -226,9 +228,9 @@ describe ActivePdftk::Wrapper do
           end
         end
 
-        describe "#multistamp" do
-          it_behaves_like "a working command" do
-            before(:all) { @example_expect = fixtures_path('multistamp/expect.pdf') }
+        describe "#multistamp", :focus => true do
+          it_behaves_like "a combination command" do
+            before(:all) { @example_expect = File.new(path_to_pdf('multistamp/expect.pdf')).read }
             before(:each) do
               @input = get_input(input_type, 'spec.a.pdf')
               @call_output = @pdftk.multistamp(@input, path_to_pdf('spec.b.pdf'), :output => @output)
