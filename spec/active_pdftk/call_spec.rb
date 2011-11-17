@@ -3,13 +3,13 @@ require 'tempfile'
 
 describe ActivePdftk::Call do
   context "#new" do
-    before do
+    before :all do
       options = {}
       options[:path] = ENV['path'] unless ENV['path'].nil?
       @pdftk = ActivePdftk::Call.new(options)
     end
 
-    it "should set the path (not nil)" do
+    it "should set the path (not nil)"do
       @pdftk.default_statements[:path].should_not be_nil
     end
 
@@ -24,7 +24,7 @@ describe ActivePdftk::Call do
 
     if ENV['path']
       it "should find the path of pdftk (unstable)" do
-        @pdftk.default_statements[:path].should == ENV['path']
+        ActivePdftk::Call.locate_pdftk.should == ENV['path']
       end
 
       it "should allow a custom path" do # not very testing ~!?
@@ -48,13 +48,13 @@ describe ActivePdftk::Call do
 
   context "#set_cmd" do
     context "prepare command" do
-      before do
+      before :all do
         @pdftk = ActivePdftk::Call.new
       end
 
       it "should convert input" do
-        @pdftk.set_cmd(:input => 'spec.a.pdf').should == "spec.a.pdf output -"
-        inputs = {'spec.a.pdf' => 'foo', 'spec.b.pdf' => 'bar', 'spec.c.pdf' => nil}
+        @pdftk.set_cmd(:input => 'multi.pdf').should == "multi.pdf output -"
+        inputs = {'multi.pdf' => 'foo', 'poly.pdf' => 'bar', 'spec.c.pdf' => nil}
         reconstruct_inputs(@pdftk.set_cmd(:input => inputs)).should == inputs
         @pdftk.set_cmd(:input => File.new(path_to_pdf('spec.fields.pdf'))).should == "- output -"
         @pdftk.set_cmd(:input => Tempfile.new('specs')).should == "- output -"
@@ -78,7 +78,7 @@ describe ActivePdftk::Call do
       end
 
       it "should convert output" do
-        @pdftk.set_cmd(:output => 'spec.a.pdf').should == "output spec.a.pdf"
+        @pdftk.set_cmd(:output => 'multi.pdf').should == "output multi.pdf"
         @pdftk.set_cmd(:output => File.new(path_to_pdf('spec.fields.pdf'))).should == "output -"
         @pdftk.set_cmd(:output => Tempfile.new('specs')).should == "output -"
         @pdftk.set_cmd(:output => StringIO.new('specs')).should == "output -"
@@ -95,54 +95,54 @@ describe ActivePdftk::Call do
     end
 
     context "build_range_option" do
-      before do
+      before :all do
         @pdftk = ActivePdftk::Call.new
       end
 
       it "should set the operation with arguments" do
         cat_options = {
-          :input => {'spec.a.pdf' => nil, 'spec.b.pdf' => nil, 'spec.c.pdf' => nil},
+          :input => {'multi.pdf' => nil, 'poly.pdf' => nil, 'spec.c.pdf' => nil},
           :operation => {
             :cat => [
-              {:start => 1, :end => 'end', :pdf => 'spec.a.pdf'},
-              {:pdf => 'spec.b.pdf', :start => 12, :end => 16, :orientation => 'E', :pages => 'even'}
+              {:start => 1, :end => 'end', :pdf => 'multi.pdf'},
+              {:pdf => 'poly.pdf', :start => 12, :end => 16, :orientation => 'E', :pages => 'even'}
             ]
           }
         }
         cmd = @pdftk.set_cmd(cat_options)
         input_pdfs = cmd.split(' cat ').first
         input_map = map_inputs(input_pdfs)
-        cmd.should == "#{input_pdfs} cat #{input_map['spec.a.pdf']}1-end #{input_map['spec.b.pdf']}12-16evenE output -"
+        cmd.should == "#{input_pdfs} cat #{input_map['multi.pdf']}1-end #{input_map['poly.pdf']}12-16evenE output -"
 
-        @pdftk.set_cmd(:input => {'spec.a.pdf' => nil}, :operation => {:cat => [{:pdf => 'spec.a.pdf', :start => 1, :end => 'end'}]}).should == "B=spec.a.pdf cat B1-end output -"
-        @pdftk.set_cmd(:input => {'spec.a.pdf' => nil}, :operation => {:cat => [{:pdf => 'spec.a.pdf'}]}).should == "B=spec.a.pdf cat B output -"
+        @pdftk.set_cmd(:input => {'multi.pdf' => nil}, :operation => {:cat => [{:pdf => 'multi.pdf', :start => 1, :end => 'end'}]}).should == "B=multi.pdf cat B1-end output -"
+        @pdftk.set_cmd(:input => {'multi.pdf' => nil}, :operation => {:cat => [{:pdf => 'multi.pdf'}]}).should == "B=multi.pdf cat B output -"
 
-        cat_options = {:input => {'spec.a.pdf' => nil, 'spec.b.pdf' => nil}, :operation => {:cat => [{:pdf => 'spec.a.pdf'}, {:pdf => 'spec.b.pdf'}]}}
+        cat_options = {:input => {'multi.pdf' => nil, 'poly.pdf' => nil}, :operation => {:cat => [{:pdf => 'multi.pdf'}, {:pdf => 'poly.pdf'}]}}
         cmd = @pdftk.set_cmd(cat_options)
         input_pdfs = cmd.split(' cat ').first
         input_map = map_inputs(input_pdfs)
-        cmd.should == "#{input_pdfs} cat #{input_map['spec.a.pdf']} #{input_map['spec.b.pdf']} output -"
+        cmd.should == "#{input_pdfs} cat #{input_map['multi.pdf']} #{input_map['poly.pdf']} output -"
 
-        @pdftk.set_cmd(:input => 'spec.a.pdf', :operation => {:cat => [{:pdf => 'spec.a.pdf', :start => 1, :end => 'end'}]}).should == "spec.a.pdf cat 1-end output -"
-        @pdftk.set_cmd(:input => 'spec.a.pdf', :operation => {:cat => [{:pdf => 'spec.a.pdf', :end => 'end'}]}).should == "spec.a.pdf cat 1-end output -"
-        @pdftk.set_cmd(:input => 'spec.a.pdf', :operation => {:cat => [{:pdf => 'spec.a.pdf', :start => '4', :orientation => 'N'}]}).should == "spec.a.pdf cat 4N output -"
+        @pdftk.set_cmd(:input => 'multi.pdf', :operation => {:cat => [{:pdf => 'multi.pdf', :start => 1, :end => 'end'}]}).should == "multi.pdf cat 1-end output -"
+        @pdftk.set_cmd(:input => 'multi.pdf', :operation => {:cat => [{:pdf => 'multi.pdf', :end => 'end'}]}).should == "multi.pdf cat 1-end output -"
+        @pdftk.set_cmd(:input => 'multi.pdf', :operation => {:cat => [{:pdf => 'multi.pdf', :start => '4', :orientation => 'N'}]}).should == "multi.pdf cat 4N output -"
       end
 
       it "should raise missing input errors" do
-        expect { @pdftk.set_cmd(:input => {'spec.a.pdf' => nil}, :operation => {:cat => [{:pdf => 'spec.a.pdf'}, {:pdf => 'spec.b.pdf'}]}) }.to raise_error(ActivePdftk::MissingInput)
-        expect { @pdftk.set_cmd(:input => 'spec.a.pdf', :operation => {:cat => [{:pdf => 'spec.a.pdf'}, {:pdf => 'spec.b.pdf'}]}) }.to raise_error(ActivePdftk::MissingInput)
-        expect { @pdftk.set_cmd(:input => {'spec.a.pdf' => nil, 'spec.c.pdf' => 'foo'}, :operation => {:cat => [{:pdf => 'spec.a.pdf'}, {:pdf => 'spec.b.pdf'}]}) }.to raise_error(ActivePdftk::MissingInput, "Missing Input file, `spec.b.pdf`")
+        expect { @pdftk.set_cmd(:input => {'multi.pdf' => nil}, :operation => {:cat => [{:pdf => 'multi.pdf'}, {:pdf => 'poly.pdf'}]}) }.to raise_error(ActivePdftk::MissingInput)
+        expect { @pdftk.set_cmd(:input => 'multi.pdf', :operation => {:cat => [{:pdf => 'multi.pdf'}, {:pdf => 'poly.pdf'}]}) }.to raise_error(ActivePdftk::MissingInput)
+        expect { @pdftk.set_cmd(:input => {'multi.pdf' => nil, 'spec.c.pdf' => 'foo'}, :operation => {:cat => [{:pdf => 'multi.pdf'}, {:pdf => 'poly.pdf'}]}) }.to raise_error(ActivePdftk::MissingInput, "Missing Input file, `poly.pdf`")
       end
 
       it "should raise an invalid options error" do
-        expect { @pdftk.set_cmd(:input => {'spec.a.pdf' => nil}, :operation => {:cat => nil}) }.to raise_error(ActivePdftk::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
-        expect { @pdftk.set_cmd(:input => {'spec.a.pdf' => nil}, :operation => {:cat => []}) }.to raise_error(ActivePdftk::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
-        expect { @pdftk.set_cmd(:input => {'spec.a.pdf' => nil}, :operation => {:cat => "test"}) }.to raise_error(ActivePdftk::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
+        expect { @pdftk.set_cmd(:input => {'multi.pdf' => nil}, :operation => {:cat => nil}) }.to raise_error(ActivePdftk::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
+        expect { @pdftk.set_cmd(:input => {'multi.pdf' => nil}, :operation => {:cat => []}) }.to raise_error(ActivePdftk::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
+        expect { @pdftk.set_cmd(:input => {'multi.pdf' => nil}, :operation => {:cat => "test"}) }.to raise_error(ActivePdftk::InvalidOptions, "Invalid options passed to the command, `cat`, please see `$: pdftk --help`")
       end
     end
 
     context "build command" do
-      before do
+      before :all do
         @pdftk = ActivePdftk::Call.new(:input => 'test.pdf', :options => {:flatten => true})
       end
 
@@ -161,7 +161,7 @@ describe ActivePdftk::Call do
   end
 
   context "#pdftk" do
-    before do
+    before :each do
       @pdftk = ActivePdftk::Call.new
       @file = File.new path_to_pdf('spec.fields.pdf')
       @tempfile = Tempfile.new('specs')
@@ -203,7 +203,7 @@ describe ActivePdftk::Call do
     end
 
     it "should raise a ActivePdftk::CommandError exception" do
-      expect{ @pdftk.pdftk(:input => {'spec.a.pdf' => 'foo', 'spec.b.pdf' => 'bar', 'spec.c.pdf' => nil}, :operation => {}, :output => 'out.pdf',:options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'}) }.to raise_error(ActivePdftk::CommandError)
+      expect{ @pdftk.pdftk(:input => {'multi.pdf' => 'foo', 'poly.pdf' => 'bar', 'spec.c.pdf' => nil}, :operation => {}, :output => 'out.pdf',:options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'}) }.to raise_error(ActivePdftk::CommandError)
     end
 
     context "#burst" do

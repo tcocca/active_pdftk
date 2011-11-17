@@ -57,3 +57,14 @@ def open_or_rewind(target)
     target.read
   end
 end
+
+def cleanup_file_content!(text)
+  text.force_encoding('ASCII-8BIT') if text.respond_to? :force_encoding   # PDF embed some binary data breaking gsub with ruby 1.9.2
+  text.gsub!(/\(D\:.*\)/, '')                                             # Remove dates ex: /CreationDate (D:20111106104455-05'00')
+  text.gsub!(/\/ID \[<\w*><\w*>\]/, '')                                   # Remove ID values ex: /ID [<4ba02a4cf55b1fc842299e6f01eb838e><33bec7dc37839cadf7ab76f3be4d4306>]
+  text
+end
+
+def cleanup_file_content(text)
+  cleanup_file_content!(text.dup)
+end
