@@ -122,7 +122,18 @@ module ActivePdftk
        command_options = call_multi_operation("background", template, background, options.delete(:multi))
        @call.pdftk(options.merge(command_options))
     end
-
+    
+    # Similar to #background, however if the background file it is multiple pages it will apply each page of the background file to the corresponding page of the template.
+    # If the template has more pages than the background file the last page of the background file will be repeated.
+    # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
+    # @param [String] background the location of the file you wish to background onto the template file.
+    # @param [Hash] options is a hash containing statements for the wrapper.
+    # @macro see_options
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
+    # @example
+    #   multibackground('in1.pdf', 'bg.pdf') # for StringIO output
+    #   multibackground('in1.pdf', 'bg.pdf', :output => 'out.pdf') # to generate a pdf output
     def multibackground(template, background, options = {})
       background(template, background, options.merge(:multi => true))
     end
@@ -143,6 +154,17 @@ module ActivePdftk
        @call.pdftk(options.merge(command_options))
     end
 
+    # Similar to #stamp, however if the stamp file it is multiple pages it will apply each page of the stamp file to the corresponding page of the template.
+    # If the template has more pages than the stamp file the last page of the stamp file will be repeated.
+    # @param [String, File, Tempfile, StringIO] template is the file on which the form is based.
+    # @param [String] stamp the location of the file you wish to stamp onto the template file.
+    # @param [Hash] options is a hash containing statements for the wrapper.
+    # @macro see_options
+    # @note +:input+ in the options hash will be overwritten by +template+ and +:operation+ will be overwritten.
+    # @return resource specified in +:output+, if +:output+ is not provided (or +nil+), return content of +stdout+ in a +StringIO+.
+    # @example
+    #   multistamp('in1.pdf', 'stamp.pdf') # for StringIO output
+    #   multistamp('in1.pdf', 'stamp.pdf', :output => 'out.pdf') # to generate a pdf output
     def multistamp(template, stamp, options = {})
       stamp(template, stamp, options.merge(:multi => true))
     end
