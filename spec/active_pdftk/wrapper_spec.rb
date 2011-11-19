@@ -299,26 +299,164 @@ describe ActivePdftk::Wrapper do
     end # each outputs
   end # each inputs
 
+  context "nop" do
+    it "should call #pdftk on @call" do
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => nil)
+      @pdftk.nop('a.pdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => nil, :encrypt  => :'40bit')
+      @pdftk.nop('a.pdf', :encrypt  => :'40bit')
+    end
+  end
+
+  context "generate_fdf" do
+    it "should call #pdftk on @call" do
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :generate_fdf)
+      @pdftk.generate_fdf('a.pdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :generate_fdf, :encrypt  => :'40bit')
+      @pdftk.generate_fdf('a.pdf', :encrypt  => :'40bit')
+    end
+  end
+
   context "burst" do
-    it "should call #pdtk on @call" do
-      @pdftk.call.should_receive(:pdftk).with({:input => path_to_pdf('spec.fields.pdf'), :operation => :burst})
-      @pdftk.burst(path_to_pdf('spec.fields.pdf'))
-      @pdftk.call.should_receive(:pdftk).with({:input => path_to_pdf('spec.fields.pdf'), :operation => :burst, :options => {:encrypt  => :'40bit'}})
-      @pdftk.burst(path_to_pdf('spec.fields.pdf'), :options => {:encrypt  => :'40bit'})
+    it "should call #pdftk on @call" do
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :burst)
+      @pdftk.burst('a.pdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :burst, :options => {:encrypt  => :'40bit'})
+      @pdftk.burst('a.pdf', :options => {:encrypt  => :'40bit'})
     end
   end
 
   context "cat" do
     it "should call #pdftk on @call" do
-      @pdftk.call.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
+      @pdftk.call.should_receive(:pdftk).with(:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]})
       @pdftk.cat([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
+      @pdftk.call.should_receive(:pdftk).with(:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:cat => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}, :output => 'c.pdf')
+      @pdftk.cat([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => 'c.pdf')
     end
   end
 
   context "shuffle" do
     it "should call #pdftk on @call" do
-      @pdftk.call.should_receive(:pdftk).with({:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:shuffle => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}})
+      @pdftk.call.should_receive(:pdftk).with(:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:shuffle => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]})
       @pdftk.shuffle([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}])
+      @pdftk.call.should_receive(:pdftk).with(:input => {'a.pdf' => 'foo', 'b.pdf' => nil}, :operation => {:shuffle => [{:pdf => 'a.pdf'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}]}, :output => 'c.pdf')
+      @pdftk.shuffle([{:pdf => 'a.pdf', :pass => 'foo'}, {:pdf => 'b.pdf', :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => 'c.pdf')
+    end
+  end
+
+  context "dump_data_fields" do
+    it "should call #pdftk on @call" do
+      @pdftk.call.stub(:utf8_support?) { false }
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :dump_data_fields)
+      @pdftk.dump_data_fields('a.pdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :dump_data_fields, :output => 'data_fields.txt')
+      @pdftk.dump_data_fields('a.pdf', :output => 'data_fields.txt')
+      @pdftk.call.stub(:utf8_support?) { true }
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :dump_data_fields_utf8)
+      @pdftk.dump_data_fields('a.pdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :dump_data_fields_utf8, :output => 'data_fields.txt')
+      @pdftk.dump_data_fields('a.pdf', :output => 'data_fields.txt')
+    end
+  end
+
+  context "dump_data" do
+    it "should call #pdftk on @call" do
+      @pdftk.call.stub(:utf8_support?) { false }
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :dump_data)
+      @pdftk.dump_data('a.pdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :dump_data, :output => 'data_fields.txt')
+      @pdftk.dump_data('a.pdf', :output => 'data_fields.txt')
+      @pdftk.call.stub(:utf8_support?) { true }
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :dump_data_utf8)
+      @pdftk.dump_data('a.pdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :dump_data_utf8, :output => 'data_fields.txt')
+      @pdftk.dump_data('a.pdf', :output => 'data_fields.txt')
+    end
+  end
+
+  context "fill_form" do
+    it "should call #pdftk on @call" do
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:fill_form => 'form.xfdf'})
+      @pdftk.fill_form('a.pdf', 'form.xfdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:fill_form => 'form.xfdf'}, :encrypt  => :'40bit')
+      @pdftk.fill_form('a.pdf', 'form.xfdf', :encrypt  => :'40bit')
+    end
+  end
+
+  context "update_info" do
+    it "should call #pdftk on @call" do
+      @pdftk.call.stub(:utf8_support?) { false }
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:update_info => 'meta.txt'})
+      @pdftk.update_info('a.pdf', 'meta.txt')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:update_info => 'meta.txt'}, :encrypt  => :'40bit')
+      @pdftk.update_info('a.pdf', 'meta.txt', :encrypt  => :'40bit')
+      @pdftk.call.stub(:utf8_support?) { true }
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:update_info_utf8 => 'meta.txt'})
+      @pdftk.update_info('a.pdf', 'meta.txt')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:update_info_utf8 => 'meta.txt'}, :encrypt  => :'40bit')
+      @pdftk.update_info('a.pdf', 'meta.txt', :encrypt  => :'40bit')
+    end
+  end
+
+  context "attach_files" do
+    it "should call #pdftk on @call" do
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:attach_files => ['attach.txt']})
+      @pdftk.attach_files('a.pdf', ['attach.txt'])
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:attach_files => ['attach.txt']}, :encrypt  => :'40bit')
+      @pdftk.attach_files('a.pdf', ['attach.txt'], :encrypt  => :'40bit')
+    end
+  end
+
+  context "unpack_files" do
+    it "should call #pdftk on @call" do
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :unpack_files, :output => nil)
+      @pdftk.unpack_files('a.pdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => :unpack_files, :output => 'test')
+      @pdftk.unpack_files('a.pdf', 'test')
+    end
+  end
+
+  context "background" do
+    it "should call #pdftk on @call" do
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:background => 'b.pdf'})
+      @pdftk.background('a.pdf', 'b.pdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:multibackground => 'b.pdf'})
+      @pdftk.background('a.pdf', 'b.pdf', :multi => true)
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:background => 'b.pdf'}, :encrypt  => :'40bit')
+      @pdftk.background('a.pdf', 'b.pdf', :encrypt  => :'40bit')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:multibackground => 'b.pdf'}, :encrypt  => :'40bit')
+      @pdftk.background('a.pdf', 'b.pdf', :encrypt  => :'40bit', :multi => true)
+    end
+  end
+
+  context "multibackground" do
+    it "should call #pdftk on @call" do
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:multibackground => 'b.pdf'})
+      @pdftk.multibackground('a.pdf', 'b.pdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:multibackground => 'b.pdf'}, :encrypt  => :'40bit')
+      @pdftk.multibackground('a.pdf', 'b.pdf', :encrypt  => :'40bit')
+    end
+  end
+
+  context "stamp" do
+    it "should call #pdftk on @call" do
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:stamp => 'b.pdf'})
+      @pdftk.stamp('a.pdf', 'b.pdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:multistamp => 'b.pdf'})
+      @pdftk.stamp('a.pdf', 'b.pdf', :multi => true)
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:stamp => 'b.pdf'}, :encrypt  => :'40bit')
+      @pdftk.stamp('a.pdf', 'b.pdf', :encrypt  => :'40bit')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:multistamp => 'b.pdf'}, :encrypt  => :'40bit')
+      @pdftk.stamp('a.pdf', 'b.pdf', :encrypt  => :'40bit', :multi => true)
+    end
+  end
+
+  context "multistamp" do
+    it "should call #pdftk on @call" do
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:multistamp => 'b.pdf'})
+      @pdftk.multistamp('a.pdf', 'b.pdf')
+      @pdftk.call.should_receive(:pdftk).with(:input => 'a.pdf', :operation => {:multistamp => 'b.pdf'}, :encrypt  => :'40bit')
+      @pdftk.multistamp('a.pdf', 'b.pdf', :encrypt  => :'40bit')
     end
   end
 
