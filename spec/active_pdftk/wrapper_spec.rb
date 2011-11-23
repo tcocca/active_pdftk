@@ -63,7 +63,7 @@ describe ActivePdftk::Wrapper do
     end
   end
 
-  shared_examples "a working command" do
+  shared_examples "a command" do
     it "should return a #{@output.nil? ? StringIO : @output.class}" do
       @call_output.should be_kind_of(@output.nil? ? StringIO : @output.class)
     end
@@ -71,25 +71,11 @@ describe ActivePdftk::Wrapper do
     it "should return expected data" do
       if example.metadata[:genesis] && @output.is_a?(String)
         FileUtils.copy_entry(@output, @example_expect.to_s, true, false, true)
-      else
-        @call_output.should have_the_content_of(@example_expect)
-      end
-    end
-
-    after(:each) { remove_output(@call_output) }
-  end
-
-  shared_examples "a combination command" do
-    it "should return a #{@output.nil? ? StringIO : @output.class}" do
-      @call_output.should be_kind_of(@output.nil? ? StringIO : @output.class)
-    end
-
-    it "should return expected data" do
-      if example.metadata[:genesis] && @output.is_a?(String)
-        FileUtils.copy_entry(@output, @example_expect.to_s, true, false, true)
-      else
+      elsif example.metadata[:cleanup]
         #cleanup_file_content!(File.open(@output, 'r:binary').read).should == cleanup_file_content!(File.open(@example_expect, 'r:binary').read) if @output.is_a?(String) # lets keep this line for debugging purpose.
         @call_output.should look_like_the_same_pdf_as(@example_expect)
+      else
+        @call_output.should have_the_content_of(@example_expect)
       end
     end
 
@@ -107,39 +93,39 @@ describe ActivePdftk::Wrapper do
         end
 
         describe "#dump_data_fields" do
-          it_behaves_like "a working command" do
+          it_behaves_like "a command" do
             before(:all) { @example_expect = fixtures_path('dump_data_fields/expect.data_fields') }
             before(:each) { @call_output = @pdftk.dump_data_fields(@input, :output => @output) }
           end
         end
 
         describe "#fill_form" do
-          it_behaves_like "a working command" do
+          it_behaves_like "a command" do
             before(:all) { @example_expect = fixtures_path('fill_form/expect.pdf') }
             before(:each) { @call_output = @pdftk.fill_form(@input, path_to_pdf('fill_form/spec.fdf'), :output => @output) }
           end
-          it_behaves_like "a working command" do
+          it_behaves_like "a command" do
             before(:all) { @example_expect = fixtures_path('fill_form/expect.pdf') }
             before(:each) { @call_output = @pdftk.fill_form(@input, path_to_pdf('fill_form/spec.xfdf'), :output => @output) }
           end
         end
 
         describe "#generate_fdf" do
-          it_behaves_like "a working command" do
+          it_behaves_like "a command" do
             before(:all) { @example_expect = fixtures_path('generate_fdf/expect.fdf') }
             before(:each) { @call_output = @pdftk.generate_fdf(@input,:output => @output) }
           end
         end
 
         describe "#dump_data" do
-          it_behaves_like "a working command" do
+          it_behaves_like "a command" do
             before(:all) { @example_expect = fixtures_path('dump_data/expect.data') }
             before(:each) { @call_output = @pdftk.dump_data(@input,:output => @output) }
           end
         end
 
         describe "#update_info" do
-          it_behaves_like "a working command" do
+          it_behaves_like "a command" do
             before(:all) { @example_expect = fixtures_path('update_info/expect.pdf') }
             before(:each) { @call_output = @pdftk.update_info(@input, path_to_pdf('update_info/spec.data'), :output => @output) }
           end
@@ -201,43 +187,43 @@ describe ActivePdftk::Wrapper do
           end
         end
 
-        describe "#background", :focus => true do
-          it_behaves_like "a combination command" do
+        describe "#background", :cleanup => true do
+          it_behaves_like "a command" do
             before(:all) { @example_expect = fixtures_path('background/expect.pdf') }
             before(:each) { @call_output = @pdftk.background(get_input(input_type, 'multi.pdf'), path_to_pdf('poly.pdf'), :output => @output) }
           end
         end
 
-        describe "#multibackground", :focus => true do
-          it_behaves_like "a combination command" do
+        describe "#multibackground", :cleanup => true do
+          it_behaves_like "a command" do
             before(:all) { @example_expect = fixtures_path('multibackground/expect.pdf') }
             before(:each) { @call_output = @pdftk.multibackground(get_input(input_type, 'multi.pdf'), path_to_pdf('poly.pdf'), :output => @output) }
           end
         end
 
-        describe "#stamp", :focus => true do
-          it_behaves_like "a combination command" do
+        describe "#stamp", :cleanup => true do
+          it_behaves_like "a command" do
             before(:all) { @example_expect = fixtures_path('stamp/expect.pdf') }
             before(:each) { @call_output = @pdftk.stamp(get_input(input_type, 'multi.pdf'), path_to_pdf('poly.pdf'), :output => @output) }
           end
         end
 
-        describe "#multistamp", :focus => true do
-          it_behaves_like "a combination command" do
+        describe "#multistamp", :cleanup => true do
+          it_behaves_like "a command" do
             before(:all) { @example_expect = fixtures_path('multistamp/expect.pdf') }
             before(:each) { @call_output = @pdftk.multistamp(get_input(input_type, 'multi.pdf'), path_to_pdf('poly.pdf'), :output => @output) }
           end
         end
 
-        describe "#cat" do
-          it_behaves_like "a combination command" do
+        describe "#cat", :cleanup => true do
+          it_behaves_like "a command" do
             before(:all) { @example_expect = fixtures_path('cat/expect.pdf')}
             before(:each) { @call_output = @pdftk.cat([{:pdf => path_to_pdf('multi.pdf')}, {:pdf => path_to_pdf('poly.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => @output) }
           end
         end
 
-        describe "#shuffle" do
-          it_behaves_like "a combination command" do
+        describe "#shuffle", :cleanup => true do
+          it_behaves_like "a command" do
             before(:all) { @example_expect = fixtures_path('shuffle/expect.pdf')}
             before(:each) { @call_output = @pdftk.shuffle([{:pdf => path_to_pdf('multi.pdf')}, {:pdf => path_to_pdf('poly.pdf'), :start => 1, :end => 'end', :orientation => 'N', :pages => 'even'}], :output => @output) }
           end
