@@ -10,7 +10,7 @@ def get_input(input_type, file_name = 'spec.fields.pdf')
   when :hash
     {path_to_pdf(file_name) => nil}
   when :file
-    File.new(path_to_pdf(file_name))
+    File.new(path_to_pdf(file_name), 'rb')
   when :tempfile
     t = Tempfile.new('input.spec')
     t.write(File.read(path_to_pdf(file_name)))
@@ -25,7 +25,7 @@ def get_output(output_type)
   when :path
     path_to_pdf('output.spec')
   when :file
-    File.new(path_to_pdf('output.spec'), 'w+')
+    File.new(path_to_pdf('output.spec'), 'wb+')
   when :tempfile
     Tempfile.new('output.spec')
   when :stringio
@@ -88,6 +88,7 @@ describe ActivePdftk::Wrapper do
       if example.metadata[:genesis] && @output.is_a?(String)
         FileUtils.copy_entry(@output, @example_expect.to_s, true, false, true)
       else
+        #cleanup_file_content!(File.open(@output, 'r:binary').read).should == cleanup_file_content!(File.open(@example_expect, 'r:binary').read) if @output.is_a?(String) # lets keep this line for debugging purpose.
         @call_output.should look_like_the_same_pdf_as(@example_expect)
       end
     end
@@ -200,29 +201,29 @@ describe ActivePdftk::Wrapper do
           end
         end
 
-        describe "#background" do
-          it_behaves_like "a working command" do
+        describe "#background", :focus => true do
+          it_behaves_like "a combination command" do
             before(:all) { @example_expect = fixtures_path('background/expect.pdf') }
             before(:each) { @call_output = @pdftk.background(get_input(input_type, 'multi.pdf'), path_to_pdf('poly.pdf'), :output => @output) }
           end
         end
 
-        describe "#multibackground" do
-          it_behaves_like "a working command" do
+        describe "#multibackground", :focus => true do
+          it_behaves_like "a combination command" do
             before(:all) { @example_expect = fixtures_path('multibackground/expect.pdf') }
             before(:each) { @call_output = @pdftk.multibackground(get_input(input_type, 'multi.pdf'), path_to_pdf('poly.pdf'), :output => @output) }
           end
         end
 
-        describe "#stamp" do
-          it_behaves_like "a working command" do
+        describe "#stamp", :focus => true do
+          it_behaves_like "a combination command" do
             before(:all) { @example_expect = fixtures_path('stamp/expect.pdf') }
             before(:each) { @call_output = @pdftk.stamp(get_input(input_type, 'multi.pdf'), path_to_pdf('poly.pdf'), :output => @output) }
           end
         end
 
-        describe "#multistamp" do
-          it_behaves_like "a working command" do
+        describe "#multistamp", :focus => true do
+          it_behaves_like "a combination command" do
             before(:all) { @example_expect = fixtures_path('multistamp/expect.pdf') }
             before(:each) { @call_output = @pdftk.multistamp(get_input(input_type, 'multi.pdf'), path_to_pdf('poly.pdf'), :output => @output) }
           end
