@@ -187,6 +187,9 @@ module ActivePdftk
         cmd.insert(0, "cd #{Dir.tmpdir} && ")
       end
       Open3.popen3(cmd) do |stdin, stdout, stderr|
+        stdin.binmode
+        stdout.binmode
+        stderr.binmode
         if @input
           @input.rewind
           stdin.puts @input.read
