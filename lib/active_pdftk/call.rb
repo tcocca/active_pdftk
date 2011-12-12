@@ -333,7 +333,7 @@ module ActivePdftk
       when Hash
         @input_file_map = {}
         args.each do |file, pass|
-          out.first << "#{i.next!}=#{file}"
+          out.first << "#{i.next!}=\"#{file}\""
           out.last << "#{i}=#{pass}" if pass
           @input_file_map[file] = "#{i}"
         end
