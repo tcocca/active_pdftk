@@ -59,7 +59,7 @@ def sha256_hash_of_almost(entry)
       if entry.directory?
         sha256_hash_of_almost(Dir.new(entry))
       elsif entry.file?
-        sha256_hash_of_almost(File.read(entry))
+        sha256_hash_of_almost(File.open(entry, 'r:binary').read)
       end
   end
 end
