@@ -40,7 +40,7 @@ or in a old rails 2.3.x app
 
 == Usage
 
-PDFTK provide all kind of operations (See below for a full list).
+PDFTK provides all kind of operations (See below for a full list).
 Depending of your needs you will use different Adapters.
 
 For form handling use +ActivePdftk::Form+ :
@@ -56,7 +56,7 @@ For read/write metadata on a pdf file use +ActivePdftk::Metadata+ (coming soon).
 
 for other needs you will use +ActivePdftk::Wrapper+ to access all operations of PDFTK.
 
-if you want to digg deeper check +ActivePdftk::Call+ which build the command line from an options hash.
+if you want to dig deeper check +ActivePdftk::Call+ which build the command line from an options hash.
 
 === ActivePdftk::Wrapper
 
@@ -129,6 +129,8 @@ Marco ( https://github.com/elmatou ) - Thanks for contributing so much to the re
 
 == Props
 
-Props to this gem go out to jkraemer (Jens Krämer) for creating https://github.com/jkraemer/pdf-forms and devfu (Dev Fu!) for creating https://github.com/devfu/pdftk.
+Props to this gem go out to: 
+jkraemer (Jens Krämer) for creating https://github.com/jkraemer/pdf-forms and 
+devfu (Dev Fu!) for creating https://github.com/devfu/pdftk.
 
 This gem was originally based on the work of those two projects and greatly expands upon their functionality.
