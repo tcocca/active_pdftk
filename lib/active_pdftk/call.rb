@@ -66,7 +66,8 @@ module ActivePdftk
   #
   # As you know command line programs take often a bunch of arguments, in a very specific syntax. that is our case.
   # In order to call pdftk in a easy way, we build a DSL, it has a hash patern, with four keys : input, operation, output, options.
-  # an additional key +:path+ can be set to specify the path to the pdftk binary.
+  # There are two additional keys. +:path+ can be set to specify the path to the pdftk binary. 
+  # +tmpdir+ can be set to specify the path of the temp directory.
   #   :input => some_input, :operation => some_operation, :output => some_output, :options => some_options
   #
   # ===Input
@@ -184,7 +185,7 @@ module ActivePdftk
       dsl_statements = @default_statements.merge(dsl_statements)
       cmd = "#{@default_statements[:path]} #{set_cmd(dsl_statements)}"
       if dsl_statements[:operation].to_s.match(/burst|unpack_files/)
-        cmd.insert(0, "cd #{Dir.tmpdir} && ")
+        cmd.insert(0, "cd #{tmpdir} && ")
       end
       Open3.popen3(cmd) do |stdin, stdout, stderr|
         if @input
@@ -196,7 +197,7 @@ module ActivePdftk
         raise(CommandError, {:stderr => @error, :cmd => cmd}) unless (@error = stderr.read).empty?
       end
       if dsl_statements[:operation].to_s.match(/burst|unpack_files/) && dsl_statements[:output].nil?
-        Dir.tmpdir
+        tmpdir
       else
         @output
       end
@@ -293,6 +294,14 @@ module ActivePdftk
     #
     def pdftk_version
       %x{#{@default_statements[:path]} --version 2>&1}.scan(/pdftk (\S*) a Handy Tool/).join
+    end
+
+    # Return the directory to use as the temp directory
+    #
+    # @return [String]
+    #
+    def tmpdir
+      @default_statements[:tmpdir] || Dir.tmpdir
     end
 
     # Return the path of the pdftk library if it can be located.

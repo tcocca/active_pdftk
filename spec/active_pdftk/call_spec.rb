@@ -6,11 +6,16 @@ describe ActivePdftk::Call do
     before :all do
       options = {}
       options[:path] = ENV['path'] unless ENV['path'].nil?
+      options[:tmpdir] = '/custom_temp'
       @pdftk = ActivePdftk::Call.new(options)
     end
 
     it "should set the path (not nil)"do
       @pdftk.default_statements[:path].should_not be_nil
+    end
+
+    it "should set the tmpdir" do
+      @pdftk.default_statements[:tmpdir].should == '/custom_temp'
     end
 
     it "should check the ENV vars" do
@@ -253,6 +258,16 @@ describe ActivePdftk::Call do
       it "should return stringio if no output is specified" do
         @pdftk.pdftk(:input => path_to_pdf('spec.fields.pdf'), :operation => :dump_data).should be_a(StringIO)
       end
+    end
+  end
+
+  context "#tmpdir" do
+    before :all do
+      @pdftk = ActivePdftk::Call.new
+    end
+
+    it "should use the system tmpdir when a tmpdir is not explicity set" do
+      @pdftk.tmpdir.should == Dir.tmpdir
     end
   end
 end
