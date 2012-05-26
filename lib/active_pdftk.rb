@@ -1,4 +1,3 @@
-require 'digest' 
 require 'builder'
 require 'active_pdftk/call'
 require 'active_pdftk/wrapper'
