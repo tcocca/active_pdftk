@@ -21,7 +21,7 @@ end
 # Anybody with a better solution should make a proposal.
 def reconstruct_inputs(chain)
   tested_inputs = Hash.new
-  chain.scan(/([A-Z])=(\S*)/).each do |item|
+  chain.scan(/([A-Z])="?([^\s"]*)/).each do |item|
     if tested_inputs[item.first]
       tested_inputs[item.first] = [tested_inputs[item.first].first, item.last]
     else

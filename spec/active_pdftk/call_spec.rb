@@ -112,16 +112,16 @@ describe ActivePdftk::Call do
         cmd = @pdftk.set_cmd(cat_options)
         input_pdfs = cmd.split(' cat ').first
         input_map = map_inputs(input_pdfs)
-        cmd.should == "#{input_pdfs} cat #{input_map['multi.pdf']}1-end #{input_map['poly.pdf']}12-16evenE output -"
+        cmd.should == "#{input_pdfs} cat #{input_map['"multi.pdf"']}1-end #{input_map['"poly.pdf"']}12-16evenE output -"
 
-        @pdftk.set_cmd(:input => {'multi.pdf' => nil}, :operation => {:cat => [{:pdf => 'multi.pdf', :start => 1, :end => 'end'}]}).should == "B=multi.pdf cat B1-end output -"
-        @pdftk.set_cmd(:input => {'multi.pdf' => nil}, :operation => {:cat => [{:pdf => 'multi.pdf'}]}).should == "B=multi.pdf cat B output -"
+        @pdftk.set_cmd(:input => {'multi.pdf' => nil}, :operation => {:cat => [{:pdf => 'multi.pdf', :start => 1, :end => 'end'}]}).should == "A=\"multi.pdf\" cat A1-end output -"
+        @pdftk.set_cmd(:input => {'multi.pdf' => nil}, :operation => {:cat => [{:pdf => 'multi.pdf'}]}).should == "A=\"multi.pdf\" cat A output -"
 
         cat_options = {:input => {'multi.pdf' => nil, 'poly.pdf' => nil}, :operation => {:cat => [{:pdf => 'multi.pdf'}, {:pdf => 'poly.pdf'}]}}
         cmd = @pdftk.set_cmd(cat_options)
         input_pdfs = cmd.split(' cat ').first
         input_map = map_inputs(input_pdfs)
-        cmd.should == "#{input_pdfs} cat #{input_map['multi.pdf']} #{input_map['poly.pdf']} output -"
+        cmd.should == "#{input_pdfs} cat #{input_map['"multi.pdf"']} #{input_map['"poly.pdf"']} output -"
 
         @pdftk.set_cmd(:input => 'multi.pdf', :operation => {:cat => [{:pdf => 'multi.pdf', :start => 1, :end => 'end'}]}).should == "multi.pdf cat 1-end output -"
         @pdftk.set_cmd(:input => 'multi.pdf', :operation => {:cat => [{:pdf => 'multi.pdf', :end => 'end'}]}).should == "multi.pdf cat 1-end output -"
