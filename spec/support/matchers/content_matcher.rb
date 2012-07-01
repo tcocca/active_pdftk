@@ -2,7 +2,6 @@ RSpec::Matchers.define :have_the_content_of do |expected|
   match do |actual|
     sha256_hash_of(actual) == sha256_hash_of(expected)
   end
-
   diffable
 end
 
@@ -10,7 +9,6 @@ RSpec::Matchers.define :look_like_the_same_pdf_as do |expected|
   match do |actual|
     sha256_hash_of_almost(actual) == sha256_hash_of_almost(expected)
   end
-
   diffable
 end
 
@@ -54,7 +52,6 @@ def sha256_hash_of_almost(entry)
       else
         Digest::SHA256.hexdigest(cleanup_file_content(entry))
       end
-
     when Pathname       then
       if entry.directory?
         sha256_hash_of_almost(Dir.new(entry))
