@@ -76,8 +76,6 @@ def cleanup_file_content!(text)
   end
   text.force_encoding('ASCII-8BIT') if text.respond_to? :force_encoding   # PDF embed some binary data breaking gsub with ruby 1.9.2
   @filter.each do |k,reg|
-    puts k.to_yaml
-    puts reg.to_yaml
     text.gsub!(reg, '')
   end
   text
