@@ -65,8 +65,7 @@ def cleanup_file_content!(text)
         :ids => /\/ID \[<\w*><\w*>\]/,          # Remove ID values ex: /ID [<4ba02a4cf55b1fc842299e6f01eb838e><33bec7dc37839cadf7ab76f3be4d4306>]
         :stream => /stream .* 9|10 0 obj /m,    # Remove some binary stream
         :content => /\/Contents \[.*\]/,
-        :xref => /^\d{10} \d{5} n|f $/,         # Remove Cross-references dictionnary
-        :outputs => /^\<.*\:(.*)\>/             # Remove file path referrences
+        :xref => /^\d{10} \d{5} n|f $/          # Remove Cross-references dictionnary
     }
     @filter.each do |k,reg|
       if reg.source.respond_to? :encode
