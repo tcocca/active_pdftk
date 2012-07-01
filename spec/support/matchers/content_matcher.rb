@@ -9,9 +9,9 @@ RSpec::Matchers.define :look_like_the_same_pdf_as do |expected|
   match do |actual|
     if sha256_hash_of_almost(actual) != sha256_hash_of_almost(expected)
       puts "Actual"
-      puts sha256_hash_of_almost(actual)
+      puts cleanup_file_content(actual)
       puts "Expected"
-      puts sha256_hash_of_almost(expected)
+      puts cleanup_file_content(expected)
     end
     sha256_hash_of_almost(actual) == sha256_hash_of_almost(expected)
   end
