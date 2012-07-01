@@ -8,7 +8,7 @@ before_install:
  - sudo apt-get update
  - sudo apt-get install pdftk
  - which pdftk
- - locate pdftk
  - sudo locate pdftk
  - locate pdftk
- - sudo locate pdftk | grep "/bin/pdftk"
+ - sudo locate pdftk
+ - locate pdftk | grep "/bin/pdftk"
