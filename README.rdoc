@@ -5,6 +5,12 @@ This is a fork of https://github.com/tcocca/active_pdftk
 1. Fix a bug with streamed output
 2. Add meta data handling uility class
 
+== Use
+
+as it's not a published Gem put this in your Gemfile
+
+  gem 'active_pdftk', :git => 'git@github.com:koenhandekyn/active_pdftk.git'
+
 == MetaDataParser
 
 The below example illustrates usage of the meta data parser extention. It uses dump_data
