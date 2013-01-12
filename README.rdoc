@@ -1,3 +1,22 @@
+This is a fork of https://github.com/tcocca/active_pdftk
+
+= Changes to the origin
+
+1. Fix a bug with streamed output
+2. Add meta data handling uility class
+
+== MetaDataParser
+
+require 'active_pdftk'
+
+  metadataparser = ActivePdftk::MetaDataParser.new
+  file = "~/Desktop/UpNxt.pdf"
+  metadata = metadataparser.parse(file)
+
+  puts "pages: #{metadata.number_of_pages}"
+  puts "creation date : #{metadata.creation_date}"
+  puts "modification date : #{metadata.mod_date}"
+
 = ActivePdftk
 
 This gem is intended to be a wrapper for the PDFTK command line utility for working with pdfs, mainly editable pdfs.
