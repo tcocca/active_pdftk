@@ -1,38 +1,3 @@
-This is a fork of https://github.com/tcocca/active_pdftk
-
-= Changes to the origin
-
-1. Fix a bug with streamed output
-2. Add meta data handling uility class
-
-== Use
-
-as it's not a published Gem put this in your Gemfile
-
-  gem 'active_pdftk', :git => 'git@github.com:koenhandekyn/active_pdftk.git'
-
-== MetaDataParser [ original Readme ]
-
-The below example illustrates usage of the meta data parser extention. It uses dump_data
-to dump the raw data from the PDF and parses that output.
-It returns a special kind of hash where the hash itselve maps the keys to the raw value strings,
-while a list of special methods also parse the values to a specific type (int, date).
-It should work both with a file reference as well with a stream reference.
-
-
-  require 'active_pdftk'
-
-  metadataparser = ActivePdftk::MetaDataParser.new
-  file = "~/Desktop/UpNxt.pdf"
-  metadata = metadataparser.parse(file)
-
-  puts "pages: #{metadata.number_of_pages}"
-  puts "creation date : #{metadata.creation_date}"
-  puts "modification date : #{metadata.mod_date}"
-
-This is an alternative to https://github.com/yob/pdf-reader.
-TODO : performance comparison.
-
 = ActivePdftk
 
 This gem is intended to be a wrapper for the PDFTK command line utility for working with pdfs, mainly editable pdfs.
