@@ -423,9 +423,6 @@ module ActivePdftk
       end
     end
 
-    def process_output(value, output)
-    end
-
     # Prepare the options part of the command line string
     #
     # @param [Hash] as defined in DSL, options statements only.
