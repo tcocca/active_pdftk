@@ -192,7 +192,10 @@ module ActivePdftk
           stdin.puts @input.read
         end
         stdin.close
-        @output.puts stdout.read if @output && !@output.is_a?(String)
+        if @output && !@output.is_a?(String)
+          @output.write stdout.read 
+          @output.rewind        
+        end
         raise(CommandError, {:stderr => @error, :cmd => cmd}) unless (@error = stderr.read).empty?
       end
       if dsl_statements[:operation].to_s.match(/burst|unpack_files/) && dsl_statements[:output].nil?
@@ -418,6 +421,9 @@ module ActivePdftk
           @output = value
           "output -"
       end
+    end
+
+    def process_output(value, output)
     end
 
     # Prepare the options part of the command line string
