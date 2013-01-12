@@ -7,7 +7,13 @@ This is a fork of https://github.com/tcocca/active_pdftk
 
 == MetaDataParser
 
-require 'active_pdftk'
+The below example illustrates usage of the meta data parser extention. It uses dump_data
+to dump the raw data from the PDF and parses that output.
+It returns a special kind of hash where the hash itselve maps the keys to the raw value strings,
+while a list of special methods also parses the values to a specific type where relevant (int, date).
+
+
+  require 'active_pdftk'
 
   metadataparser = ActivePdftk::MetaDataParser.new
   file = "~/Desktop/UpNxt.pdf"
