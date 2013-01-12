@@ -11,6 +11,7 @@ The below example illustrates usage of the meta data parser extention. It uses d
 to dump the raw data from the PDF and parses that output.
 It returns a special kind of hash where the hash itselve maps the keys to the raw value strings,
 while a list of special methods also parses the values to a specific type where relevant (int, date).
+It should work both with a file reference as well with a stream reference.
 
 
   require 'active_pdftk'
@@ -22,6 +23,9 @@ while a list of special methods also parses the values to a specific type where 
   puts "pages: #{metadata.number_of_pages}"
   puts "creation date : #{metadata.creation_date}"
   puts "modification date : #{metadata.mod_date}"
+
+This is an alternative to https://github.com/yob/pdf-reader.
+TODO : performance comparison.
 
 = ActivePdftk
 
