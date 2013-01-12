@@ -11,12 +11,12 @@ as it's not a published Gem put this in your Gemfile
 
   gem 'active_pdftk', :git => 'git@github.com:koenhandekyn/active_pdftk.git'
 
-== MetaDataParser
+== MetaDataParser [ original Readme ]
 
 The below example illustrates usage of the meta data parser extention. It uses dump_data
 to dump the raw data from the PDF and parses that output.
 It returns a special kind of hash where the hash itselve maps the keys to the raw value strings,
-while a list of special methods also parses the values to a specific type where relevant (int, date).
+while a list of special methods also parse the values to a specific type (int, date).
 It should work both with a file reference as well with a stream reference.
 
 
