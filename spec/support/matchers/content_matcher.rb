@@ -35,7 +35,7 @@ def sha256_hash_of(entry)
   case entry
     when File, Tempfile then Digest::SHA256.file(entry.path).hexdigest
     when Dir            then (entry.entries - ['.', '..']).collect { |filename| sha256_hash_of(Pathname.new(File.join(entry.path, filename))) }.compact.sort
-    when StringIO       then sha256_hash_of(entry.read)
+    when StringIO       then puts entry.read; sha256_hash_of(entry.read)
     when String         then
       if entry.size < 256 && (Pathname.new(entry).file? || Pathname.new(entry).directory?) # Would be deprecated in favor of Pathname object
         sha256_hash_of(Pathname.new(entry))

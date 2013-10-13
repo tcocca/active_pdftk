@@ -5,7 +5,7 @@
 
 == v 0.1.0 - 05/09/11
 
-* Initial Release of the new gem
+* Initial Release of the new gem: pdftk_forms
 * Combined the 2 projects here:
   1. https://github.com/devfu/pdftk
   2. https://github.com/jkraemer/pdf-forms
