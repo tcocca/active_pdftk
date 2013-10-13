@@ -33,7 +33,7 @@ end
 def sha256_hash_of(entry)
   entry.rewind if entry.respond_to? :rewind
   case entry
-    when File, Tempfile then Digest::SHA256.file(entry.path).hexdigest
+    when File, Tempfile then puts entry.read; puts " "; puts " !!!!!!!!!!!!!!!--------!!!!!!!!!!!!! "; puts ""; Digest::SHA256.file(entry.path).hexdigest
     when Dir            then (entry.entries - ['.', '..']).collect { |filename| sha256_hash_of(Pathname.new(File.join(entry.path, filename))) }.compact.sort
     when StringIO       then sha256_hash_of(entry.read)
     when String         then
@@ -54,7 +54,7 @@ end
 def sha256_hash_of_almost(entry)
   entry.rewind if entry.respond_to? :rewind
   case entry
-    when File, Tempfile, StringIO then puts entry.read; puts " "; puts " !!!!!!!!!!!!!!!--------!!!!!!!!!!!!! "; puts ""; sha256_hash_of_almost(entry.read)
+    when File, Tempfile, StringIO then sha256_hash_of_almost(entry.read)
     when Dir            then (entry.entries - ['.', '..']).collect { |filename| sha256_hash_of_almost(Pathname.new(File.join(entry.path, filename))) }.compact.sort
     when String         then
       if entry.size < 256 && (Pathname.new(entry).file? || Pathname.new(entry).directory?) # Would be deprecated in favor of Pathname object
