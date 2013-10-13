@@ -6,5 +6,5 @@ rvm:
   - ree
 before_install:
  - sudo apt-get update
- - sudo apt-get install pdftk
+ - sudo apt-get install mlocate pdftk
  - sudo updatedb -U /usr/bin
