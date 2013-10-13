@@ -2,7 +2,7 @@ require File.expand_path('../../lib/active_pdftk', __FILE__)
 
 require 'rspec'
 
-puts ActivePdftk::Call.locate_pdftk.to_yaml
+puts ActivePdftk::Call.locate_pdftk.inspect
 
 Dir[File.expand_path(File.join(File.dirname(__FILE__),'support','**','*.rb'))].each {|f| require f}
 
