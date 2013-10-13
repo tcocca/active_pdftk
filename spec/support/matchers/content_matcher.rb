@@ -1,10 +1,16 @@
 RSpec::Matchers.define :have_the_content_of do |expected|
   match do |actual|
-    puts " ### have_the_content_of"
-    puts actual.to_s
-    puts " ----------- "
-    puts expected.to_s
-    puts " =========== "
+    puts actual.class.name.to_s
+    puts expected.class.name.to_s
+    actual_content = read_content(actual)
+    ta = Tempfile.new('actual_data')
+    ta.write(actual_content.to_s)
+    actual_input = ta.path
+    expected_content = read_content(expected)
+    te = Tempfile.new('actual_data')
+    te.write(expected_content.to_s)
+    expected_input = te.path
+    puts `diff #{actual_input} #{expected_input}`
     sha256_hash_of(actual) == sha256_hash_of(expected)
   end
   diffable
@@ -12,11 +18,6 @@ end
 
 RSpec::Matchers.define :look_like_the_same_pdf_as do |expected|
   match do |actual|
-    puts " ### look_like_the_same_pdf_as"
-    puts actual.to_s
-    puts " ----------- "
-    puts expected.to_s
-    puts " =========== "
     sha256_hash_of_almost(actual) == sha256_hash_of_almost(expected)
   end
   diffable
@@ -30,10 +31,25 @@ end
 #  end
 #end
 
+def read_content(entry)
+  entry.rewind if entry.respond_to? :rewind
+  case entry
+    when File, Tempfile, StringIO then entry.read
+    when Dir            then (entry.entries - ['.', '..']).collect { |filename| read_content(Pathname.new(File.join(entry.path, filename))) }.compact.sort
+    when String         then entry
+    when Pathname       then
+      if entry.directory?
+        read_content(entry)
+      elsif entry.file?
+        File.open(entry, 'r:binary').read
+      end
+  end
+end
+
 def sha256_hash_of(entry)
   entry.rewind if entry.respond_to? :rewind
   case entry
-    when File, Tempfile then puts entry.read; puts " "; puts " !!!!!!!!!!!!!!!--------!!!!!!!!!!!!! "; puts ""; Digest::SHA256.file(entry.path).hexdigest
+    when File, Tempfile then Digest::SHA256.file(entry.path).hexdigest
     when Dir            then (entry.entries - ['.', '..']).collect { |filename| sha256_hash_of(Pathname.new(File.join(entry.path, filename))) }.compact.sort
     when StringIO       then sha256_hash_of(entry.read)
     when String         then
