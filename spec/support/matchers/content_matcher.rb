@@ -1,5 +1,10 @@
 RSpec::Matchers.define :have_the_content_of do |expected|
   match do |actual|
+    puts " ### have_the_content_of"
+    puts actual.to_s
+    puts " ----------- "
+    puts expected.to_s
+    puts " =========== "
     sha256_hash_of(actual) == sha256_hash_of(expected)
   end
   diffable
@@ -7,6 +12,11 @@ end
 
 RSpec::Matchers.define :look_like_the_same_pdf_as do |expected|
   match do |actual|
+    puts " ### look_like_the_same_pdf_as"
+    puts actual.to_s
+    puts " ----------- "
+    puts expected.to_s
+    puts " =========== "
     sha256_hash_of_almost(actual) == sha256_hash_of_almost(expected)
   end
   diffable
