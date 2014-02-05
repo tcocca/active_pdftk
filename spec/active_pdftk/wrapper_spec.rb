@@ -58,8 +58,8 @@ describe ActivePdftk::Wrapper do
 
     it "should pass the defaults statements to the call instance." do
       path = ActivePdftk::Call.new.locate_pdftk
-      @pdftk_opt = ActivePdftk::Wrapper.new(:path => path, :operation => {:fill_form => 'a.fdf'}, :options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'})
-      @pdftk_opt.default_statements.should == {:path => path, :operation => {:fill_form => 'a.fdf'}, :options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'}}
+      @pdftk_opt = ActivePdftk::Wrapper.new(:path => path, :tmpdir => '/other_tmp', :operation => {:fill_form => 'a.fdf'}, :options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'})
+      @pdftk_opt.default_statements.should == {:path => path, :tmpdir => '/other_tmp', :operation => {:fill_form => 'a.fdf'}, :options => { :flatten => false, :owner_pw => 'bar', :user_pw => 'baz', :encrypt  => :'40bit'}}
     end
   end
 

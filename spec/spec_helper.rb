@@ -1,6 +1,7 @@
 require File.expand_path('../../lib/active_pdftk', __FILE__)
 
 require 'rspec'
+require 'digest'
 
 puts ActivePdftk::Call.locate_pdftk.inspect
 
