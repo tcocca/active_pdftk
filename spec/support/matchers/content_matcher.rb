@@ -1,3 +1,4 @@
+require 'digest'
 RSpec::Matchers.define :have_the_content_of do |expected|
   match do |actual|
     puts actual.class.name.to_s
