@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "active_pdftk"
 
   s.add_dependency 'builder', '>= 2.1.2'
-  s.add_development_dependency 'rspec', '~> 2.6.0'
+  s.add_development_dependency 'rspec', '~> 2.14.0'
   s.add_development_dependency 'rake', '>= 0.8.7'
   s.add_development_dependency 'yard'
   s.add_development_dependency 'fuubar'
