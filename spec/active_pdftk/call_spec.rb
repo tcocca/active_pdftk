@@ -183,17 +183,23 @@ describe ActivePdftk::Call do
     end
 
     it "should output without exception and give the appropriate result" do
+      @data_dump_regexp = /^InfoKey:\s(.+)\nInfoValue:\s(.+)/
       @data_string = File.new(path_to_pdf('call/fields.data')).read
+      @data_hash = Hash[@data_string.scan(@data_dump_regexp)]
       
       expect{ @pdftk.pdftk(:input => path_to_pdf('spec.fields.pdf'), :operation => :dump_data, :output => @tempfile) }.to_not raise_error(ActivePdftk::CommandError)
       @tempfile.rewind
-      @tempfile.read.should == @data_string
+      @tempfile_string = @tempfile.read
+      @tempfile_hash = Hash[@tempfile_string.scan(@data_dump_regexp)]
+      @tempfile_hash.should == @data_hash
 
       expect{ @pdftk.pdftk(:input => path_to_pdf('spec.fields.pdf'), :operation => :dump_data, :output => @stringio) }.to_not raise_error(ActivePdftk::CommandError)
-      @stringio.string.should == @data_string
+      @stringio_hash = Hash[@stringio.string.scan(@data_dump_regexp)]
+      @stringio_hash.should == @data_hash
 
-      expect{@return_stringio =  @pdftk.pdftk(:input => path_to_pdf('spec.fields.pdf'), :operation => :dump_data) }.to_not raise_error(ActivePdftk::CommandError)
-      @return_stringio.string.should == @data_string
+      expect{@return_stringio = @pdftk.pdftk(:input => path_to_pdf('spec.fields.pdf'), :operation => :dump_data) }.to_not raise_error(ActivePdftk::CommandError)
+      @return_stringio_hash = Hash[@return_stringio.string.scan(@data_dump_regexp)]
+      @return_stringio_hash.should == @data_hash
     end
 
     it "should input a File, output a StringIO without exception and give the appropriate result" do

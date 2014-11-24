@@ -7,7 +7,7 @@ def fixtures_path(entry, expand = false)
   if expand && entry_path.directory?
     entry_path.children
   else
-    entry_path
+    entry_path.to_s
   end
 end
 
