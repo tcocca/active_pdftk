@@ -292,7 +292,7 @@ module ActivePdftk
     # @return [String]
     #
     def pdftk_version
-      %x{#{@default_statements[:path]} --version 2>&1}.scan(/pdftk (\S*) a Handy Tool/).join
+      %x{#{@default_statements[:path]} --version 2>&1}.scan(/pdftk (port to java )?(\S*) a Handy Tool/).flatten.last
     end
 
     # Return the path of the pdftk library if it can be located.
