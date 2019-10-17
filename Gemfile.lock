@@ -24,7 +24,7 @@ GEM
     rspec-instafail (0.1.8)
     rspec-mocks (2.6.0)
     ruby-progressbar (0.0.10)
-    yard (0.7.2)
+    yard (0.9.20)
 
 PLATFORMS
   ruby
