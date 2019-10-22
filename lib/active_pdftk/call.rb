@@ -456,14 +456,20 @@ module ActivePdftk
     #
     def build_range_option(range_args)
       range = ""
-      if range_args[:pdf] && !@input_file_map.nil?
-        raise(MissingInput, {:input => range_args[:pdf]}) unless @input_file_map.has_key?(range_args[:pdf])
-        range += @input_file_map[range_args[:pdf]]
-      end
-      range += range_args[:start].to_s if range_args[:start]
-      if range_args[:end]
-        range += "1" unless range_args[:start]
-        range += "-#{range_args[:end]}"
+      if range_args[:custom_range]
+        #@todo validate range and account for multiple PDFs
+        #@todo add tests to this
+        range += range_args[:custom_range]
+      else
+        if range_args[:pdf] && !@input_file_map.nil?
+          raise(MissingInput, {:input => range_args[:pdf]}) unless @input_file_map.has_key?(range_args[:pdf])
+          range += @input_file_map[range_args[:pdf]]
+        end
+        range += range_args[:start].to_s if range_args[:start]
+        if range_args[:end]
+          range += "1" unless range_args[:start]
+          range += "-#{range_args[:end]}"
+        end
       end
       range += range_args[:pages] if range_args[:pages]
       range += range_args[:orientation] if range_args[:orientation]
