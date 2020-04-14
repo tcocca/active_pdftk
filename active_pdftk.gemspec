@@ -12,8 +12,6 @@ Gem::Specification.new do |s|
   s.summary     = "Fill out PDF forms with pdftk."
   s.description = "Fill out editable PDF forms with pdftk (http://www.accesspdf.com/pdftk/)."
 
-  s.rubyforge_project = "active_pdftk"
-
   s.add_dependency 'builder', '>= 2.1.2'
   s.add_development_dependency 'rspec', '~> 2.6.0'
   s.add_development_dependency 'rake', '>= 0.8.7'
