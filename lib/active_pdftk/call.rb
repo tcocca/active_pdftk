@@ -193,7 +193,10 @@ module ActivePdftk
         end
         stdin.close
         @output.puts stdout.read if @output && !@output.is_a?(String)
-        raise(CommandError, {:stderr => @error, :cmd => cmd}) unless (@error = stderr.read).empty?
+        # We ignore 'no info dictionary' warning since it doesn't affect the integrity of the PDF
+        # and handling this warning as an error prevents us from accessing the other metadata
+        raise(CommandError, {:stderr => @error, :cmd => cmd, :stdout => stdout, :output => @output}) unless
+          ((@error = stderr.read).empty? || @error == "Warning: no info dictionary found\n")
       end
       if dsl_statements[:operation].to_s.match(/burst|unpack_files/) && dsl_statements[:output].nil?
         Dir.tmpdir
