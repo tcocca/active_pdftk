@@ -193,7 +193,10 @@ module ActivePdftk
         end
         stdin.close
         @output.puts stdout.read if @output && !@output.is_a?(String)
-        raise(CommandError, {:stderr => @error, :cmd => cmd}) unless (@error = stderr.read).empty?
+        # We ignore 'no info dictionary' warning since it doesn't affect the integrity of the PDF
+        # and handling this warning as an error prevents us from accessing the other metadata
+        raise(CommandError, {:stderr => @error, :cmd => cmd, :stdout => stdout, :output => @output}) unless
+          ((@error = stderr.read).empty? || @error.include?("Warning: no info dictionary found"))
       end
       if dsl_statements[:operation].to_s.match(/burst|unpack_files/) && dsl_statements[:output].nil?
         Dir.tmpdir
@@ -456,14 +459,20 @@ module ActivePdftk
     #
     def build_range_option(range_args)
       range = ""
-      if range_args[:pdf] && !@input_file_map.nil?
-        raise(MissingInput, {:input => range_args[:pdf]}) unless @input_file_map.has_key?(range_args[:pdf])
-        range += @input_file_map[range_args[:pdf]]
-      end
-      range += range_args[:start].to_s if range_args[:start]
-      if range_args[:end]
-        range += "1" unless range_args[:start]
-        range += "-#{range_args[:end]}"
+      if range_args[:custom_range]
+        #@todo validate range and account for multiple PDFs
+        #@todo add tests to this
+        range += range_args[:custom_range]
+      else
+        if range_args[:pdf] && !@input_file_map.nil?
+          raise(MissingInput, {:input => range_args[:pdf]}) unless @input_file_map.has_key?(range_args[:pdf])
+          range += @input_file_map[range_args[:pdf]]
+        end
+        range += range_args[:start].to_s if range_args[:start]
+        if range_args[:end]
+          range += "1" unless range_args[:start]
+          range += "-#{range_args[:end]}"
+        end
       end
       range += range_args[:pages] if range_args[:pages]
       range += range_args[:orientation] if range_args[:orientation]
