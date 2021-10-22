@@ -1,0 +1,46 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  changes:
+    name: Detect version bump
+    runs-on: ubuntu-latest
+    # Set job outputs to values from filter step
+    outputs:
+      version: ${{ steps.filter.outputs.version }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            version:
+              - 'lib/active_pdftk/version.rb'
+
+  publish:
+    name: Build + Publish
+    # lol https://stackoverflow.com/questions/58139406/only-run-job-on-specific-branch-with-github-actions/58142412#58142412
+    if: ${{ needs.changes.outputs.version == 'true' && github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    needs: changes
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+      - name: Publish to Github Packages Registry
+        run: |
+          mkdir -p $HOME/.gem
+          touch $HOME/.gem/credentials
+          chmod 0600 $HOME/.gem/credentials
+          printf -- "---\n:github: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
+          gem build *.gemspec
+          gem push --KEY github --host https://rubygems.pkg.github.com/${OWNER} *.gem
+        env:
+          GEM_HOST_API_KEY: "Bearer ${{secrets.GITHUB_TOKEN}}"
+          OWNER: ${{ github.repository_owner }}
